@@ -1,0 +1,76 @@
+## .NET / Visual Studio / VS Code / Rider
+# Build and IDE artifacts
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+# Logs and diagnostics
+logs/
+*.log
+*.tlg
+*.etl
+*.dmp
+
+# Test results and coverage
+TestResults/
+*.trx
+coverage/
+.coverage
+.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Publish / artifacts
+artifacts/
+publish/
+
+# Resharper / Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# ASP.NET Core specific
+# Do NOT ignore appsettings.json (commonly tracked)
+# Ignore environment/local secrets configs
+**/appsettings.Development.json
+**/appsettings.development.json
+**/appsettings.*.local.json
+**/secrets.json
+
+# User-specific settings
+*.launchSettings.json
+
+# EF Core tools / migrations
+# If you want to ignore migrations, uncomment the following lines
+**/Migrations/
+**/*ModelSnapshot.cs
+**/*Migration*.cs
+migration.sql
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Node (if present for tooling/UI)
+node_modules/
+
+# Rider/JetBrains caches
+/.idea/.idea.*
+
+# Other caches
+*.cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
