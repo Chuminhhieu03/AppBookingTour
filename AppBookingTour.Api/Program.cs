@@ -1,9 +1,15 @@
+﻿using AppBookingTour.Application;
+using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
+using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
+using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System;
 
-// Configure Serilog for structured logging
+#region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -13,28 +19,48 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 Log.Information("Starting AppBookingTour API application");
+#endregion
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Serilog
+// Use Serilog
 builder.Host.UseSerilog();
 
-// Add services to the container
+#region Core Services
 builder.Services.AddControllers();
 
-// Infrastructure Layer (Db, Identity, Repositories, External services)
+// ✅ Add MediatR for CQRS (point to Application layer)
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblies(typeof(AssemblyMarker).Assembly)
+);
+
+// ✅ Add FluentValidation (if you use it)
+builder.Services.AddValidatorsFromAssembly(typeof(AssemblyMarker).Assembly);
+#endregion
+
+#region Infrastructure Layer
+// ✅ Add Infrastructure (DbContext, Identity, Repositories, External services)
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Health Checks (basic)
+// ✅ Add Identity so UserManager<User> & SignInManager<User> can be resolved
+builder.Services.AddIdentity<User, IdentityRole<int>>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+#endregion
+
+#region Common Services
+// Health Checks
 builder.Services.AddHealthChecks();
 
 // Output cache for controller attributes
 builder.Services.AddOutputCache();
 
-// Bind configuration objects
+builder.Services.AddLogging();
+
+// Configuration binding
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
-// CORS
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigins", policy =>
@@ -43,13 +69,14 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000",
                 "https://localhost:3001",
                 "http://localhost:5173")
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+#endregion
 
-// Swagger
+#region Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -65,7 +92,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // JWT in Swagger
+    // ✅ Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: Authorization: Bearer {token}",
@@ -91,26 +118,26 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+#endregion
 
 var app = builder.Build();
 
-// Always enable Swagger (both Development & Production)
+#region Middleware
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AppBookingTour API V1");
-    // Serve Swagger UI at /swagger and keep root redirect
-    c.RoutePrefix = "swagger"; 
+    c.RoutePrefix = "swagger";
 });
 
-// Environment specific handlers
+// Error Handling + HSTS
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
-// Security headers (basic)
+// Security Headers
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
@@ -120,30 +147,28 @@ app.Use(async (context, next) =>
 });
 
 app.UseHttpsRedirection();
-
-// Logging of requests
 app.UseSerilogRequestLogging();
-
-// CORS
 app.UseCors("AllowSpecificOrigins");
-
 app.UseRouting();
 
-// Output cache must be added before endpoints
-app.UseOutputCache();
-
-// AuthN/AuthZ
+// ✅ Authentication + Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map endpoints
-app.MapControllers();
+app.UseOutputCache();
 
-// Health checks endpoint
+app.MapControllers();
 app.MapHealthChecks("/health");
 
-// Root redirect to Swagger UI
+// Redirect root to Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
+#endregion
 
-Log.Information("Starting web host on {Environment}", app.Environment.EnvironmentName);
-await app.RunAsync();await app.RunAsync();
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    foreach (var address in app.Urls)
+        Console.WriteLine($"The application is running at: {address}");
+});
+
+Log.Information("Running web host in {Environment}", app.Environment.EnvironmentName);
+await app.RunAsync();

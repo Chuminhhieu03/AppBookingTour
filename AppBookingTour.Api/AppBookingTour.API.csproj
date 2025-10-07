@@ -46,7 +46,6 @@
     <ProjectReference Include="../AppBookingTour.Domain/AppBookingTour.Domain.csproj" />
     <ProjectReference Include="../AppBookingTour.Application/AppBookingTour.Application.csproj" />
     <ProjectReference Include="../AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj" />
-    <ProjectReference Include="../AppBookingTour.Share\AppBookingTour.Share.csproj" />
+    <ProjectReference Include="../AppBookingTour.Share/AppBookingTour.Share.csproj" />
   </ItemGroup>
-
 </Project>

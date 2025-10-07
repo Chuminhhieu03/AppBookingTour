@@ -12,7 +12,7 @@ namespace AppBookingTour.Application.Features.Auth.ForgotPassword
     public class ForgotPasswordCommandHandler(
     UserManager<User> _userManager,
     IEmailService _emailService,
-    Logger<ForgotPasswordCommandHandler> _logger
+    ILogger<ForgotPasswordCommandHandler> _logger
 ) : IRequestHandler<ForgotPasswordCommand, BaseResponse>
     {
         public async Task<BaseResponse> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)

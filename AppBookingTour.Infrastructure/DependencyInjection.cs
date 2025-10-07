@@ -30,13 +30,13 @@ public static class DependencyInjection
         AddDatabase(services, configuration);
 
         // ASP.NET Core Identity Configuration
-        AddIdentity(services); // fixed generic role type
+        //AddIdentity(services); // fixed generic role type
 
         // JWT Authentication Configuration
-        AddJwtAuthentication(services, configuration);
+        //AddJwtAuthentication(services, configuration);
 
         // Authorization policies
-        AddAuthorizationPolicies(services);
+        //AddAuthorizationPolicies(services);
 
         // Repository Pattern & Unit of Work (Clean Architecture)
         AddRepositoryPattern(services);
@@ -181,7 +181,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
 
         // Add other business services here as needed
-        // services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailService, EmailService>();
         // services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         // services.AddScoped<IPaymentGatewayService, VNPayService>();
         // services.AddScoped<INotificationService, NotificationService>();
