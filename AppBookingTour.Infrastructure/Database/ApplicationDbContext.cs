@@ -168,6 +168,11 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
                   .WithMany(tt => tt.Tours)
                   .HasForeignKey(t => t.TypeId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(t => t.Category)
+                  .WithMany(c => c.Tours)
+                  .HasForeignKey(t => t.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TourCategory>(e =>
@@ -184,10 +189,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.Property(x => x.PriceLevel).HasConversion<int>();
-            e.HasOne(tt => tt.Category)
-             .WithMany(c => c.TourTypes)
-             .HasForeignKey(tt => tt.CategoryId)
-             .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<TourDeparture>(e =>
