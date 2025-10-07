@@ -176,7 +176,7 @@ public static class DependencyInjection
     private static void AddBusinessServices(IServiceCollection services)
     {
         // Authentication & JWT services (implement Application interfaces)
-        //services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
 
         // Add other business services here as needed

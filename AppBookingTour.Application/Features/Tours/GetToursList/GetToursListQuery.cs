@@ -139,7 +139,6 @@ public sealed class GetToursListQueryHandler : IRequestHandler<GetToursListQuery
                 TotalBookings = tour.TotalBookings,
                 Status = tour.Status.ToString(),
                 TypeName = tour.Type?.Name,
-                CategoryName = tour.Category?.Name
             }).ToList();
 
             var response = new GetToursListResponse

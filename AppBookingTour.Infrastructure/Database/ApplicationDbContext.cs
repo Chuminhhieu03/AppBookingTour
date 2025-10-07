@@ -1,4 +1,4 @@
-using AppBookingTour.Domain.Entities;
+﻿using AppBookingTour.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -78,9 +78,18 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         ConfigureContentEntities(modelBuilder);
         ConfigurePromotionEntities(modelBuilder);
         ConfigureComboEntities(modelBuilder);
+        ConfigureAdditionalDecimalEntities(modelBuilder);
         
         // Configure base entity properties
         ConfigureBaseEntityProperties(modelBuilder);
+
+        // Mắc định restrict khi xóa cho tất cả các FK
+        foreach( var foreignKey in modelBuilder.Model
+            .GetEntityTypes()
+            .SelectMany(e => e.GetForeignKeys()))
+        {
+            foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+        }
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -106,41 +115,40 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
 
     private void ConfigureIdentityTables(ModelBuilder modelBuilder)
     {
-        // Configure other Identity tables
-        modelBuilder.Entity<IdentityRole>(entity =>
+        modelBuilder.Entity<IdentityRole<int>>(entity =>
         {
             entity.ToTable("AspNetRoles");
         });
 
-        modelBuilder.Entity<IdentityUserRole<string>>(entity =>
+        modelBuilder.Entity<IdentityUserRole<int>>(entity =>
         {
             entity.ToTable("AspNetUserRoles");
         });
 
-        modelBuilder.Entity<IdentityUserClaim<string>>(entity =>
+        modelBuilder.Entity<IdentityUserClaim<int>>(entity =>
         {
             entity.ToTable("AspNetUserClaims");
         });
 
-        modelBuilder.Entity<IdentityUserLogin<string>>(entity =>
+        modelBuilder.Entity<IdentityUserLogin<int>>(entity =>
         {
             entity.ToTable("AspNetUserLogins");
         });
 
-        modelBuilder.Entity<IdentityUserToken<string>>(entity =>
+        modelBuilder.Entity<IdentityUserToken<int>>(entity =>
         {
             entity.ToTable("AspNetUserTokens");
         });
 
-        modelBuilder.Entity<IdentityRoleClaim<string>>(entity =>
+        modelBuilder.Entity<IdentityRoleClaim<int>>(entity =>
         {
             entity.ToTable("AspNetRoleClaims");
         });
     }
 
+
     private void ConfigureToursEntities(ModelBuilder modelBuilder)
     {
-        // Tour configuration
         modelBuilder.Entity<Tour>(entity =>
         {
             entity.ToTable("Tours");
@@ -151,50 +159,70 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.BasePriceChild).HasPrecision(12, 2);
             entity.Property(e => e.Rating).HasPrecision(3, 2);
             entity.Property(e => e.Status).HasConversion<int>();
-            
             entity.HasIndex(e => e.Code).IsUnique();
+            // Updated index: removed CategoryId
             entity.HasIndex(e => new { e.DepartureCityId, e.TypeId, e.Status });
+
+            // Relationship: TourType
+            entity.HasOne(t => t.Type)
+                  .WithMany(tt => tt.Tours)
+                  .HasForeignKey(t => t.TypeId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // TourCategory configuration
-        modelBuilder.Entity<TourCategory>(entity =>
+        modelBuilder.Entity<TourCategory>(e =>
         {
-            entity.ToTable("TourCategories");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
-            
-            entity.HasIndex(e => e.Name).IsUnique();
+            e.ToTable("TourCategories");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.HasIndex(x => x.Name).IsUnique();
         });
 
-        // TourType configuration
-        modelBuilder.Entity<TourType>(entity =>
+        modelBuilder.Entity<TourType>(e =>
         {
-            entity.ToTable("TourTypes");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
-            entity.Property(e => e.PriceLevel).HasConversion<int>();
+            e.ToTable("TourTypes");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).HasMaxLength(100).IsRequired();
+            e.Property(x => x.PriceLevel).HasConversion<int>();
+            e.HasOne(tt => tt.Category)
+             .WithMany(c => c.TourTypes)
+             .HasForeignKey(tt => tt.CategoryId)
+             .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // TourDeparture configuration
-        modelBuilder.Entity<TourDeparture>(entity =>
+        modelBuilder.Entity<TourDeparture>(e =>
         {
-            entity.ToTable("TourDepartures");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.PriceAdult).HasPrecision(12, 2);
-            entity.Property(e => e.PriceChildren).HasPrecision(12, 2);
-            entity.Property(e => e.Status).HasConversion<int>();
-            
-            entity.HasIndex(e => new { e.TourId, e.DepartureDate, e.Status });
+            e.ToTable("TourDepartures");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.PriceAdult).HasPrecision(12, 2);
+            e.Property(x => x.PriceChildren).HasPrecision(12, 2);
+            e.Property(x => x.Status).HasConversion<int>();
+            e.HasIndex(x => new { x.TourId, x.DepartureDate, x.Status });
         });
 
-        // TourItinerary configuration
-        modelBuilder.Entity<TourItinerary>(entity =>
+        modelBuilder.Entity<TourItinerary>(e =>
         {
-            entity.ToTable("TourItineraries");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.DayNumber).HasMaxLength(50).IsRequired();
-            
-            entity.HasIndex(e => new { e.TourId, e.DayNumber });
+            e.ToTable("TourItineraries");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.DayNumber).HasMaxLength(50).IsRequired();
+            e.HasIndex(x => new { x.TourId, x.DayNumber });
+        });
+
+        modelBuilder.Entity<TourItineraryDestination>(e =>
+        {
+            e.ToTable("TourItineraryDestinations");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Notes).HasMaxLength(1000);
+
+            e.HasOne(x => x.TourItinerary)
+            .WithMany(ti => ti.Destinations)
+            .HasForeignKey(x => x.TourItineraryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasOne(x => x.Destination)
+            .WithMany(d => d.TourItineraryDestinations)
+            .HasForeignKey(x => x.DestinationId)
+            .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
@@ -326,6 +354,29 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
 
             entity.HasIndex(e => e.Code).IsUnique();
         });
+
+        modelBuilder.Entity<PromotionUsage>(entity =>
+        {
+            entity.ToTable("PromotionUsages");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.DiscountAmount).HasPrecision(12, 2);
+            entity.Property(e => e.UsedAt).IsRequired();
+            
+            entity.HasOne(entity => entity.Promotion)
+                  .WithMany(p => p.PromotionUsages)
+                  .HasForeignKey(entity => entity.PromotionId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(entity => entity.User)
+                .WithMany(u => u.PromotionUsages)
+                .HasForeignKey(entity => entity.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(entity => entity.Booking)
+                .WithMany(b => b.PromotionUsages)
+                .HasForeignKey(entity => entity.BookingId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 
     private void ConfigureComboEntities(ModelBuilder modelBuilder)
@@ -342,6 +393,50 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.Rating).HasPrecision(3, 2);
             
             entity.HasIndex(e => new { e.FromCityId, e.ToCityId });
+
+            // Explicit relationships for dual FK to City
+            entity.HasOne(c => c.FromCity)
+                  .WithMany(c => c.FromCombos)
+                  .HasForeignKey(c => c.FromCityId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(c => c.ToCity)
+                  .WithMany(c => c.ToCombos)
+                  .HasForeignKey(c => c.ToCityId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private void ConfigureAdditionalDecimalEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ComboSchedule>(entity =>
+        {
+            entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
+            entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
+        });
+
+        modelBuilder.Entity<Destination>(entity =>
+        {
+            entity.Property(e => e.Latitude).HasPrecision(9, 6);
+            entity.Property(e => e.Longitude).HasPrecision(9, 6);
+            entity.Property(e => e.Rating).HasPrecision(3, 2);
+        });
+
+        modelBuilder.Entity<PromotionUsage>(entity =>
+        {
+            entity.Property(e => e.DiscountAmount).HasPrecision(12, 2);
+        });
+
+        modelBuilder.Entity<RoomInventory>(entity =>
+        {
+            entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
+            entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
+        });
+
+        modelBuilder.Entity<RoomType>(entity =>
+        {
+            entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
+            entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
         });
     }
 

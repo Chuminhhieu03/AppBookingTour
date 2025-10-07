@@ -1,4 +1,5 @@
 using AppBookingTour.Application.IServices;
+using AppBookingTour.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,6 +19,7 @@ public class JwtService : IJwtService
     private readonly string _issuer;
     private readonly string _audience;
     private readonly int _tokenExpirationMinutes;
+    private readonly int _refreshTokenExpirationDays;
 
     public JwtService(IConfiguration configuration)
     {
@@ -26,46 +28,44 @@ public class JwtService : IJwtService
         _issuer = _configuration["JWT:Issuer"] ?? throw new ArgumentNullException("JWT:Issuer not configured");
         _audience = _configuration["JWT:Audience"] ?? throw new ArgumentNullException("JWT:Audience not configured");
         _tokenExpirationMinutes = int.Parse(_configuration["JWT:TokenExpirationMinutes"] ?? "60");
+        _refreshTokenExpirationDays = int.Parse(_configuration["JWT:RefreshTokenExpirationDays"] ?? "30");
     }
 
-    //public string GenerateToken(object userObj, IList<string> roles)
-    //{
-    //    if (userObj is not ApplicationUser user)
-    //        throw new ArgumentException("User must be ApplicationUser", nameof(userObj));
+    public string GenerateAccessToken(User user, IList<string> roles, out DateTime expiresAtUtc)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_secretKey);
 
-    //    var tokenHandler = new JwtSecurityTokenHandler();
-    //    var key = Encoding.ASCII.GetBytes(_secretKey);
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new("FullName", user.FullName),
+            new("UserType", user.UserType.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+        };
 
-    //    var claims = new List<Claim>
-    //    {
-    //        new(ClaimTypes.NameIdentifier, user.Id),
-    //        new(ClaimTypes.Email, user.Email!),
-    //        new(ClaimTypes.Name, user.UserName!),
-    //        new("FullName", user.FullName),
-    //        new("UserType", user.UserType.ToString()),
-    //        new("Status", user.Status.ToString()),
-    //        new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-    //        new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
-    //    };
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
-    //    // Add roles as claims
-    //    foreach (var role in roles)
-    //    {
-    //        claims.Add(new Claim(ClaimTypes.Role, role));
-    //    }
+        expiresAtUtc = DateTime.UtcNow.AddMinutes(_tokenExpirationMinutes);
 
-    //    var tokenDescriptor = new SecurityTokenDescriptor
-    //    {
-    //        Subject = new ClaimsIdentity(claims),
-    //        Expires = DateTime.UtcNow.AddMinutes(_tokenExpirationMinutes),
-    //        Issuer = _issuer,
-    //        Audience = _audience,
-    //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-    //    };
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = expiresAtUtc,
+            Issuer = _issuer,
+            Audience = _audience,
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
 
-    //    var token = tokenHandler.CreateToken(tokenDescriptor);
-    //    return tokenHandler.WriteToken(token);
-    //}
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
 
     public ClaimsPrincipal? ValidateToken(string token)
     {
@@ -110,4 +110,6 @@ public class JwtService : IJwtService
         rng.GetBytes(randomBytes);
         return Convert.ToBase64String(randomBytes);
     }
+
+    public int GetRefreshTokenExpiryDays() => _refreshTokenExpirationDays;
 }

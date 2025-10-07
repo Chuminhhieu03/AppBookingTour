@@ -9,5 +9,6 @@ namespace AppBookingTour.Application.IServices
         Task<string> GenerateTokenEmailConfirm(string email);
         Task DeleteAsync(string userEmail);
         Task<LoginCommandResponse> LoginAsync(LoginCommand request);
+        Task<LoginCommandResponse> RefreshTokenAsync(string refreshToken);
     }
 }

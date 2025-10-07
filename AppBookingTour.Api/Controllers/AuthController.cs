@@ -1,6 +1,9 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Auth.ForgotPassword;
 using AppBookingTour.Application.Features.Auth.Login;
+using AppBookingTour.Application.Features.Auth.RefreshToken;
 using AppBookingTour.Application.Features.Auth.Register;
+using AppBookingTour.Application.Features.Auth.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,22 +30,41 @@ public class AuthController : ControllerBase
     /// User login endpoint
     /// </summary>
     [HttpPost("login")]
-    public async Task<ActionResult> Login([FromBody] LoginCommand command)
+    public async Task<ActionResult<ApiResponse<object>>> Login([FromBody] LoginCommand command)
     {
         try
         {
             var result = await _mediator.Send(command);
             
-            if (result.Success)
+            if (!result.Success)
             {
-                return Ok(result);
+                return Unauthorized(result);
             }
-            
-            return Unauthorized(result);
+
+            if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue) {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = result.RefreshTokenExpiry.Value
+                };
+
+                Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+            }
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                result.Token,
+                result.Expiration,
+                result.Message,
+                result.Success
+            }));
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during login for email: {Email}", command.Email);
+            _logger.LogError(ex, "Có lỗi xảy ra trong quá trình đăng nhập cho: {Email}", command.Email);
             return BadRequest(new { Success = false, Message = "An error occurred during login" });
         }
     }
@@ -72,6 +94,88 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// User refresh token endpoint
+    /// </summary>
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<ApiResponse<object>>> RefreshToken()
+    {
+        try
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            // Kiểm tra xem refresh token có tồn tại không 
+            if (string.IsNullOrEmpty(refreshToken)){
+                return Unauthorized(ApiResponse<object>.Fail("Xác thực refresh token thất bại, vui lòng đăng nhập lại"));
+            }
+
+            var result = await _mediator.Send(new RefreshTokenCommand(refreshToken));
+            // Nếu không thành công 
+            if(!result.Success)
+            {
+                return Unauthorized(ApiResponse<object>.Fail(result.Message));
+            }
+
+            // Nếu thành công thì sẽ gắn refresh token vào HTTP secure tiếp 
+            if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue)
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = result.RefreshTokenExpiry.Value
+                };
+
+                Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+            }
+
+            return Ok(ApiResponse<object>.Ok(new
+            {
+                result.Token,
+                result.Expiration,
+                result.Message,
+                result.Success
+            }));
+
+
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Có lỗi xảy ra trong quá trình xử lý refresh token");
+            return BadRequest(ApiResponse<object>.Fail("Có lỗi xảy ra trong quá trình xác thực người dùng, vui lòng đăng nhập lại"));
+        }
+    }
+
+    /// <summary>
+    /// User forgot password endpoint
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// User reset password endpoint
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+
+
+    /// <summary>
     /// Get current user profile
     /// </summary>
     //[HttpGet("profile")]
@@ -87,7 +191,7 @@ public class AuthController : ControllerBase
 
     //        var query = new GetProfileQuery(userId);
     //        var result = await _mediator.Send(query);
-            
+
     //        if (result == null)
     //        {
     //            return NotFound(new { Message = "User profile not found" });
@@ -99,33 +203,6 @@ public class AuthController : ControllerBase
     //    {
     //        _logger.LogError(ex, "Error getting user profile");
     //        return BadRequest(new { Message = "An error occurred while getting profile" });
-    //    }
-    //}
-
-    /// <summary>
-    /// User logout endpoint
-    /// </summary>
-    //[HttpPost("logout")]
-    //public async Task<ActionResult> Logout()
-    //{
-    //    try
-    //    {
-    //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //        if (string.IsNullOrEmpty(userId))
-    //        {
-    //            return Unauthorized();
-    //        }
-
-    //        // Get auth service directly from DI (for logout operations)
-    //        var authService = HttpContext.RequestServices.GetRequiredService<IAuthService>();
-    //        await authService.LogoutAsync(userId);
-            
-    //        return Ok(new { Success = true, Message = "Logged out successfully" });
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error during logout");
-    //        return BadRequest(new { Success = false, Message = "An error occurred during logout" });
     //    }
     //}
 }
