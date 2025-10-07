@@ -30,7 +30,7 @@ public static class DependencyInjection
         AddDatabase(services, configuration);
 
         // ASP.NET Core Identity Configuration
-        AddIdentity(services);
+        AddIdentity(services); // fixed generic role type
 
         // JWT Authentication Configuration
         AddJwtAuthentication(services, configuration);
@@ -73,7 +73,8 @@ public static class DependencyInjection
 
     private static void AddIdentity(IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole>(options =>
+        // IMPORTANT: Use IdentityRole<int> because ApplicationDbContext inherits IdentityDbContext<User, IdentityRole<int>, int>
+        services.AddIdentity<User, IdentityRole<int>>(options =>
         {
             // Password settings
             options.Password.RequireDigit = true;
