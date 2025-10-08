@@ -60,6 +60,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     #endregion
 
+    public DbSet<Discount> Discounts { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

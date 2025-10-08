@@ -1,4 +1,5 @@
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
 
 namespace AppBookingTour.Application.IRepositories;
 
@@ -9,8 +10,11 @@ namespace AppBookingTour.Application.IRepositories;
 public interface IUnitOfWork : IDisposable
 {
     #region Core Repositories
+
     //IUserRepository Users { get; }
     ITourRepository Tours { get; }
+    IDiscountRepository Discounts { get; }
+
     #endregion
     
     #region Generic Repository Access
