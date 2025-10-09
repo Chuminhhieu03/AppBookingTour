@@ -4,6 +4,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using AppBookingTour.Application.Features.Tours.CreateTour;
+using AppBookingTour.Api.Contracts.Responses;
 
 namespace AppBookingTour.Api.Controllers;
 
@@ -95,6 +97,28 @@ public sealed class ToursController : ControllerBase
         {
             _logger.LogError(ex, "Error getting tour details for ID: {TourId}", id);
             return BadRequest(new { Success = false, Message = "An error occurred while retrieving tour details" });
+        }
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromBody]TourRequestDTO requestBody)
+    {
+        try
+        {
+            var command = new CreateTourCommand(requestBody);
+            var result = await _mediator.Send(command);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new { Success = false, Message = result.ErrorMessage });
+            }
+
+            _logger.LogInformation("Created new tour with ID: {TourId}", result.Tour?.Id);
+            return CreatedAtAction(nameof(GetTourById), new { id = result.Tour?.Id }, result.Tour);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating tour");
+            return BadRequest(new { Success = false, Message = "An error occurred while creating the tour" });
         }
     }
 
