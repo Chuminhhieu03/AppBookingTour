@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Auth.ConfirmEmail;
 using AppBookingTour.Application.Features.Auth.ForgotPassword;
 using AppBookingTour.Application.Features.Auth.Login;
 using AppBookingTour.Application.Features.Auth.RefreshToken;
@@ -174,35 +175,17 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-
     /// <summary>
-    /// Get current user profile
+    /// Confirm email endpoint
     /// </summary>
-    //[HttpGet("profile")]
-    //public async Task<ActionResult> GetProfile()
-    //{
-    //    try
-    //    {
-    //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //        if (string.IsNullOrEmpty(userId))
-    //        {
-    //            return Unauthorized();
-    //        }
-
-    //        var query = new GetProfileQuery(userId);
-    //        var result = await _mediator.Send(query);
-
-    //        if (result == null)
-    //        {
-    //            return NotFound(new { Message = "User profile not found" });
-    //        }
-
-    //        return Ok(result);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error getting user profile");
-    //        return BadRequest(new { Message = "An error occurred while getting profile" });
-    //    }
-    //}
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userName, [FromQuery] string token)
+    {
+        var result = await _mediator.Send(new ConfirmEmailCommand(userName, token));
+        if (!result.Success)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.Message));
+        }
+        return Ok(ApiResponse<object>.Ok(new { result.Message }));
+    }
 }

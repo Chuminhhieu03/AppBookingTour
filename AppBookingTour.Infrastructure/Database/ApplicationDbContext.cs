@@ -152,7 +152,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Tour>(entity =>
         {
             entity.ToTable("Tours");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
@@ -178,7 +177,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<TourCategory>(e =>
         {
             e.ToTable("TourCategories");
-            e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.HasIndex(x => x.Name).IsUnique();
         });
@@ -186,7 +184,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<TourType>(e =>
         {
             e.ToTable("TourTypes");
-            e.HasKey(x => x.Id);
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.Property(x => x.PriceLevel).HasConversion<int>();
         });
@@ -194,7 +191,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<TourDeparture>(e =>
         {
             e.ToTable("TourDepartures");
-            e.HasKey(x => x.Id);
             e.Property(x => x.PriceAdult).HasPrecision(12, 2);
             e.Property(x => x.PriceChildren).HasPrecision(12, 2);
             e.Property(x => x.Status).HasConversion<int>();
@@ -204,7 +200,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<TourItinerary>(e =>
         {
             e.ToTable("TourItineraries");
-            e.HasKey(x => x.Id);
             e.Property(x => x.DayNumber).HasMaxLength(50).IsRequired();
             e.HasIndex(x => new { x.TourId, x.DayNumber });
         });
@@ -212,7 +207,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<TourItineraryDestination>(e =>
         {
             e.ToTable("TourItineraryDestinations");
-            e.HasKey(x => x.Id);
             e.Property(x => x.Notes).HasMaxLength(1000);
 
             e.HasOne(x => x.TourItinerary)
@@ -233,7 +227,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<City>(entity =>
         {
             entity.ToTable("Cities");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Code).HasMaxLength(10);
             entity.Property(e => e.Region).HasConversion<int>();
@@ -246,7 +239,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Hotel>(entity =>
         {
             entity.ToTable("Hotels");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.Rating).HasPrecision(3, 2);
@@ -261,7 +253,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.ToTable("Bookings");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.BookingCode).HasMaxLength(50).IsRequired();
             entity.Property(e => e.BookingType).HasConversion<int>();
             entity.Property(e => e.TotalAmount).HasPrecision(12, 2);
@@ -280,7 +271,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<BookingParticipant>(entity =>
         {
             entity.ToTable("BookingParticipants");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.FullName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Gender).HasConversion<int>();
             entity.Property(e => e.ParticipantType).HasConversion<int>().IsRequired();
@@ -293,7 +283,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<PaymentMethod>(entity =>
         {
             entity.ToTable("PaymentMethods");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Type).HasConversion<int>();
@@ -305,7 +294,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Payment>(entity =>
         {
             entity.ToTable("Payments");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.PaymentNumber).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(12, 2);
             entity.Property(e => e.TransactionId).HasMaxLength(50);
@@ -322,7 +310,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<BlogPost>(entity =>
         {
             entity.ToTable("BlogPosts");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).HasMaxLength(255).IsRequired();
             entity.Property(e => e.Status).HasConversion<int>();
         });
@@ -331,7 +318,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Review>(entity =>
         {
             entity.ToTable("Reviews");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).HasMaxLength(255);
             entity.Property(e => e.Comment).HasMaxLength(2000).IsRequired();
             entity.Property(e => e.Status).HasConversion<int>();
@@ -346,7 +332,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Promotion>(entity =>
         {
             entity.ToTable("Promotions");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
             entity.Property(e => e.DiscountType).HasConversion<int>();
@@ -359,7 +344,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<PromotionUsage>(entity =>
         {
             entity.ToTable("PromotionUsages");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.DiscountAmount).HasPrecision(12, 2);
             entity.Property(e => e.UsedAt).IsRequired();
             
@@ -386,7 +370,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Combo>(entity =>
         {
             entity.ToTable("Combos");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
             entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
