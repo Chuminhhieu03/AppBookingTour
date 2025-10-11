@@ -1,6 +1,7 @@
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Data;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
@@ -169,6 +170,7 @@ public static class DependencyInjection
         // Register specific repositories
         //services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITourRepository, TourRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
 
         // Register generic repository
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
