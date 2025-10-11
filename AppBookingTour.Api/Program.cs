@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application;
+﻿using AppBookingTour.Api.DataSeeder;
+using AppBookingTour.Application;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
@@ -121,6 +122,15 @@ builder.Services.AddSwaggerGen(c =>
 #endregion
 
 var app = builder.Build();
+
+# region Seeding Data
+
+using (var scope = app.Services.CreateScope())
+{
+    await Seeder.SeedRolesAsync(scope.ServiceProvider);
+}
+
+#endregion
 
 #region Middleware
 app.UseSwagger();
