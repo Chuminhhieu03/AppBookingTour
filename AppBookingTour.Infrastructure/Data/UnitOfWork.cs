@@ -1,5 +1,6 @@
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -21,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
     // Repository instances
     //private IUserRepository? _userRepository;
     private ITourRepository? _tourRepository;
+    private IDiscountRepository _discountRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -38,6 +40,8 @@ public class UnitOfWork : IUnitOfWork
 
     public ITourRepository Tours =>
         _tourRepository ??= new TourRepository(_context);
+
+    public IDiscountRepository Discounts => _discountRepository ?? new DiscountRepository(_context);
 
     #endregion
 

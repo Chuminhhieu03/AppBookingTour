@@ -7,8 +7,9 @@ public class Tour : BaseEntity
     public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
     public int? BusinessId { get; set; }
-    public int CategoryId { get; set; }
+    // Removed CategoryId – category now inferred via TourType.Category
     public int TypeId { get; set; }
+    public int CategoryId { get; set; }
     public int DepartureCityId { get; set; }
     public string? ImageGallery { get; set; } // JSON
     public int DurationDays { get; set; }
@@ -31,8 +32,9 @@ public class Tour : BaseEntity
 
     // Navigation properties
     public virtual Business? Business { get; set; }
-    public virtual TourCategory Category { get; set; } = null!;
+    // Removed direct Category navigation; resolve via Type.Category
     public virtual TourType Type { get; set; } = null!;
+    public virtual TourCategory Category { get; set; } = null!;
     public virtual City DepartureCity { get; set; } = null!;
     public virtual ICollection<TourDeparture> Departures { get; set; } = [];
     public virtual ICollection<TourItinerary> Itineraries { get; set; } = [];

@@ -1,4 +1,4 @@
-using AppBookingTour.Application.IServices;
+﻿using AppBookingTour.Application.IServices;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +14,7 @@ public class LoginCommandHandler(
 {
     public async Task<LoginCommandResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Processing login for {Email}", request.Email);
+        logger.LogInformation("Đang thực hiện login cho {Email}", request.Email);
         return await authService.LoginAsync(request);
     }
 }

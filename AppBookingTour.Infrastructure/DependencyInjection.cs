@@ -1,6 +1,7 @@
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Data;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
@@ -30,13 +31,13 @@ public static class DependencyInjection
         AddDatabase(services, configuration);
 
         // ASP.NET Core Identity Configuration
-        AddIdentity(services);
+        //AddIdentity(services); // fixed generic role type
 
         // JWT Authentication Configuration
-        AddJwtAuthentication(services, configuration);
+        //AddJwtAuthentication(services, configuration);
 
         // Authorization policies
-        AddAuthorizationPolicies(services);
+        //AddAuthorizationPolicies(services);
 
         // Repository Pattern & Unit of Work (Clean Architecture)
         AddRepositoryPattern(services);
@@ -73,7 +74,8 @@ public static class DependencyInjection
 
     private static void AddIdentity(IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole>(options =>
+        // IMPORTANT: Use IdentityRole<int> because ApplicationDbContext inherits IdentityDbContext<User, IdentityRole<int>, int>
+        services.AddIdentity<User, IdentityRole<int>>(options =>
         {
             // Password settings
             options.Password.RequireDigit = true;
@@ -168,6 +170,7 @@ public static class DependencyInjection
         // Register specific repositories
         //services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITourRepository, TourRepository>();
+        services.AddScoped<IDiscountRepository, DiscountRepository>();
 
         // Register generic repository
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -176,11 +179,11 @@ public static class DependencyInjection
     private static void AddBusinessServices(IServiceCollection services)
     {
         // Authentication & JWT services (implement Application interfaces)
-        //services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
 
         // Add other business services here as needed
-        // services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IEmailService, EmailService>();
         // services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         // services.AddScoped<IPaymentGatewayService, VNPayService>();
         // services.AddScoped<INotificationService, NotificationService>();

@@ -50,7 +50,6 @@ public class TourRepository : Repository<Tour>, ITourRepository
         return await _dbSet
             .Include(t => t.DepartureCity)
             .Include(t => t.Type)
-            .Include(t => t.Category)
             .Include(t => t.Itineraries)
             .Include(t => t.Departures)
             .FirstOrDefaultAsync(t => t.Id == tourId && t.IsActive, cancellationToken);
