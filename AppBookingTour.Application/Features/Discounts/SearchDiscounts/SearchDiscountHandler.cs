@@ -17,7 +17,7 @@ namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
 
         public async Task<SearchDiscountResponse> Handle(SearchDiscountQuery request, CancellationToken cancellationToken)
         {
-            var filter = request.discountFilter ?? new Discount();
+            var filter = request.discountFilter ?? new SearchDiscountFilter();
             int pageIndex = request.pageIndex ?? Constants.Pagination.PageIndex;
             int pageSize = request.pageSize ?? Constants.Pagination.PageSize;
             var listDiscount = await _unitOfWork.Discounts.SearchDiscount(filter, pageIndex, pageSize);

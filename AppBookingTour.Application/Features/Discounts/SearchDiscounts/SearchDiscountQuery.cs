@@ -3,5 +3,5 @@ using MediatR;
 
 namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
 {
-    public record class SearchDiscountQuery(int? pageIndex, int? pageSize, Discount discountFilter) : IRequest<SearchDiscountResponse>;
+    public record class SearchDiscountQuery(int? pageIndex, int? pageSize, SearchDiscountFilter? discountFilter) : IRequest<SearchDiscountResponse>;
 }

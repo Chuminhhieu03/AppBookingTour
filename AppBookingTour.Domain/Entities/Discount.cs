@@ -4,16 +4,16 @@
     {
         #region Primary props
 
-        public string Code { get; set; }
+        public string? Code { get; set; }
         public DateTime? StartEffectedDtg { get; set; }
         public DateTime? EndEffectedDtg { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public decimal? DiscountPercent { get; set; }
         public int? TotalQuantity { get; set; }
         public int? RemainQuantity { get; set; }
         public int? ServiceType { get; set; }
         public int? Status { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         #endregion
 
