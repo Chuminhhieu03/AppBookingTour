@@ -7,6 +7,5 @@ namespace AppBookingTour.Domain.IRepositories
     public interface IDiscountRepository : IRepository<Discount>
     {
         Task<List<Discount>> SearchDiscount(SearchDiscountFilter discountFilter, int pageIndex, int pageSize);
-        Task<>
     }
 }
