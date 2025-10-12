@@ -17,7 +17,7 @@ namespace AppBookingTour.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ResetPassword([FromBody] SearchDiscountQuery query)
+        public async Task<IActionResult> GetListDiscount([FromBody] SearchDiscountQuery query)
         {
             var result = await _mediator.Send(query);
 
