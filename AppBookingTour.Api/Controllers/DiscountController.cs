@@ -1,4 +1,4 @@
-﻿using AppBookingTour.Application.Features.Auth.ResetPassword;
+﻿using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
 using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +16,17 @@ namespace AppBookingTour.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GetListDiscount([FromBody] SearchDiscountQuery query)
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchDiscount([FromBody] SearchDiscountQuery query)
         {
             var result = await _mediator.Send(query);
+            return Ok(result);
+        }
 
-            if (!result.Success)
-                return BadRequest(result);
-
+        [HttpPost]
+        public async Task<IActionResult> AddNewDiscount([FromBody] AddNewDiscountCommand command)
+        {
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

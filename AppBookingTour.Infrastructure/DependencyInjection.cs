@@ -6,6 +6,7 @@ using AppBookingTour.Infrastructure.Data;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Infrastructure.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

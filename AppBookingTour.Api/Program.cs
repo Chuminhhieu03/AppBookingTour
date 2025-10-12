@@ -4,6 +4,8 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
+using AutoMapper;
+using AppBookingTour.Application.Mapping;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
@@ -34,6 +36,8 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblies(typeof(AssemblyMarker).Assembly)
 );
+
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile).Assembly));
 
 // ✅ Add FluentValidation (if you use it)
 builder.Services.AddValidatorsFromAssembly(typeof(AssemblyMarker).Assembly);
@@ -75,6 +79,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
 #endregion
 
 #region Swagger
