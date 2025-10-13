@@ -28,6 +28,7 @@ namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount
         {
             var discountDTO = request.Discount ?? new AddNewDiscountDTO();
             var discount = _mapper.Map<Discount>(discountDTO);
+            discount.RemainQuantity = discount.TotalQuantity;
             await _unitOfWork.Discounts.AddAsync(discount, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return new AddNewDiscountResponse
