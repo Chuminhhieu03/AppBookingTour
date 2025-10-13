@@ -3,11 +3,11 @@ using AppBookingTour.Application.Features.Discounts.UpdateDiscount;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
 
-namespace AppBookingTour.Application.Mapping
+namespace AppBookingTour.Application.Features.Discounts.Mapping
 {
-    public class MappingProfile : Profile
+    public class DiscountProfile : Profile
     {
-        public MappingProfile()
+        public DiscountProfile()
         {
             #region Discount mapping
 

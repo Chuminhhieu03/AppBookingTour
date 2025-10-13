@@ -4,13 +4,10 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using AutoMapper;
-using AppBookingTour.Application.Mapping;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using System;
 
 #region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
@@ -33,14 +30,13 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 
 // ✅ Add MediatR for CQRS (point to Application layer)
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblies(typeof(AssemblyMarker).Assembly)
+builder.Services.AddApplication();
+
+// Add AutoMapper 
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(AssemblyMarker).Assembly
 );
-
-builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile).Assembly));
-
-// ✅ Add FluentValidation (if you use it)
-builder.Services.AddValidatorsFromAssembly(typeof(AssemblyMarker).Assembly);
 #endregion
 
 #region Infrastructure Layer
