@@ -1,6 +1,5 @@
-﻿using AppBookingTour.Application.Features.Tours.GetTourById;
-using MediatR;
+﻿using MediatR;
 
 namespace AppBookingTour.Application.Features.Tours.CreateTour;
 
-public record CreateTourCommand(TourRequestDTO TourRequest) : IRequest<GetTourByIdResponse>;
+public record CreateTourCommand(TourRequestDTO TourRequest) : IRequest<CreateTourCommandResponse>;

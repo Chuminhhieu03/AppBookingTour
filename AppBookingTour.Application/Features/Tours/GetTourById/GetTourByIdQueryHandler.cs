@@ -1,9 +1,11 @@
-using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Enums;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+
+using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Domain.Enums;
+using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
 #region Validator
@@ -37,32 +39,35 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
                 return GetTourByIdResponse.Failed($"Tour with ID {request.TourId} not found");
             }
 
-            // Increment view count (side effect)
+            // Increment view count (side effect) => chuẩn bị bỏ
             tour.ViewCount++;
             _unitOfWork.Tours.Update(tour);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            // Map to DTO with enhanced data
+            // TODO: dùng AutoMapper để map
+            // Map entity => dto
             var tourDto = new TourDetailDto
             {
                 Id = tour.Id,
                 Code = tour.Code,
                 Name = tour.Name,
-                Description = tour.Description,
                 DurationDays = tour.DurationDays,
+                DurationNights = tour.DurationNights,
                 BasePriceAdult = tour.BasePriceAdult,
                 BasePriceChild = tour.BasePriceChild,
                 MaxParticipants = tour.MaxParticipants,
+                MinParticipants = tour.MinParticipants,
                 Rating = tour.Rating,
                 TotalBookings = tour.TotalBookings,
                 ViewCount = tour.ViewCount,
-                ImageUrl = ExtractFirstImageUrl(tour.ImageGallery),
+                //ImageMain = tour.ImageMain,
                 ImageGallery = ParseJsonArray(tour.ImageGallery) ?? [],
                 IsActive = tour.IsActive,
                 CreatedAt = tour.CreatedAt,
                 UpdatedAt = tour.UpdatedAt,
                 DepartureCityName = tour.DepartureCity?.Name ?? "Unknown",
                 TypeName = tour.Type?.Name ?? "Unknown",
+                Description = tour.Description,
                 Includes = ParseJsonArray(tour.Includes) ?? [],
                 Excludes = ParseJsonArray(tour.Excludes) ?? [],
                 TermsConditions = tour.TermsConditions,
@@ -73,11 +78,11 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
                         DayNumber = i.DayNumber,
                         Title = i.Title,
                         Description = i.Description,
-                        Activities = ParseJsonArray(i.Activity) ?? [],
-                        Notes = i.Note
+                        Activity = i.Activity,
+                        Note = i.Note
                     })
                     .ToList() ?? [],
-                UpcomingDepartures = tour.Departures?
+                TourDepartures = tour.Departures?
                     .Where(d => d.DepartureDate > DateTime.Now && d.Status == DepartureStatus.Available)
                     .OrderBy(d => d.DepartureDate)
                     .Take(5)
@@ -103,12 +108,6 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
             _logger.LogError(ex, "Error occurred while getting tour details for ID: {TourId}", request.TourId);
             return GetTourByIdResponse.Failed("An error occurred while retrieving tour details");
         }
-    }
-
-    private static string? ExtractFirstImageUrl(string? imageGallery)
-    {
-        var images = ParseJsonArray(imageGallery);
-        return images?.FirstOrDefault();
     }
 
     private static List<string>? ParseJsonArray(string? jsonString)

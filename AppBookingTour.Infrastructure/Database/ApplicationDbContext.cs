@@ -152,7 +152,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         modelBuilder.Entity<Tour>(entity =>
         {
             entity.ToTable("Tours");
-            entity.HasKey(e => e.Id);
             entity.Property(e => e.Code).HasMaxLength(50).IsRequired();
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
@@ -164,12 +163,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.HasIndex(e => new { e.DepartureCityId, e.TypeId, e.Status });
 
             // Relationship: TourType
-            entity.HasOne(t => t.Type)
+            entity.HasOne(t => t.Type)  
                   .WithMany(tt => tt.Tours)
                   .HasForeignKey(t => t.TypeId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(t => t.Category)
+            entity.HasOne(t => t.Category) 
                   .WithMany(c => c.Tours)
                   .HasForeignKey(t => t.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);

@@ -7,7 +7,6 @@ public class Tour : BaseEntity
     public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
     public int? BusinessId { get; set; }
-    // Removed CategoryId – category now inferred via TourType.Category
     public int TypeId { get; set; }
     public int CategoryId { get; set; }
     public int DepartureCityId { get; set; }
