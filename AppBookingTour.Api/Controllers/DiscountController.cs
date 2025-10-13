@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
 using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
+using AppBookingTour.Application.Features.Discounts.UpdateDiscount;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,6 +29,14 @@ namespace AppBookingTour.Api.Controllers
         {
             var result = await _mediator.Send(command);
             return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDiscount(int id, [FromBody] UpdateDiscountDTO dto)
+        {
+            var command = new UpdateDiscountCommand(id, dto);
+            var response = await _mediator.Send(command);
+            return Ok(response);
         }
     }
 }

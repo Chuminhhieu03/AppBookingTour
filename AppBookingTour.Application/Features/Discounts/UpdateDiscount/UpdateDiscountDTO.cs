@@ -1,9 +1,9 @@
 ﻿using AppBookingTour.Domain.Entities;
 using AppBookingTour.Share.DTOS;
 
-namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount
+namespace AppBookingTour.Application.Features.Discounts.UpdateDiscount
 {
-    public class AddNewDiscountDTO
+    public class UpdateDiscountDTO
     {
         public string? Code { get; set; }
         public DateTime? StartEffectedDtg { get; set; }
@@ -16,7 +16,7 @@ namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount
         public string? Description { get; set; }
     }
 
-    public class AddNewDiscountResponse : BaseResponse
+    public class UpdateDiscountResponse : BaseResponse
     {
         public Discount? Discount { get; set; }
     }
