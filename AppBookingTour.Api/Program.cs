@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application;
+﻿using AppBookingTour.Api.DataSeeder;
+using AppBookingTour.Application;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
@@ -7,7 +8,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using System;
 
 #region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
@@ -30,12 +30,13 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 
 // ✅ Add MediatR for CQRS (point to Application layer)
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblies(typeof(AssemblyMarker).Assembly)
-);
+builder.Services.AddApplication();
 
-// ✅ Add FluentValidation (if you use it)
-builder.Services.AddValidatorsFromAssembly(typeof(AssemblyMarker).Assembly);
+// Add AutoMapper 
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(AssemblyMarker).Assembly
+);
 #endregion
 
 #region Infrastructure Layer
@@ -74,6 +75,7 @@ builder.Services.AddCors(options =>
             .AllowCredentials();
     });
 });
+
 #endregion
 
 #region Swagger
@@ -121,6 +123,15 @@ builder.Services.AddSwaggerGen(c =>
 #endregion
 
 var app = builder.Build();
+
+# region Seeding Data
+
+using (var scope = app.Services.CreateScope())
+{
+    await Seeder.SeedRolesAsync(scope.ServiceProvider);
+}
+
+#endregion
 
 #region Middleware
 app.UseSwagger();

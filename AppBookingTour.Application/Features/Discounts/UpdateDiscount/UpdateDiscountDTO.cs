@@ -1,0 +1,23 @@
+﻿using AppBookingTour.Domain.Entities;
+using AppBookingTour.Share.DTOS;
+
+namespace AppBookingTour.Application.Features.Discounts.UpdateDiscount
+{
+    public class UpdateDiscountDTO
+    {
+        public string? Code { get; set; }
+        public DateTime? StartEffectedDtg { get; set; }
+        public DateTime? EndEffectedDtg { get; set; }
+        public string? Name { get; set; }
+        public decimal? DiscountPercent { get; set; }
+        public int? TotalQuantity { get; set; }
+        public int? ServiceType { get; set; }
+        public int? Status { get; set; }
+        public string? Description { get; set; }
+    }
+
+    public class UpdateDiscountResponse : BaseResponse
+    {
+        public Discount? Discount { get; set; }
+    }
+}

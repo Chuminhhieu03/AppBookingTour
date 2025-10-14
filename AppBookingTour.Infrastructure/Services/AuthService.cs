@@ -57,12 +57,18 @@ namespace AppBookingTour.Infrastructure.Services
                 var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                 return new RegisterCommandResponse(false, errors);
             }
-
-            var resultCreateRole = await _userManager.AddToRoleAsync(newUser, request.UserType.ToString());
-            if (!resultCreateRole.Succeeded)
+            try
             {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return new RegisterCommandResponse(false, errors);
+                var resultCreateRole = await _userManager.AddToRoleAsync(newUser, request.UserType.ToString());
+                if (!resultCreateRole.Succeeded)
+                {
+                    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    return new RegisterCommandResponse(false, errors);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("CHUI");
             }
 
             _logger.LogInformation("Đã tạo tài khoản thành công cho {Email}", request.Email);
@@ -91,6 +97,7 @@ namespace AppBookingTour.Infrastructure.Services
                 await _userManager.DeleteAsync(user);
             }
         }
+
         // Method dùng để đăng nhập tài khoản 
         public async Task<LoginCommandResponse> LoginAsync(LoginCommand request)
         {
