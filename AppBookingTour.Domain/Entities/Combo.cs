@@ -6,6 +6,7 @@ public class Combo : BaseEntity
 {
     public int FromCityId { get; set; }
     public int ToCityId { get; set; }
+    public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? ShortDescription { get; set; }
     public Vehicle Vehicle { get; set; }
@@ -23,6 +24,7 @@ public class Combo : BaseEntity
     public int ViewCount { get; set; }
     public int InterestCount { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? ComboImageCover { get; set; }
 
     // Navigation properties
     public virtual City FromCity { get; set; } = null!;

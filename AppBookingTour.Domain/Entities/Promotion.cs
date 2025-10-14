@@ -1,4 +1,5 @@
 using AppBookingTour.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppBookingTour.Domain.Entities;
 
@@ -16,6 +17,9 @@ public class Promotion : BaseEntity
     public decimal? MaximumDiscount { get; set; }
     public bool IsActive { get; set; } = true;
     public string? Description { get; set; }
+
+    [Precision(12, 2)]
+    public decimal? MinimumDiscount{ get; set; }
 
     // Navigation properties
     public virtual Business? Business { get; set; }
