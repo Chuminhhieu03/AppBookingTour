@@ -6,8 +6,6 @@ public class Tour : BaseEntity
 {
     public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
-    public int? BusinessId { get; set; }
-    // Removed CategoryId – category now inferred via TourType.Category
     public int TypeId { get; set; }
     public int CategoryId { get; set; }
     public int DepartureCityId { get; set; }
@@ -28,11 +26,10 @@ public class Tour : BaseEntity
     public int TotalBookings { get; set; }
     public int ViewCount { get; set; }
     public int InterestCount { get; set; }
+    public string? Image_Main { get; set; }
     public bool IsActive { get; set; } = true;
 
     // Navigation properties
-    public virtual Business? Business { get; set; }
-    // Removed direct Category navigation; resolve via Type.Category
     public virtual TourType Type { get; set; } = null!;
     public virtual TourCategory Category { get; set; } = null!;
     public virtual City DepartureCity { get; set; } = null!;

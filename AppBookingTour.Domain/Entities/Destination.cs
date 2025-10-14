@@ -9,7 +9,7 @@ public class Destination : BaseEntity
     public decimal? Longitude { get; set; }
     public string? Category { get; set; }
     public decimal? Rating { get; set; }
-    public string? ImageGallery { get; set; } // JSON
+    public string? ImageGallery { get; set; }
     public bool IsActive { get; set; } = true;
 
     // Navigation properties
