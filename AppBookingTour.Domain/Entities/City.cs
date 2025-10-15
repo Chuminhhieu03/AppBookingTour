@@ -13,7 +13,6 @@ public class City : BaseEntity
     public bool IsActive { get; set; } = true;
 
     // Navigation properties
-    public virtual ICollection<Destination> Destinations { get; set; } = [];
     public virtual ICollection<Hotel> Hotels { get; set; } = [];
     public virtual ICollection<Tour> Tours { get; set; } = [];
     public virtual ICollection<BlogPost> BlogPosts { get; set; } = [];

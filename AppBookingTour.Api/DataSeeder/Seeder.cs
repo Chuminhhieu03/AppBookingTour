@@ -10,7 +10,7 @@ namespace AppBookingTour.Api.DataSeeder
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
             // Danh sách các role bạn muốn có trong hệ thống
-            string[] roleNames = { "Admin", "Customer", "Business" };
+            string[] roleNames = { "Admin", "Customer", "Staff" };
 
             foreach (var roleName in roleNames)
             {

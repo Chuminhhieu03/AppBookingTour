@@ -22,7 +22,6 @@ public class Promotion : BaseEntity
     public decimal? MinimumDiscount{ get; set; }
 
     // Navigation properties
-    public virtual Business? Business { get; set; }
     public virtual ICollection<PromotionItem> PromotionItems { get; set; } = [];
     public virtual ICollection<PromotionUsage> PromotionUsages { get; set; } = [];
 }
