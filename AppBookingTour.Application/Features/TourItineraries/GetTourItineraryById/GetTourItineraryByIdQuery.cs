@@ -1,7 +1,5 @@
-﻿
-namespace AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById
-{
-    internal class GetTourItineraryByIdQuery
-    {
-    }
-}
+﻿using MediatR;
+
+namespace AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
+
+public record GetTourItineraryByIdQuery(int TourItineraryId) : IRequest<GetTourItineraryByIdResponse>;

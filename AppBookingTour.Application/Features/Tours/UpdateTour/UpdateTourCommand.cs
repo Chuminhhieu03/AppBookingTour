@@ -3,4 +3,4 @@ using MediatR;
 
 namespace AppBookingTour.Application.Features.Tours.UpdateTour;
 
-public record UpdateTourCommand(int TourId, TourRequestDTO TourRequest) : IRequest<UpdateTourCommandResponse>;
+public record UpdateTourCommand(int TourId, TourRequestDTO TourRequest) : IRequest<UpdateTourResponse>;

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace AppBookingTour.Application.Features.Tours.DeleteTour;
 
 #region Handler
-public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand, DeleteTourCommandResponse>
+public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand, DeleteTourResponse>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteTourCommandHanler> _logger;
@@ -19,7 +19,7 @@ public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand,
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
-    public async Task<DeleteTourCommandResponse> Handle(DeleteTourCommand request, CancellationToken cancellationToken)
+    public async Task<DeleteTourResponse> Handle(DeleteTourCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Delete tour by id: {TourId}", request.TourId);
         try
@@ -28,7 +28,7 @@ public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand,
 
             if (existingTour == null)
             {
-                return DeleteTourCommandResponse.Failed($"Tour with ID {request.TourId} not found.");
+                return DeleteTourResponse.Failed($"Tour with ID {request.TourId} not found.");
             }
 
             try
@@ -58,15 +58,15 @@ public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand,
             {
                 _logger.LogError(ex.Message);
                 await _unitOfWork.RollbackTransactionAsync();
-                return DeleteTourCommandResponse.Failed("An error occurred while deleting the tour. Please try again later.");
+                return DeleteTourResponse.Failed("An error occurred while deleting the tour. Please try again later.");
             }
 
-            return DeleteTourCommandResponse.Success();
+            return DeleteTourResponse.Success();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting tour with ID {TourId}: {ErrorMessage}", request.TourId, ex.Message);
-            return DeleteTourCommandResponse.Failed("An error occurred while deleting the tour. Please try again later.");
+            return DeleteTourResponse.Failed("An error occurred while deleting the tour. Please try again later.");
         }
     }
 }

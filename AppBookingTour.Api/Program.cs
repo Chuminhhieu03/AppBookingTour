@@ -4,7 +4,6 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;

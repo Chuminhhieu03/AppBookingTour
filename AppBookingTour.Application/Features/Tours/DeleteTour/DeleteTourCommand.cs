@@ -2,4 +2,4 @@
 
 namespace AppBookingTour.Application.Features.Tours.DeleteTour;
 
-public record DeleteTourCommand(int TourId) : IRequest<DeleteTourCommandResponse>;
+public record DeleteTourCommand(int TourId) : IRequest<DeleteTourResponse>;

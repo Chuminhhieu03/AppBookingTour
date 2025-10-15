@@ -1,4 +1,5 @@
-using AppBookingTour.Application.Features.TourItinerary.GetTourItineraryById;
+using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
+using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
 public class GetTourByIdResponse
@@ -37,21 +38,9 @@ public class TourDetailDto
     public string DepartureCityName { get; set; } = null!;
     public string TypeName { get; set; } = null!;
     public string? CategoryName { get; set; }
-    public List<TourItineraryDto> Itineraries { get; set; } = [];
-    public List<TourDepartureDto> TourDepartures { get; set; } = [];
+    public List<TourItineraryDTO> Itineraries { get; set; } = [];
+    public List<TourDepartureDTO> Departures { get; set; } = [];
     public List<string> Includes { get; set; } = [];
     public List<string> Excludes { get; set; } = [];
     public string? TermsConditions { get; set; }
-}
-
-public class TourDepartureDto
-{
-    public int Id { get; set; }
-    public DateTime DepartureDate { get; set; }
-    public DateTime ReturnDate { get; set; }
-    public decimal PriceAdult { get; set; }
-    public decimal PriceChildren { get; set; }
-    public int AvailableSlots { get; set; }
-    public string? GuideName { get; set; }
-    public string Status { get; set; } = null!;
 }

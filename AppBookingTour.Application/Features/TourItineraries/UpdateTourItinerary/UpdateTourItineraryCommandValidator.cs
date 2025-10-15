@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
+namespace AppBookingTour.Application.Features.TourItineraries.UpdateTourItinerary;
 
-public class CreateTourItineraryCommandValidator : AbstractValidator<CreateTourItineraryCommand>
+public class UpdateTourItineraryCommandValidator : AbstractValidator<UpdateTourItineraryCommand>
 {
-    public CreateTourItineraryCommandValidator()
+    public UpdateTourItineraryCommandValidator()
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 

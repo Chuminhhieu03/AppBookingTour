@@ -2,4 +2,4 @@
 
 namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 
-public record CreateTourItineraryCommand(TourItineraryRequestDto TourItineraryRequest) : IRequest<CreateTourItineraryCommandResponse>;
+public record CreateTourItineraryCommand(TourItineraryRequestDTO TourItineraryRequest) : IRequest<CreateTourItineraryResponse>;

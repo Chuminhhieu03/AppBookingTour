@@ -1,7 +1,19 @@
 ﻿
 namespace AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
-public class TourItineraryDto
+public class GetTourItineraryByIdResponse
+{
+    public bool IsSuccess { get; init; }
+    public string? ErrorMessage { get; init; }
+    public TourItineraryDTO? TourItinerary { get; init; }
+
+    public static GetTourItineraryByIdResponse Success(TourItineraryDTO tourItinerary) =>
+        new() { IsSuccess = true, TourItinerary = tourItinerary };
+
+    public static GetTourItineraryByIdResponse Failed(string errorMessage) =>
+        new() { IsSuccess = false, ErrorMessage = errorMessage };
+}
+public class TourItineraryDTO
 {
     public int Id { get; set; }
     public int TourId { get; set; }

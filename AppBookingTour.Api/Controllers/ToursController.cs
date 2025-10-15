@@ -1,7 +1,8 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using AppBookingTour.Api.Contracts.Responses;
+using FluentValidation;
 
+using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
@@ -10,7 +11,7 @@ using AppBookingTour.Application.Features.Tours.DeleteTour;
 namespace AppBookingTour.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/tours")]
 public sealed class ToursController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -29,18 +30,23 @@ public sealed class ToursController : ControllerBase
         {
             var command = new CreateTourCommand(requestBody);
             var result = await _mediator.Send(command);
+
             if (!result.IsSuccess)
-            {
-                return BadRequest(new { Success = false, Message = result.ErrorMessage });
-            }
+                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
 
             _logger.LogInformation("Created new tour with ID: {TourId}", result.Tour?.Id);
             return Created("", ApiResponse<object>.Ok(result.Tour!));
         }
+        catch (ValidationException vex)
+        {
+            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+            _logger.LogWarning(vex, "Validation failed for create tour: {Errors}", messages);
+            return BadRequest(ApiResponse<object>.Fail(messages));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating tour");
-            return BadRequest(new { Success = false, Message = "An error occurred while creating the tour" });
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while creating the tour"));
         }
     }
 
@@ -55,20 +61,18 @@ public sealed class ToursController : ControllerBase
             if (!result.IsSuccess)
             {
                 if (result.ErrorMessage?.Contains("not found") == true)
-                {
-                    return NotFound(new { Success = false, Message = result.ErrorMessage });
-                }
+                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
 
-                return BadRequest(new { Success = false, Message = result.ErrorMessage });
+                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
             }
 
             _logger.LogInformation("Retrieved tour details for ID: {TourId}", id);
-            return Ok(result.Tour);
+            return Ok(ApiResponse<object>.Ok(result.Tour!));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting tour details for ID: {TourId}", id);
-            return BadRequest(new { Success = false, Message = "An error occurred while retrieving tour details" });
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while retrieving tour details"));
         }
     }
 
@@ -79,23 +83,32 @@ public sealed class ToursController : ControllerBase
         {
             var command = new UpdateTourCommand(id, requestBody);
             var result = await _mediator.Send(command);
+
             if (!result.IsSuccess)
             {
                 if (result.Message?.Contains("not found") == true)
-                {
-                    return NotFound(new { Success = false, Message = result.Message! });
-                }
-                return BadRequest(new { Success = false, Message = result.Message! });
+                    return NotFound(ApiResponse<object>.Fail(result.Message!));
+
+                return BadRequest(ApiResponse<object>.Fail(result.Message!));
             }
 
             _logger.LogInformation("Updated tour with ID: {TourId}", id);
-
-            return Ok(new ApiResponse<object> { Success = true, Message = "Update tour successfully" });
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Update tour successfully"
+            });
+        }
+        catch (ValidationException vex)
+        {
+            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+            _logger.LogWarning(vex, "Validation failed for update tour: {Errors}", messages);
+            return BadRequest(ApiResponse<object>.Fail(messages));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating tour with ID: {TourId}", id);
-            return BadRequest(new { Success = false, Message = "An error occurred while updating the tour" });
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while updating the tour"));
         }
     }
 
@@ -106,22 +119,26 @@ public sealed class ToursController : ControllerBase
         {
             var command = new DeleteTourCommand(id);
             var result = await _mediator.Send(command);
+
             if (!result.IsSuccess)
             {
                 if (result.Message?.Contains("not found") == true)
-                {
-                    return NotFound(new { Success = false, Message = result.Message! });
-                }
-                return BadRequest(new { Success = false, Message = result.Message! });
+                    return NotFound(ApiResponse<object>.Fail(result.Message!));
+
+                return BadRequest(ApiResponse<object>.Fail(result.Message!));
             }
+
             _logger.LogInformation("Deleted tour with ID: {TourId}", id);
-            return Ok(new ApiResponse<object> { Success = true, Message = "Delete tour successfully" });
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Delete tour successfully"
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting tour with ID: {TourId}", id);
-            return BadRequest(new { Success = false, Message = "An error occurred while deleting the tour" });
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while deleting the tour"));
         }
     }
-
 }
