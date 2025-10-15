@@ -1,0 +1,632 @@
+[
+  {
+    "Name": "Hà Nội",
+    "Slug": "ha-noi",
+    "Code": "01",
+    "Region": "North",
+    "IsPopular": true,
+    "Description": "Thủ đô của Việt Nam, trung tâm chính trị - văn hóa.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hải Phòng",
+    "Slug": "hai-phong",
+    "Code": "31",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": "Thành phố cảng lớn ở miền Bắc.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hải Dương",
+    "Slug": "hai-duong",
+    "Code": "34",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hưng Yên",
+    "Slug": "hung-yen",
+    "Code": "33",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Thái Bình",
+    "Slug": "thai-binh",
+    "Code": "36",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Nam Định",
+    "Slug": "nam-dinh",
+    "Code": "18",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Ninh Bình",
+    "Slug": "ninh-binh",
+    "Code": "30",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hà Nam",
+    "Slug": "ha-nam",
+    "Code": "35",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Thái Nguyên",
+    "Slug": "thai-nguyen",
+    "Code": "19",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bắc Giang",
+    "Slug": "bac-giang",
+    "Code": "24",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bắc Ninh",
+    "Slug": "bac-ninh",
+    "Code": "27",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Phú Thọ",
+    "Slug": "phu-tho",
+    "Code": "25",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Vĩnh Phúc",
+    "Slug": "vinh-phuc",
+    "Code": "26",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Quảng Ninh",
+    "Slug": "quang-ninh",
+    "Code": "22",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": "Nổi tiếng với Vịnh Hạ Long.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hà Giang",
+    "Slug": "ha-giang",
+    "Code": "02",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Cao Bằng",
+    "Slug": "cao-bang",
+    "Code": "04",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bắc Kạn",
+    "Slug": "bac-kan",
+    "Code": "06",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Lạng Sơn",
+    "Slug": "lang-son",
+    "Code": "20",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Tuyên Quang",
+    "Slug": "tuyen-quang",
+    "Code": "07",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Lào Cai",
+    "Slug": "lao-cai",
+    "Code": "10",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Yên Bái",
+    "Slug": "yen-bai",
+    "Code": "15",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Sơn La",
+    "Slug": "son-la",
+    "Code": "05",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hòa Bình",
+    "Slug": "hoa-binh",
+    "Code": "17",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Điện Biên",
+    "Slug": "dien-bien",
+    "Code": "11",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Lai Châu",
+    "Slug": "lai-chau",
+    "Code": "12",
+    "Region": "North",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Thanh Hóa",
+    "Slug": "thanh-hoa",
+    "Code": "38",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Nghệ An",
+    "Slug": "nghe-an",
+    "Code": "40",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hà Tĩnh",
+    "Slug": "ha-tinh",
+    "Code": "42",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Quảng Bình",
+    "Slug": "quang-binh",
+    "Code": "44",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Quảng Trị",
+    "Slug": "quang-tri",
+    "Code": "45",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Thừa Thiên Huế",
+    "Slug": "thua-thien-hue",
+    "Code": "46",
+    "Region": "Central",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Đà Nẵng",
+    "Slug": "da-nang",
+    "Code": "48",
+    "Region": "SouthCentral",
+    "IsPopular": true,
+    "Description": "Thành phố trực thuộc trung ương ở miền Trung.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Quảng Nam",
+    "Slug": "quang-nam",
+    "Code": "49",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Quảng Ngãi",
+    "Slug": "quang-ngai",
+    "Code": "51",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bình Định",
+    "Slug": "binh-dinh",
+    "Code": "52",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Phú Yên",
+    "Slug": "phu-yen",
+    "Code": "54",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Khánh Hòa",
+    "Slug": "khanh-hoa",
+    "Code": "56",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Ninh Thuận",
+    "Slug": "ninh-thuan",
+    "Code": "58",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bình Thuận",
+    "Slug": "binh-thuan",
+    "Code": "60",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Kon Tum",
+    "Slug": "kon-tum",
+    "Code": "62",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Gia Lai",
+    "Slug": "gia-lai",
+    "Code": "64",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Đắk Lắk",
+    "Slug": "dak-lak",
+    "Code": "66",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Đắk Nông",
+    "Slug": "dak-nong",
+    "Code": "67",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Lâm Đồng",
+    "Slug": "lam-dong",
+    "Code": "68",
+    "Region": "SouthCentral",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bình Phước",
+    "Slug": "binh-phuoc",
+    "Code": "70",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Tây Ninh",
+    "Slug": "tay-ninh",
+    "Code": "72",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bình Dương",
+    "Slug": "binh-duong",
+    "Code": "74",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Đồng Nai",
+    "Slug": "dong-nai",
+    "Code": "75",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bà Rịa - Vũng Tàu",
+    "Slug": "ba-ria-vung-tau",
+    "Code": "77",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hồ Chí Minh",
+    "Slug": "ho-chi-minh",
+    "Code": "79",
+    "Region": "SouthWest",
+    "IsPopular": true,
+    "Description": "Trung tâm kinh tế lớn nhất Việt Nam.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Long An",
+    "Slug": "long-an",
+    "Code": "80",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Tiền Giang",
+    "Slug": "tien-giang",
+    "Code": "82",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bến Tre",
+    "Slug": "ben-tre",
+    "Code": "83",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Trà Vinh",
+    "Slug": "tra-vinh",
+    "Code": "84",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Vĩnh Long",
+    "Slug": "vinh-long",
+    "Code": "86",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Đồng Tháp",
+    "Slug": "dong-thap",
+    "Code": "87",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "An Giang",
+    "Slug": "an-giang",
+    "Code": "89",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Kiên Giang",
+    "Slug": "kien-giang",
+    "Code": "91",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Cần Thơ",
+    "Slug": "can-tho",
+    "Code": "92",
+    "Region": "SouthWest",
+    "IsPopular": true,
+    "Description": "Thành phố trung tâm vùng Đồng bằng sông Cửu Long.",
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Hậu Giang",
+    "Slug": "hau-giang",
+    "Code": "93",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Sóc Trăng",
+    "Slug": "soc-trang",
+    "Code": "94",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Bạc Liêu",
+    "Slug": "bac-lieu",
+    "Code": "95",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": null,
+    "ImageUrl": null,
+    "IsActive": true
+  },
+  {
+    "Name": "Cà Mau",
+    "Slug": "ca-mau",
+    "Code": "96",
+    "Region": "SouthWest",
+    "IsPopular": false,
+    "Description": "Cực Nam của đất nước.",
+    "ImageUrl": null,
+    "IsActive": true
+  }
+]

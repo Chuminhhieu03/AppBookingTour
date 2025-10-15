@@ -29,7 +29,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<TourItinerary> TourItineraries { get; set; }
     public DbSet<TourItineraryDestination> TourItineraryDestinations { get; set; }
     public DbSet<City> Cities { get; set; }
-    public DbSet<Destination> Destinations { get; set; }
     public DbSet<Hotel> Hotels { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
     #endregion
@@ -215,11 +214,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             .WithMany(ti => ti.Destinations)
             .HasForeignKey(x => x.TourItineraryId)
             .OnDelete(DeleteBehavior.Restrict);
-
-            e.HasOne(x => x.Destination)
-            .WithMany(d => d.TourItineraryDestinations)
-            .HasForeignKey(x => x.DestinationId)
-            .OnDelete(DeleteBehavior.Cascade);
         });
     }
 
@@ -399,13 +393,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         {
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
             entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
-        });
-
-        modelBuilder.Entity<Destination>(entity =>
-        {
-            entity.Property(e => e.Latitude).HasPrecision(9, 6);
-            entity.Property(e => e.Longitude).HasPrecision(9, 6);
-            entity.Property(e => e.Rating).HasPrecision(3, 2);
         });
 
         modelBuilder.Entity<PromotionUsage>(entity =>
