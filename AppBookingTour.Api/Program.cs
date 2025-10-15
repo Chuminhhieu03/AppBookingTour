@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Api.DataSeeder;
+using AppBookingTour.Api.Middlewares;
 using AppBookingTour.Application;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
@@ -132,7 +133,10 @@ using (var scope = app.Services.CreateScope())
 
 #endregion
 
-#region Middleware
+// Add Custom Middlewares
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+# region Middleware Pipeline Configuration
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -140,10 +144,9 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// Error Handling + HSTS
+// Error Handling + HSTS (after custom exception handling)
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
