@@ -8,6 +8,7 @@ public class City : BaseEntity
     public string? Code { get; set; }
     public Region? Region { get; set; }
     public bool IsPopular { get; set; } = false;
+    public string Slug { get; set; } = null!;
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;

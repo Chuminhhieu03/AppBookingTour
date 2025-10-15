@@ -1,3 +1,5 @@
+﻿using System.ComponentModel;
+
 namespace AppBookingTour.Domain.Enums;
 
 /// <summary>
@@ -183,9 +185,17 @@ public enum ReviewType
 #region General Enums
 public enum Region
 {
-    North = 1,   // Mi?n B?c
-    Central = 2, // Mi?n Trung
-    South = 3    // Mi?n Nam
+    [Description("Miền Bắc")]
+    North = 1,
+
+    [Description("Miền Trung")]
+    Central = 2,
+
+    [Description("Nam Trung Bộ")]
+    SouthCentral = 3,
+
+    [Description("Tây Nam Bộ")]
+    SouthWest = 4
 }
 
 public enum Vehicle

@@ -4,7 +4,6 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -28,6 +27,7 @@ builder.Host.UseSerilog();
 
 #region Core Services
 builder.Services.AddControllers();
+
 
 // ✅ Add MediatR for CQRS (point to Application layer)
 builder.Services.AddApplication();
@@ -128,7 +128,12 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    // Seed roles first
     await Seeder.SeedRolesAsync(scope.ServiceProvider);
+    
+    // Seed cities from JSON file
+    var citiesJsonPath = Path.Combine(app.Environment.ContentRootPath, "DataSeeder", "vn_provinces_63.json");
+    await Seeder.SeedCitiesFromJsonAsync(scope.ServiceProvider, citiesJsonPath);
 }
 
 #endregion
