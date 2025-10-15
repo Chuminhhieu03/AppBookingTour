@@ -32,13 +32,10 @@ public static class DependencyInjection
         AddDatabase(services, configuration);
 
         // ASP.NET Core Identity Configuration
-        //AddIdentity(services); // fixed generic role type
+        AddIdentity(services);
 
         // JWT Authentication Configuration
-        //AddJwtAuthentication(services, configuration);
-
-        // Authorization policies
-        //AddAuthorizationPolicies(services);
+        AddJwtAuthentication(services, configuration);
 
         // Repository Pattern & Unit of Work (Clean Architecture)
         AddRepositoryPattern(services);
@@ -75,13 +72,12 @@ public static class DependencyInjection
 
     private static void AddIdentity(IServiceCollection services)
     {
-        // IMPORTANT: Use IdentityRole<int> because ApplicationDbContext inherits IdentityDbContext<User, IdentityRole<int>, int>
         services.AddIdentity<User, IdentityRole<int>>(options =>
         {
             // Password settings
             options.Password.RequireDigit = true;
             options.Password.RequiredLength = 8;
-            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireNonAlphanumeric = true;
             options.Password.RequireUppercase = true;
             options.Password.RequireLowercase = true;
             
@@ -92,7 +88,7 @@ public static class DependencyInjection
             
             // User settings
             options.User.RequireUniqueEmail = true;
-            options.SignIn.RequireConfirmedEmail = false;
+            options.SignIn.RequireConfirmedEmail = true;
             options.SignIn.RequireConfirmedPhoneNumber = false;
         })
         .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -139,27 +135,6 @@ public static class DependencyInjection
                     return Task.CompletedTask;
                 }
             };
-        });
-    }
-
-    private static void AddAuthorizationPolicies(IServiceCollection services)
-    {
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("AdminPolicy", policy => 
-                policy.RequireRole("Admin"));
-            options.AddPolicy("StaffPolicy", policy => 
-                policy.RequireRole("Admin", "Staff"));
-            options.AddPolicy("CustomerPolicy", policy => 
-                policy.RequireRole("Admin", "Staff", "Customer"));
-            
-            // Add more granular policies
-            options.AddPolicy("CanManageUsers", policy =>
-                policy.RequireRole("Admin"));
-            options.AddPolicy("CanManageTours", policy =>
-                policy.RequireRole("Admin", "Staff"));
-            options.AddPolicy("CanViewReports", policy =>
-                policy.RequireRole("Admin", "Staff"));
         });
     }
 

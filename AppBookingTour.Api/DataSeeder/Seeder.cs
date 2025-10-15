@@ -13,7 +13,7 @@ namespace AppBookingTour.Api.DataSeeder
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
-            string[] roleNames = { "Admin", "Customer", "Business" };
+            string[] roleNames = { "Admin", "Customer", "Staff" };
 
             foreach (var roleName in roleNames)
             {

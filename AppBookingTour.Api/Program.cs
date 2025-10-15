@@ -28,9 +28,9 @@ builder.Host.UseSerilog();
 #region Core Services
 builder.Services.AddControllers();
 
-
-// ✅ Add MediatR for CQRS (point to Application layer)
+# region Application Layer
 builder.Services.AddApplication();
+#endregion
 
 // Add AutoMapper 
 builder.Services.AddAutoMapper(
@@ -40,13 +40,7 @@ builder.Services.AddAutoMapper(
 #endregion
 
 #region Infrastructure Layer
-// ✅ Add Infrastructure (DbContext, Identity, Repositories, External services)
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// ✅ Add Identity so UserManager<User> & SignInManager<User> can be resolved
-builder.Services.AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 #endregion
 
 #region Common Services
@@ -167,7 +161,7 @@ app.UseSerilogRequestLogging();
 app.UseCors("AllowSpecificOrigins");
 app.UseRouting();
 
-// ✅ Authentication + Authorization
+// Authentication must come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
