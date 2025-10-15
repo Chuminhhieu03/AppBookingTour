@@ -1,18 +1,17 @@
-using AppBookingTour.Application.Features.Tours.GetToursList;
-using AppBookingTour.Application.Features.Tours.GetTourById;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
+using FluentValidation;
+
+using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Tours.CreateTour;
+using AppBookingTour.Application.Features.Tours.GetTourById;
+using AppBookingTour.Application.Features.Tours.UpdateTour;
+using AppBookingTour.Application.Features.Tours.DeleteTour;
 
 namespace AppBookingTour.Api.Controllers;
 
-/// <summary>
-/// Tours management controller following Clean Architecture
-/// Uses MediatR with integrated DTOs in use cases
-/// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/tours")]
 public sealed class ToursController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -24,54 +23,35 @@ public sealed class ToursController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Get tours list with pagination and search
-    /// </summary>
-    /// <param name="page">Page number (default: 1)</param>
-    /// <param name="pageSize">Page size (default: 10, max: 100)</param>
-    /// <param name="searchTerm">Search term for tour name/description</param>
-    /// <param name="cityId">Filter by departure city ID</param>
-    /// <param name="maxPrice">Maximum price filter</param>
-    /// <returns>Paginated tours list with metadata</returns>
-    [HttpGet]
-    [OutputCache(Duration = 300)]
-    [ProducesResponseType(typeof(GetToursListResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<GetToursListResponse>> GetTours(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? searchTerm = null,
-        [FromQuery] int? cityId = null,
-        [FromQuery] decimal? maxPrice = null)
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromBody] TourRequestDTO requestBody)
     {
         try
         {
-            var query = new GetToursListQuery(page, pageSize, searchTerm, cityId, maxPrice);
-            var result = await _mediator.Send(query);
-            
-            _logger.LogInformation("Retrieved {TourCount} tours for page {Page} with search '{SearchTerm}'", 
-                result.Tours.Count, page, searchTerm);
+            var command = new CreateTourCommand(requestBody);
+            var result = await _mediator.Send(command);
 
-            return Ok(result);
+            if (!result.IsSuccess)
+                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+
+            _logger.LogInformation("Created new tour with ID: {TourId}", result.Tour?.Id);
+            return Created("", ApiResponse<object>.Ok(result.Tour!));
+        }
+        catch (ValidationException vex)
+        {
+            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+            _logger.LogWarning(vex, "Validation failed for create tour: {Errors}", messages);
+            return BadRequest(ApiResponse<object>.Fail(messages));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting tours list");
-            return BadRequest(new { Success = false, Message = "An error occurred while retrieving tours" });
+            _logger.LogError(ex, "Error creating tour");
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while creating the tour"));
         }
     }
 
-    /// <summary>
-    /// Get tour details by ID with comprehensive information
-    /// </summary>
-    /// <param name="id">Tour ID</param>
-    /// <returns>Detailed tour information including itinerary and departures</returns>
     [HttpGet("{id:int}")]
-    [OutputCache(Duration = 300)]
-    [ProducesResponseType(typeof(TourDetailDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<TourDetailDto>> GetTourById(int id)
+    public async Task<ActionResult<ApiResponse<object>>> GetTourById(int id)
     {
         try
         {
@@ -81,147 +61,84 @@ public sealed class ToursController : ControllerBase
             if (!result.IsSuccess)
             {
                 if (result.ErrorMessage?.Contains("not found") == true)
-                {
-                    return NotFound(new { Success = false, Message = result.ErrorMessage });
-                }
-                
-                return BadRequest(new { Success = false, Message = result.ErrorMessage });
+                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
+
+                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
             }
 
             _logger.LogInformation("Retrieved tour details for ID: {TourId}", id);
-            return Ok(result.Tour);
+            return Ok(ApiResponse<object>.Ok(result.Tour!));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting tour details for ID: {TourId}", id);
-            return BadRequest(new { Success = false, Message = "An error occurred while retrieving tour details" });
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while retrieving tour details"));
         }
     }
 
-    /// <summary>
-    /// Get popular tours (top rated and most booked)
-    /// </summary>
-    /// <param name="limit">Number of tours to return (default: 10)</param>
-    /// <returns>List of popular tours</returns>
-    [HttpGet("popular")]
-    [OutputCache(Duration = 600)] // Cache for 10 minutes
-    [ProducesResponseType(typeof(GetToursListResponse), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetToursListResponse>> GetPopularTours([FromQuery] int limit = 10)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromBody] TourRequestDTO requestBody)
     {
         try
         {
-            // Use existing query with enhanced logic for popular tours
-            var query = new GetToursListQuery(1, limit);
-            var result = await _mediator.Send(query);
-            
-            // Sort by rating and total bookings (this could be enhanced in the handler)
-            result.Tours = result.Tours
-                .OrderByDescending(t => t.Rating)
-                .ThenByDescending(t => t.TotalBookings)
-                .Take(limit)
-                .ToList();
+            var command = new UpdateTourCommand(id, requestBody);
+            var result = await _mediator.Send(command);
 
-            _logger.LogInformation("Retrieved {TourCount} popular tours", result.Tours.Count);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting popular tours");
-            return BadRequest(new { Success = false, Message = "An error occurred while retrieving popular tours" });
-        }
-    }
-
-    /// <summary>
-    /// Search tours by various criteria
-    /// </summary>
-    /// <param name="searchTerm">Search term</param>
-    /// <param name="cityId">Departure city ID</param>
-    /// <param name="maxPrice">Maximum price</param>
-    /// <param name="minRating">Minimum rating</param>
-    /// <param name="page">Page number</param>
-    /// <param name="pageSize">Page size</param>
-    /// <returns>Filtered tours list</returns>
-    [HttpGet("search")]
-    [OutputCache(Duration = 180)] // Cache for 3 minutes
-    [ProducesResponseType(typeof(GetToursListResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<GetToursListResponse>> SearchTours(
-        [FromQuery] string? searchTerm = null,
-        [FromQuery] int? cityId = null,
-        [FromQuery] decimal? maxPrice = null,
-        [FromQuery] decimal? minRating = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
-    {
-        try
-        {
-            var query = new GetToursListQuery(page, pageSize, searchTerm, cityId, maxPrice);
-            var result = await _mediator.Send(query);
-            
-            // Apply rating filter if provided (could be moved to use case)
-            if (minRating.HasValue)
+            if (!result.IsSuccess)
             {
-                result.Tours = result.Tours
-                    .Where(t => t.Rating >= minRating.Value)
-                    .ToList();
-                result.TotalCount = result.Tours.Count;
-                result.TotalPages = (int)Math.Ceiling((double)result.TotalCount / pageSize);
+                if (result.Message?.Contains("not found") == true)
+                    return NotFound(ApiResponse<object>.Fail(result.Message!));
+
+                return BadRequest(ApiResponse<object>.Fail(result.Message!));
             }
 
-            _logger.LogInformation("Search returned {TourCount} tours for criteria: SearchTerm='{SearchTerm}', CityId={CityId}, MaxPrice={MaxPrice}, MinRating={MinRating}", 
-                result.Tours.Count, searchTerm, cityId, maxPrice, minRating);
-
-            return Ok(result);
+            _logger.LogInformation("Updated tour with ID: {TourId}", id);
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Update tour successfully"
+            });
+        }
+        catch (ValidationException vex)
+        {
+            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+            _logger.LogWarning(vex, "Validation failed for update tour: {Errors}", messages);
+            return BadRequest(ApiResponse<object>.Fail(messages));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error searching tours");
-            return BadRequest(new { Success = false, Message = "An error occurred while searching tours" });
+            _logger.LogError(ex, "Error updating tour with ID: {TourId}", id);
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while updating the tour"));
         }
     }
 
-    /// <summary>
-    /// Get tours statistics (Admin only)
-    /// </summary>
-    /// <returns>Tours statistics</returns>
-    [HttpGet("statistics")]
-    [Authorize(Policy = "AdminPolicy")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult> GetToursStatistics()
+    [HttpDelete("{id:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteTour(int id)
     {
         try
         {
-            // Get all tours for statistics
-            var query = new GetToursListQuery(1, int.MaxValue);
-            var result = await _mediator.Send(query);
+            var command = new DeleteTourCommand(id);
+            var result = await _mediator.Send(command);
 
-            var statistics = new
+            if (!result.IsSuccess)
             {
-                TotalTours = result.TotalCount,
-                ActiveTours = result.Tours.Count(t => t.IsActive),
-                AverageRating = result.Tours.Where(t => t.Rating > 0).Average(t => t.Rating),
-                TotalBookings = result.Tours.Sum(t => t.TotalBookings),
-                PopularTours = result.Tours
-                    .OrderByDescending(t => t.TotalBookings)
-                    .Take(5)
-                    .Select(t => new { t.Id, t.Name, t.TotalBookings })
-                    .ToList(),
-                RecentTours = result.Tours
-                    .OrderByDescending(t => t.CreatedAt)
-                    .Take(5)
-                    .Select(t => new { t.Id, t.Name, t.CreatedAt })
-                    .ToList()
-            };
+                if (result.Message?.Contains("not found") == true)
+                    return NotFound(ApiResponse<object>.Fail(result.Message!));
 
-            _logger.LogInformation("Generated tours statistics for admin");
-            return Ok(statistics);
+                return BadRequest(ApiResponse<object>.Fail(result.Message!));
+            }
+
+            _logger.LogInformation("Deleted tour with ID: {TourId}", id);
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Delete tour successfully"
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating tours statistics");
-            return BadRequest(new { Success = false, Message = "An error occurred while generating statistics" });
+            _logger.LogError(ex, "Error deleting tour with ID: {TourId}", id);
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while deleting the tour"));
         }
     }
 }
