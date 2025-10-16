@@ -160,7 +160,7 @@ public static class DependencyInjection
 
         // Add other business services here as needed
         services.AddScoped<IEmailService, EmailService>();
-        // services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+        services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         // services.AddScoped<IPaymentGatewayService, VNPayService>();
         // services.AddScoped<INotificationService, NotificationService>();
     }
