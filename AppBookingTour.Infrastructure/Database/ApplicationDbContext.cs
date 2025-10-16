@@ -164,12 +164,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.HasIndex(e => new { e.DepartureCityId, e.TypeId, e.Status });
 
             // Relationship: TourType
-            entity.HasOne(t => t.Type)
+            entity.HasOne(t => t.Type)  
                   .WithMany(tt => tt.Tours)
                   .HasForeignKey(t => t.TypeId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(t => t.Category)
+            entity.HasOne(t => t.Category) 
                   .WithMany(c => c.Tours)
                   .HasForeignKey(t => t.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);

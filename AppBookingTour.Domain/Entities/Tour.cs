@@ -17,7 +17,6 @@ public class Tour : BaseEntity
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChild { get; set; }
     public string? Description { get; set; } // TEXT
-    public string? Itinerary { get; set; } // JSON
     public string? Includes { get; set; } // JSON
     public string? Excludes { get; set; } // JSON
     public string? TermsConditions { get; set; } // TEXT
@@ -26,7 +25,7 @@ public class Tour : BaseEntity
     public int TotalBookings { get; set; }
     public int ViewCount { get; set; }
     public int InterestCount { get; set; }
-    public string? Image_Main { get; set; }
+    public string? ImageMain { get; set; }
     public bool IsActive { get; set; } = true;
 
     // Navigation properties
