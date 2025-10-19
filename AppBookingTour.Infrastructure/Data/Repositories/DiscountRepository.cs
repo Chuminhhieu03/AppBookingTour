@@ -15,6 +15,8 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             IQueryable<Discount> query = _dbSet;
             if (!string.IsNullOrEmpty(filter.Name))
                 query = query.Where(x => x.Name.Contains(filter.Name));
+            if (!string.IsNullOrEmpty(filter.Code))
+                query = query.Where(x => x.Code.Contains(filter.Code));
             if (filter.Status.HasValue)
                 query = query.Where(x => x.Status == filter.Status.Value);
             query = query

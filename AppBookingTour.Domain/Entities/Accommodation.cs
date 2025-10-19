@@ -1,6 +1,6 @@
 namespace AppBookingTour.Domain.Entities;
 
-public class Hotel : BaseEntity
+public class Accommodation : BaseEntity
 {
     public int CityId { get; set; }
     public int? TypeHotel { get; set; }

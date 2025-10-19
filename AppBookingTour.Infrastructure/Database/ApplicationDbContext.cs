@@ -30,7 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<TourItineraryDestination> TourItineraryDestinations { get; set; }
     public DbSet<City> Cities { get; set; }
     public DbSet<Destination> Destinations { get; set; }
-    public DbSet<Hotel> Hotels { get; set; }
+    public DbSet<Accommodation> Accommodations { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
     #endregion
 
@@ -238,7 +238,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         });
 
         // Hotel configuration
-        modelBuilder.Entity<Hotel>(entity =>
+        modelBuilder.Entity<Accommodation>(entity =>
         {
             entity.ToTable("Hotels");
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();

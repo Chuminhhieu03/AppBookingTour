@@ -14,6 +14,6 @@ public class RoomType : BaseEntity
     public string? Amenities { get; set; } // JSON
 
     // Navigation properties
-    public virtual Hotel Hotel { get; set; } = null!;
+    public virtual Accommodation Hotel { get; set; } = null!;
     public virtual ICollection<RoomInventory> RoomInventories { get; set; } = [];
 }

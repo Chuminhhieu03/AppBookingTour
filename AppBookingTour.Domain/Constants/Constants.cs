@@ -20,15 +20,15 @@
             public const int PageIndex = 0;
         }
 
-        public static class Category
+        public static class ServiceTypes
         {
-            public const int Hotel = 1;
+            public const int Accommodation = 1;
             public const int Tour = 2;
             public const int Combo = 3;
 
             public static readonly Dictionary<int, string> dctName = new()
             {
-                { Hotel, "Khách sạn" },
+                { Accommodation, "Cơ sở lưu trú" },
                 { Tour, "Tour" },
                 { Combo, "Combo" }
             };

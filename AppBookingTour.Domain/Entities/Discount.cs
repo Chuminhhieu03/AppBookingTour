@@ -1,4 +1,6 @@
-﻿namespace AppBookingTour.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AppBookingTour.Domain.Entities
 {
     public class Discount : BaseEntity
     {
@@ -18,6 +20,9 @@
         #endregion
 
         #region Extend props
+
+        [NotMapped]
+        public string? StatusName { get; set; }
 
         #endregion
     }

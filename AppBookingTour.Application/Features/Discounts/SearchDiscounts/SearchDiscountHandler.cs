@@ -21,6 +21,11 @@ namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
             int pageIndex = request.pageIndex ?? Constants.Pagination.PageIndex;
             int pageSize = request.pageSize ?? Constants.Pagination.PageSize;
             var listDiscount = await _unitOfWork.Discounts.SearchDiscount(filter, pageIndex, pageSize);
+            listDiscount?.ForEach(item =>
+            {
+                if (item.Status.HasValue)
+                    item.StatusName = Constants.ActiveStatus.dctName[item.Status.Value];
+            });
             return new SearchDiscountResponse
             {
                 Success = true,
