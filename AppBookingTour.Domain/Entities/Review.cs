@@ -1,4 +1,5 @@
 using AppBookingTour.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppBookingTour.Domain.Entities;
 
@@ -15,6 +16,8 @@ public class Review : BaseEntity
     public DateTime ReviewDate { get; set; }
     public ReviewStatus Status { get; set; } = ReviewStatus.Pending;
     public int HelpfulCount { get; set; } = 0;
+    [NotMapped]
+    public List<Image>? Images { get; set; }
 
     // Navigation properties
     public virtual Review? ParentReview { get; set; }

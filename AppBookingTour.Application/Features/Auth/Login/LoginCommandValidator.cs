@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace AppBookingTour.Application.Features.Auth.Login;
 
@@ -7,8 +7,10 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 {
     public LoginCommandValidator()
     {
+        RuleLevelCascadeMode = CascadeMode.Stop;
+
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required")
+            .NotEmpty().WithMessage("Cần phải nhập email để tiếp tục")
             .EmailAddress().WithMessage("Invalid email format");
 
         RuleFor(x => x.Password)

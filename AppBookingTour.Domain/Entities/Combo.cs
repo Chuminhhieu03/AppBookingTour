@@ -1,4 +1,5 @@
 using AppBookingTour.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppBookingTour.Domain.Entities;
 
@@ -6,10 +7,10 @@ public class Combo : BaseEntity
 {
     public int FromCityId { get; set; }
     public int ToCityId { get; set; }
+    public string Code { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? ShortDescription { get; set; }
     public Vehicle Vehicle { get; set; }
-    public string? HotelImages { get; set; } // JSON list of image URLs
     public int DurationDays { get; set; }
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChildren { get; set; }
@@ -23,6 +24,9 @@ public class Combo : BaseEntity
     public int ViewCount { get; set; }
     public int InterestCount { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? ComboImageCoverUrl { get; set; }
+    [NotMapped]
+    public List<Image>? Images { get; set; } 
 
     // Navigation properties
     public virtual City FromCity { get; set; } = null!;

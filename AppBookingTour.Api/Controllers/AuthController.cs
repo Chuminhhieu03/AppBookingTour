@@ -7,6 +7,7 @@ using AppBookingTour.Application.Features.Auth.Register;
 using AppBookingTour.Application.Features.Auth.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 
 namespace AppBookingTour.Api.Controllers;
 
@@ -36,13 +37,14 @@ public class AuthController : ControllerBase
         try
         {
             var result = await _mediator.Send(command);
-            
+
             if (!result.Success)
             {
                 return Unauthorized(result);
             }
 
-            if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue) {
+            if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue)
+            {
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -62,6 +64,12 @@ public class AuthController : ControllerBase
                 result.Success
             }));
 
+        }
+        catch (ValidationException vex)
+        {
+            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+            _logger.LogWarning(vex, "Validation failed for login: {Errors}", messages);
+            return BadRequest(ApiResponse<object>.Fail(messages));
         }
         catch (Exception ex)
         {

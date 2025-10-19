@@ -1,3 +1,4 @@
+using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Domain.Entities;
 
 namespace AppBookingTour.Application.IRepositories;
@@ -35,5 +36,5 @@ public interface ITourRepository : IRepository<Tour>
     
     // Availability management
     Task<bool> IsTourAvailableAsync(int tourId, DateTime departureDate, int participants, CancellationToken cancellationToken = default);
-    Task<IEnumerable<Tour>> GetAvailableToursAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken = default);
+    Task<IEnumerable<Tour>> GetAvailableToursAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken = default); 
 }

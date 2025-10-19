@@ -1,16 +1,13 @@
 ﻿using AppBookingTour.Api.DataSeeder;
+using AppBookingTour.Api.Middlewares;
 using AppBookingTour.Application;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
 using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using AutoMapper;
-using AppBookingTour.Application.Mapping;
-using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using System;
 
 #region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
@@ -32,25 +29,19 @@ builder.Host.UseSerilog();
 #region Core Services
 builder.Services.AddControllers();
 
-// ✅ Add MediatR for CQRS (point to Application layer)
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblies(typeof(AssemblyMarker).Assembly)
+# region Application Layer
+builder.Services.AddApplication();
+#endregion
+
+// Add AutoMapper 
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(AssemblyMarker).Assembly
 );
-
-builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(MappingProfile).Assembly));
-
-// ✅ Add FluentValidation (if you use it)
-builder.Services.AddValidatorsFromAssembly(typeof(AssemblyMarker).Assembly);
 #endregion
 
 #region Infrastructure Layer
-// ✅ Add Infrastructure (DbContext, Identity, Repositories, External services)
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// ✅ Add Identity so UserManager<User> & SignInManager<User> can be resolved
-builder.Services.AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
 #endregion
 
 #region Common Services
@@ -132,12 +123,20 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    // Seed roles first
     await Seeder.SeedRolesAsync(scope.ServiceProvider);
+    
+    // Seed cities from JSON file
+    var citiesJsonPath = Path.Combine(app.Environment.ContentRootPath, "DataSeeder", "vn_provinces_63.json");
+    await Seeder.SeedCitiesFromJsonAsync(scope.ServiceProvider, citiesJsonPath);
 }
 
 #endregion
 
-#region Middleware
+// Add Custom Middlewares
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+
+# region Middleware Pipeline Configuration
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -145,10 +144,9 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-// Error Handling + HSTS
+// Error Handling + HSTS (after custom exception handling)
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
@@ -166,7 +164,7 @@ app.UseSerilogRequestLogging();
 app.UseCors("AllowSpecificOrigins");
 app.UseRouting();
 
-// ✅ Authentication + Authorization
+// Authentication must come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
