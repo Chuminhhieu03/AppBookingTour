@@ -28,16 +28,8 @@ namespace AppBookingTour.Infrastructure.Services
             // Tạo container nếu chưa tồn tại
             await containerClient.CreateIfNotExistsAsync();
             // Thiết lập quyền truy cập công khai
-            try
-            {
-                await containerClient.SetAccessPolicyAsync();
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-
+            await containerClient.SetAccessPolicyAsync();
+            
             fileName = string.IsNullOrEmpty(fileName) ? Guid.NewGuid().ToString() : fileName;
             // Đặt tên cho file được upload
             var blobClient = containerClient.GetBlobClient(fileName);

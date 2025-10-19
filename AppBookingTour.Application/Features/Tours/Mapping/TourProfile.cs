@@ -19,10 +19,10 @@ namespace AppBookingTour.Application.Features.Tours.Mapping
                 .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type.Name)) //TODO: fix khong hien thi
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null)) //TODO: fix khong hien thi
 
-                .ForMember(dest => dest.ImageGallery, opt => opt.MapFrom(src =>
-                    string.IsNullOrEmpty(src.ImageGallery)
-                    ? new List<string>()
-                    : src.ImageGallery.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
+                //.ForMember(dest => dest.ImageGallery, opt => opt.MapFrom(src =>
+                //    string.IsNullOrEmpty(src.ImageGallery)
+                //    ? new List<string>()
+                //    : src.ImageGallery.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
 
                 .ForMember(dest => dest.Includes, opt => opt.MapFrom(src =>
                     string.IsNullOrEmpty(src.Includes)

@@ -281,3 +281,12 @@ public enum PriceLevel
     Standard = 2,
     Premium = 3
 }
+
+public enum EntityType
+{
+    Tour = 1,
+    Hotel = 2,
+    Combo = 3,
+    User = 4,
+    Review = 5
+}

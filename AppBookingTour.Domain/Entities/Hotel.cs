@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace AppBookingTour.Domain.Entities;
 
 public class Hotel : BaseEntity
@@ -8,11 +10,13 @@ public class Hotel : BaseEntity
     public string? Address { get; set; }
     public int StarRating { get; set; }
     public decimal? Rating { get; set; }
-    public string? ImageGallery { get; set; } // JSON
     public string? Description { get; set; } // Rich text
     public string? Regulation { get; set; } // Rich text
     public string? Amenities { get; set; } // JSON
     public bool IsActive { get; set; } = true;
+    public string? HotelImageCoverUrl { get; set; }
+    [NotMapped]
+    public List<Image>? Images { get; set; }
 
     // Navigation properties
     public virtual City City { get; set; } = null!;

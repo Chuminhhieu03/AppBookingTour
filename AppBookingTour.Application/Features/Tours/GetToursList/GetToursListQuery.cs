@@ -133,7 +133,7 @@ public sealed class GetToursListQueryHandler : IRequestHandler<GetToursListQuery
                 DurationDays = tour.DurationDays,
                 Rating = tour.Rating,
                 DepartureCityName = tour.DepartureCity?.Name ?? "Unknown",
-                ImageUrl = ExtractFirstImageUrl(tour.ImageGallery),
+                ImageUrl = "",
                 IsActive = tour.IsActive,
                 CreatedAt = tour.CreatedAt,
                 TotalBookings = tour.TotalBookings,

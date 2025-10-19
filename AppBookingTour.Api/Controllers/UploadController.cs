@@ -1,11 +1,7 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AppBookingTour.Api.Controllers
 {
