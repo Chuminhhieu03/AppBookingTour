@@ -1,14 +1,7 @@
-﻿using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
-using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
-using AppBookingTour.Share.DTOS;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
+using MediatR;
 
 
 namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount

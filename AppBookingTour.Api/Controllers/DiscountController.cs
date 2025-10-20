@@ -1,8 +1,12 @@
-﻿using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
+﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
 using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountAddnew;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountDefault;
+using AppBookingTour.Application.Features.Discounts.SetupDiscountDisplay;
+using AppBookingTour.Application.Features.Discounts.SetupDiscountEdit;
 using AppBookingTour.Application.Features.Discounts.UpdateDiscount;
+using IdentityModel.OidcClient;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,8 +41,8 @@ namespace AppBookingTour.Api.Controllers
         public async Task<IActionResult> UpdateDiscount(int id, [FromBody] UpdateDiscountDTO dto)
         {
             var command = new UpdateDiscountCommand(id, dto);
-            var response = await _mediator.Send(command);
-            return Ok(response);
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
 
         [HttpPost("setup-default")]
@@ -51,6 +55,22 @@ namespace AppBookingTour.Api.Controllers
         [HttpPost("setup-addnew")]
         public async Task<IActionResult> SetupAddnew([FromBody] SetupDiscountAddnewQuery query)
         {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> SetupDisplay(int id)
+        {
+            var query = new SetupDiscountDisplayQuery(id);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpPost("setup-edit/{id}")]
+        public async Task<IActionResult> SetupEdit(int id)
+        {
+            var query = new SetupDiscountEditQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }

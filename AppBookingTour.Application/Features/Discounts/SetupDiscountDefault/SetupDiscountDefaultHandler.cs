@@ -3,11 +3,15 @@ using MediatR;
 
 namespace AppBookingTour.Application.Features.Discounts.SetupDiscountDefault
 {
-    public class SetupDiscountDefaultHandler : IRequestHandler<SetupDiscountDefaultQuery, List<KeyValuePair<int, string>>>
+    public class SetupDiscountDefaultHandler : IRequestHandler<SetupDiscountDefaultQuery, SetupDiscountDefaultDTO>
     {
-        public Task<List<KeyValuePair<int, string>>> Handle(SetupDiscountDefaultQuery request, CancellationToken cancellationToken)
+        public async Task<SetupDiscountDefaultDTO> Handle(SetupDiscountDefaultQuery request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(Constants.ActiveStatus.dctName.ToList());
+            return new SetupDiscountDefaultDTO
+            {
+                ListStatus = Constants.ActiveStatus.dctName.ToList(),
+                Success = true
+            };
         }
     }
 }

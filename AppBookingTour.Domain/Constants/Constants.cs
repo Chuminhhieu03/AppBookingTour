@@ -20,7 +20,7 @@
             public const int PageIndex = 0;
         }
 
-        public static class ServiceTypes
+        public static class ServiceType
         {
             public const int Accommodation = 1;
             public const int Tour = 2;

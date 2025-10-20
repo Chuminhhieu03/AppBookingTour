@@ -23,6 +23,8 @@ namespace AppBookingTour.Domain.Entities
 
         [NotMapped]
         public string? StatusName { get; set; }
+        [NotMapped]
+        public string? ServiceTypeName { get; set; }
 
         #endregion
     }

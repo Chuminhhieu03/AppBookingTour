@@ -25,6 +25,8 @@ namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
             {
                 if (item.Status.HasValue)
                     item.StatusName = Constants.ActiveStatus.dctName[item.Status.Value];
+                if (item.ServiceType.HasValue && Constants.ServiceType.dctName.ContainsKey(item.ServiceType.Value))
+                    item.ServiceTypeName = Constants.ServiceType.dctName[item.ServiceType.Value];
             });
             return new SearchDiscountResponse
             {

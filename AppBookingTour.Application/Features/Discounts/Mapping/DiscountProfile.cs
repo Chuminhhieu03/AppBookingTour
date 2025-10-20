@@ -11,8 +11,7 @@ namespace AppBookingTour.Application.Features.Discounts.Mapping
         {
             #region Discount mapping
 
-            CreateMap<AddNewDiscountDTO, Discount>()
-                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<AddNewDiscountDTO, Discount>();
 
             CreateMap<UpdateDiscountDTO, Discount>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
