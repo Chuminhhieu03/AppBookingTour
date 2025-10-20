@@ -48,26 +48,26 @@ public static class DependencyInjection
         return services;
     }
 
-    private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
-    {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        
-        services.AddDbContext<ApplicationDbContext>(options =>
+        private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
         {
-            options.UseSqlServer(connectionString, builder =>
+            var connectionString = configuration.GetConnectionString("DefaultConnection")!;
+        
+            services.AddDbContext<ApplicationDbContext>(options =>
             {
-                builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
-                builder.EnableRetryOnFailure(
-                    maxRetryCount: 3,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null);
-            });
+                options.UseSqlServer(connectionString, builder =>
+                {
+                    builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                    //builder.EnableRetryOnFailure(
+                    //    maxRetryCount: 3,
+                    //    maxRetryDelay: TimeSpan.FromSeconds(30),
+                    //    errorNumbersToAdd: null);
+                });
             
-            // Enable in development for detailed logs
-            options.EnableSensitiveDataLogging(false);
-            options.EnableDetailedErrors(false);
-        });
-    }
+                // Enable in development for detailed logs
+                options.EnableSensitiveDataLogging(false);
+                options.EnableDetailedErrors(false);
+            });
+        }
 
     private static void AddIdentity(IServiceCollection services)
     {
