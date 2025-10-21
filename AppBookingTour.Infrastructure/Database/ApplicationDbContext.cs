@@ -70,7 +70,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
 
         // Configure Identity tables to use default schema
         ConfigureIdentityTables(modelBuilder);
-        
+
         // Configure domain entities
         ConfigureToursEntities(modelBuilder);
         ConfigureCatalogEntities(modelBuilder);
@@ -80,12 +80,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         ConfigurePromotionEntities(modelBuilder);
         ConfigureComboEntities(modelBuilder);
         ConfigureAdditionalDecimalEntities(modelBuilder);
-        
+
         // Configure base entity properties
         ConfigureBaseEntityProperties(modelBuilder);
 
         // Mắc định restrict khi xóa cho tất cả các FK
-        foreach( var foreignKey in modelBuilder.Model
+        foreach (var foreignKey in modelBuilder.Model
             .GetEntityTypes()
             .SelectMany(e => e.GetForeignKeys()))
         {
@@ -158,18 +158,17 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
             entity.Property(e => e.BasePriceChild).HasPrecision(12, 2);
             entity.Property(e => e.Rating).HasPrecision(3, 2);
-            entity.Property(e => e.Status).HasConversion<int>();
             entity.HasIndex(e => e.Code).IsUnique();
             // Updated index: removed CategoryId
-            entity.HasIndex(e => new { e.DepartureCityId, e.TypeId, e.Status });
+            entity.HasIndex(e => new { e.DepartureCityId, e.TypeId });
 
             // Relationship: TourType
-            entity.HasOne(t => t.Type)  
+            entity.HasOne(t => t.Type)
                   .WithMany(tt => tt.Tours)
                   .HasForeignKey(t => t.TypeId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(t => t.Category) 
+            entity.HasOne(t => t.Category)
                   .WithMany(c => c.Tours)
                   .HasForeignKey(t => t.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);
@@ -226,7 +225,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Code).HasMaxLength(10);
             entity.Property(e => e.Region).HasConversion<int>();
-            
+
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => e.Name);
         });
@@ -238,7 +237,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.Rating).HasPrecision(3, 2);
-            
+
             entity.HasIndex(e => new { e.CityId, e.StarRating });
         });
     }
@@ -342,7 +341,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.ToTable("PromotionUsages");
             entity.Property(e => e.DiscountAmount).HasPrecision(12, 2);
             entity.Property(e => e.UsedAt).IsRequired();
-            
+
             entity.HasOne(entity => entity.Promotion)
                   .WithMany(p => p.PromotionUsages)
                   .HasForeignKey(entity => entity.PromotionId)
@@ -371,7 +370,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
             entity.Property(e => e.Vehicle).HasConversion<int>();
             entity.Property(e => e.Rating).HasPrecision(3, 2);
-            
+
             entity.HasIndex(e => new { e.FromCityId, e.ToCityId });
 
             // Explicit relationships for dual FK to City

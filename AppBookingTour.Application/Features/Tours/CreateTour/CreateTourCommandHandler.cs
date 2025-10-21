@@ -53,7 +53,7 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
             }
 
 
-            var tourDto = _mapper.Map<TourDetailDto>(tour);
+            var tourDto = _mapper.Map<TourDTO>(tour);
 
             tourDto.Itineraries = tourDto.Itineraries.OrderBy(i => i.DayNumber).ToList();
             tourDto.Departures = tourDto.Departures
