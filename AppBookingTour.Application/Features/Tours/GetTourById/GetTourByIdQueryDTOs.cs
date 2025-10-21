@@ -1,21 +1,21 @@
-using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
+using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
 public class GetTourByIdResponse
 {
     public bool IsSuccess { get; init; }
     public string? ErrorMessage { get; init; }
-    public TourDetailDto? Tour { get; init; }
+    public TourDTO? Tour { get; init; }
 
-    public static GetTourByIdResponse Success(TourDetailDto tour) =>
+    public static GetTourByIdResponse Success(TourDTO tour) =>
         new() { IsSuccess = true, Tour = tour };
 
     public static GetTourByIdResponse Failed(string errorMessage) =>
         new() { IsSuccess = false, ErrorMessage = errorMessage };
 }
 
-public class TourDetailDto
+public class TourDTO
 {
     public int Id { get; set; }
     public string Code { get; set; } = null!;

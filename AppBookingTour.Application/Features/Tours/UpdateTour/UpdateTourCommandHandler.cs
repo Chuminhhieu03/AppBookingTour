@@ -1,8 +1,7 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using AppBookingTour.Application.IRepositories;
 using AutoMapper;
-
-using AppBookingTour.Application.IRepositories;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.Tours.UpdateTour;
 

@@ -54,10 +54,6 @@ namespace AppBookingTour.Application.Features.Tours.CreateTour
                 .NotNull().WithMessage("BasePriceChild is required")
                 .GreaterThanOrEqualTo(0).WithMessage("BasePriceChild must be greater than or equal to 0");
 
-            RuleFor(x => x.TourRequest.Status)
-                .NotNull().WithMessage("Status is required")
-                .IsInEnum().WithMessage("Invalid Status value");
-
         }
     }
 }

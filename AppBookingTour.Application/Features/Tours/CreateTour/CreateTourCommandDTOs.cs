@@ -1,6 +1,6 @@
-﻿using AppBookingTour.Application.Features.Tours.GetTourById;
+﻿using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
 using AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
-using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
+using AppBookingTour.Application.Features.Tours.GetTourById;
 
 namespace AppBookingTour.Application.Features.Tours.CreateTour;
 
@@ -8,8 +8,8 @@ public class CreateTourResponse
 {
     public bool IsSuccess { get; init; }
     public string? ErrorMessage { get; init; }
-    public TourDetailDto? Tour { get; init; }
-    public static CreateTourResponse Success(TourDetailDto tour) =>
+    public TourDTO? Tour { get; init; }
+    public static CreateTourResponse Success(TourDTO tour) =>
         new() { IsSuccess = true, Tour = tour };
     public static CreateTourResponse Failed(string errorMessage) =>
         new() { IsSuccess = false, ErrorMessage = errorMessage };
@@ -29,7 +29,6 @@ public class TourRequestDTO
     public int? MinParticipants { get; set; }
     public decimal? BasePriceAdult { get; set; }
     public decimal? BasePriceChild { get; set; }
-    public int? Status { get; set; }
     public bool? IsActive { get; set; }
     public string? ImageMain { get; set; }
     public string? ImageGallery { get; set; }

@@ -1,0 +1,19 @@
+﻿using FluentValidation;
+
+namespace AppBookingTour.Application.Features.TourCategories.CreateTourCategory;
+
+public class CreateTourCategoryCommandValidator : AbstractValidator<CreateTourCategoryCommand>
+{
+    public CreateTourCategoryCommandValidator()
+    {
+        RuleLevelCascadeMode = CascadeMode.Stop;
+
+        RuleFor(x => x.RequestDto.Name)
+            .NotEmpty().WithMessage("Name is required")
+            .MaximumLength(100).WithMessage("Name must not exceed 100 characters");
+
+        RuleFor(x => x.RequestDto.ParentCategoryId)
+            .GreaterThan(0).WithMessage("ParentCategoryId must be greater than 0")
+            .When(x => x.RequestDto.ParentCategoryId.HasValue);
+    }
+}
