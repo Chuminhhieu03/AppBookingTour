@@ -4,6 +4,7 @@ using FluentValidation;
 
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Tours.CreateTour;
+using AppBookingTour.Application.Features.Tours.SearchTours;
 using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
 using AppBookingTour.Application.Features.Tours.DeleteTour;
@@ -47,6 +48,22 @@ public sealed class ToursController : ControllerBase
         {
             _logger.LogError(ex, "Error creating tour");
             return BadRequest(ApiResponse<object>.Fail("An error occurred while creating the tour"));
+        }
+    }
+
+    [HttpPost("search")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchTours([FromBody] SearchToursQuery query)
+    {
+        try
+        {
+            var result = await _mediator.Send(query);
+
+            return Ok(ApiResponse<object>.Ok(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching tours");
+            return BadRequest(ApiResponse<object>.Fail("An error occurred while searching for tours"));
         }
     }
 

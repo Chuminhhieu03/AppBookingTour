@@ -20,7 +20,6 @@ public class Tour : BaseEntity
     public string? Includes { get; set; } // JSON
     public string? Excludes { get; set; } // JSON
     public string? TermsConditions { get; set; } // TEXT
-    public TourStatus Status { get; set; } = TourStatus.Draft;
     public decimal Rating { get; set; }
     public int TotalBookings { get; set; }
     public int ViewCount { get; set; }

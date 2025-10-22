@@ -1,12 +1,7 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
+﻿using AppBookingTour.Application.IRepositories;
 using AutoMapper;
-using System.Text.Json;
-
-using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Enums;
-using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
-using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
 
@@ -46,7 +41,7 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
             _unitOfWork.Tours.Update(tour);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var tourDto = _mapper.Map<TourDetailDto>(tour);
+            var tourDto = _mapper.Map<TourDTO>(tour);
 
             _logger.LogInformation("Successfully retrieved tour details for ID: {TourId}", request.TourId);
             return GetTourByIdResponse.Success(tourDto);

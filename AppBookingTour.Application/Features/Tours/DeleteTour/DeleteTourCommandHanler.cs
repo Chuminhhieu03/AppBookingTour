@@ -33,7 +33,7 @@ public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand,
 
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
                 // Lấy các bản ghi con
                 var tourDepartures = await _unitOfWork.Repository<TourDeparture>()
@@ -52,12 +52,12 @@ public sealed class DeleteTourCommandHanler : IRequestHandler<DeleteTourCommand,
 
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                await _unitOfWork.CommitTransactionAsync();
+                await _unitOfWork.CommitTransactionAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                await _unitOfWork.RollbackTransactionAsync();
+                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 return DeleteTourResponse.Failed("An error occurred while deleting the tour. Please try again later.");
             }
 

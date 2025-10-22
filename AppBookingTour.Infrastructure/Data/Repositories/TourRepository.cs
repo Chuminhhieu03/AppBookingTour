@@ -1,3 +1,4 @@
+﻿using AppBookingTour.Application.Features.Tours.SearchTours;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure.Database;
@@ -9,42 +10,6 @@ public class TourRepository : Repository<Tour>, ITourRepository
 {
     public TourRepository(ApplicationDbContext context) : base(context) { }
 
-    public async Task<IEnumerable<Tour>> GetActiveTours(CancellationToken cancellationToken = default)
-    {
-        return await _dbSet
-            .Where(t => t.IsActive)
-            .Include(t => t.DepartureCity)
-            .Include(t => t.Type)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<Tour>> SearchToursAsync(string searchTerm, int? cityId = null, decimal? maxPrice = null)
-    {
-        var query = _dbSet.Where(t => t.IsActive);
-
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            query = query.Where(t => t.Name.Contains(searchTerm) || 
-                                   t.Description != null && t.Description.Contains(searchTerm));
-        }
-
-        if (cityId.HasValue)
-        {
-            query = query.Where(t => t.DepartureCityId == cityId.Value);
-        }
-
-        if (maxPrice.HasValue)
-        {
-            query = query.Where(t => t.BasePriceAdult <= maxPrice.Value);
-        }
-
-        return await query
-            .Include(t => t.DepartureCity)
-            .Include(t => t.Type)
-            .OrderBy(t => t.BasePriceAdult)
-            .ToListAsync();
-    }
-
     public async Task<Tour?> GetTourWithDetailsAsync(int tourId, CancellationToken cancellationToken = default)
     {
         return await _dbSet
@@ -55,88 +20,56 @@ public class TourRepository : Repository<Tour>, ITourRepository
             .FirstOrDefaultAsync(t => t.Id == tourId && t.IsActive, cancellationToken);
     }
 
-    public Task<Tour?> GetTourByCodeAsync(string code, CancellationToken cancellationToken = default)
+    public async Task<(List<Tour> Tours, int TotalCount)> SearchToursAsync(SearchTourFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
+        IQueryable<Tour> query = _dbSet.AsQueryable();
 
-    public Task<IEnumerable<Tour>> GetToursByCityAsync(int cityId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (!string.IsNullOrEmpty(filter.Code))
+        {
+            query = query.Where(t => t.Code.Contains(filter.Code));
+        }
 
-    public Task<IEnumerable<Tour>> GetToursByCategoryAsync(int categoryId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (!string.IsNullOrEmpty(filter.Name))
+        {
+            query = query.Where(t => t.Name.Contains(filter.Name));
+        }
 
-    public Task<IEnumerable<Tour>> GetToursByTypeAsync(int typeId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (filter.CategoryId.HasValue)
+        {
+            query = query.Where(t => t.CategoryId == filter.CategoryId.Value);
+        }
 
-    public Task<IEnumerable<Tour>> GetToursByPriceRangeAsync(decimal minPrice, decimal maxPrice, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (filter.TypeId.HasValue)
+        {
+            query = query.Where(t => t.TypeId == filter.TypeId.Value);
+        }
 
-    public Task<IEnumerable<Tour>> GetToursByRatingAsync(decimal minRating, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (filter.CityId.HasValue)
+        {
+            query = query.Where(t => t.DepartureCityId == filter.CityId.Value);
+        }
 
-    public Task<IEnumerable<Tour>> GetPopularToursAsync(int limit = 10, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (filter.PriceFrom.HasValue)
+        {
+            query = query.Where(t => t.BasePriceAdult >= filter.PriceFrom.Value);
+        }
 
-    public Task<IEnumerable<Tour>> GetMostBookedToursAsync(int limit = 10, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        if (filter.PriceTo.HasValue)
+        {
+            query = query.Where(t => t.BasePriceAdult <= filter.PriceTo.Value);
+        }
 
-    public Task<IEnumerable<Tour>> GetHighestRatedToursAsync(int limit = 10, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        var totalCount = await query.CountAsync(cancellationToken);
 
-    public Task<IEnumerable<Tour>> GetNewestToursAsync(int limit = 10, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+        var items = await query
+            .Include(t => t.DepartureCity)
+            .Include(t => t.Category)
+            .Include(t => t.Type)
+            .OrderBy(t => t.Id)
+            .Skip((pageIndex-1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
-    public Task<IEnumerable<Tour>> GetFeaturedToursAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<int> GetTotalActiveToursCountAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<decimal> GetAverageRatingAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<decimal> GetAveragePriceAsync(CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Dictionary<int, int>> GetToursByMonthAsync(int year, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> IsTourAvailableAsync(int tourId, DateTime departureDate, int participants, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IEnumerable<Tour>> GetAvailableToursAsync(DateTime fromDate, DateTime toDate, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        return (items, totalCount);
     }
 }
