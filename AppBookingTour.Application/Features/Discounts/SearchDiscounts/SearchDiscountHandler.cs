@@ -1,8 +1,6 @@
 ﻿using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Constants;
-using AppBookingTour.Domain.Entities;
 using MediatR;
-using System.Linq.Expressions;
 
 namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
 {

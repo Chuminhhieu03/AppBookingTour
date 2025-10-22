@@ -23,6 +23,10 @@ public class UnitOfWork : IUnitOfWork
     //private IUserRepository? _userRepository;
     private ITourRepository? _tourRepository;
     private IDiscountRepository _discountRepository;
+    private IAccommodationRepository _accommodationRepository;
+    private IRoomInventoryRepository _roomInventoryRepository;
+    private IRoomTypeRepository _roomTypeRepository;
+    private ICityRepository _cityRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -42,6 +46,10 @@ public class UnitOfWork : IUnitOfWork
         _tourRepository ??= new TourRepository(_context);
 
     public IDiscountRepository Discounts => _discountRepository ?? new DiscountRepository(_context);
+    public IAccommodationRepository Accommodations => _accommodationRepository ?? new AccomodationRepository(_context);
+    public IRoomTypeRepository RoomTypes => _roomTypeRepository ?? new RoomTypeRepository(_context);
+    public IRoomInventoryRepository RoomInventories => _roomInventoryRepository ?? new RoomInventoryRepository(_context);
+    public ICityRepository Cities => _cityRepository ?? new CityRepository(_context);
 
     #endregion
 

@@ -1,8 +1,7 @@
 ﻿using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
-using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
 
-namespace AppBookingTour.Domain.IRepositories
+namespace AppBookingTour.Application.IRepositories
 {
     public interface IDiscountRepository : IRepository<Discount>
     {

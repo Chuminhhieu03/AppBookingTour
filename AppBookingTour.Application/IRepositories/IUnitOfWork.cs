@@ -14,6 +14,10 @@ public interface IUnitOfWork : IDisposable
     //IUserRepository Users { get; }
     ITourRepository Tours { get; }
     IDiscountRepository Discounts { get; }
+    IAccommodationRepository Accommodations { get; }
+    IRoomInventoryRepository RoomInventories { get; }
+    IRoomTypeRepository RoomTypes { get; }
+    ICityRepository Cities { get; }
 
     #endregion
     

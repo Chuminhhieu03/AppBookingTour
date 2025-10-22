@@ -1,8 +1,5 @@
-﻿using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
-using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Constants;
-using AppBookingTour.Domain.Entities;
-using AppBookingTour.Domain.IRepositories;
 using AutoMapper;
 using MediatR;
 
@@ -24,9 +21,15 @@ namespace AppBookingTour.Application.Features.Discounts.UpdateDiscount
             var discountDTO = request.Discount ?? new UpdateDiscountDTO();
             var discount = await _unitOfWork.Discounts.GetByIdAsync(request.DiscountId);
             if (discount == null) { 
-                throw new Exception(Message.NotFound);
+                throw new ArgumentException(Message.NotFound);
             }
             _mapper.Map(discountDTO, discount);
+            var listDiscountTmp = await _unitOfWork.Discounts.FindAsync(x => x.Code.Trim() == discount.Code.Trim());
+            var existDiscount = listDiscountTmp.FirstOrDefault();
+            if (existDiscount != null && existDiscount.Id != discount.Id)
+            {
+                throw new ArgumentException(string.Format("Đã tồn tại mã giảm giá [{0}]", discount.Code));
+            }
             if (discount.TotalQuantity.HasValue && discount.RemainQuantity.HasValue && discount.TotalQuantity.Value < discount.RemainQuantity.Value)
             {
                 discount.RemainQuantity = discount.TotalQuantity;

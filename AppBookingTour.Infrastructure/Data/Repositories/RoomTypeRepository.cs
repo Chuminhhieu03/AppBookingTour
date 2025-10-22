@@ -1,0 +1,20 @@
+using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
+using AppBookingTour.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
+
+namespace AppBookingTour.Infrastructure.Data.Repositories
+{
+    public class RoomTypeRepository : Repository<RoomType>, IRoomTypeRepository
+    {
+        public RoomTypeRepository(ApplicationDbContext context) : base(context) { }
+        public async Task<List<RoomType>> SearchRoomType(string? name, int? type, int? accommodationId, int pageIndex, int pageSize)
+        {
+            IQueryable<RoomType> query = _dbSet;
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(x => x.Name.Contains(name));
+            query = query.OrderBy(x => x.Id).Skip(pageIndex * pageSize).Take(pageSize);
+            return await query.ToListAsync();
+        }
+    }
+}

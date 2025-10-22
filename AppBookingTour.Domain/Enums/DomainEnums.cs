@@ -262,12 +262,6 @@ public enum ReviewItemType
     Combo = 3,
 }
 
-public enum RoomStatus
-{
-    Draft = 1,
-    Published = 2
-}
-
 public enum DepartureStatus
 {
     Available = 1,

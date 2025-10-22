@@ -1,6 +1,6 @@
 ﻿using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
+using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
-using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 

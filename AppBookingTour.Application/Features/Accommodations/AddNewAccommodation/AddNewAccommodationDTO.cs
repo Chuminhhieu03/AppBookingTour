@@ -1,0 +1,24 @@
+using AppBookingTour.Domain.Entities;
+using AppBookingTour.Share.DTOS;
+
+namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
+{
+    public class AddNewAccommodationDTO
+    {
+        public int CityId { get; set; }
+        public int? Type { get; set; }
+        public string Name { get; set; } = null!;
+        public string? Address { get; set; }
+        public int StarRating { get; set; }
+        public decimal? Rating { get; set; }
+        public string? Description { get; set; }
+        public string? Regulation { get; set; }
+        public string? Amenities { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class AddNewAccommodationResponse : BaseResponse
+    {
+        public Accommodation? Accommodation { get; set; }
+    }
+}

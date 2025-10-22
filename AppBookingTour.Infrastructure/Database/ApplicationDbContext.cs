@@ -231,15 +231,13 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.HasIndex(e => e.Name);
         });
 
-        // Hotel configuration
+        // Accommodation configuration
         modelBuilder.Entity<Accommodation>(entity =>
         {
-            entity.ToTable("Hotels");
+            entity.ToTable("Accommodations");
             entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.Rating).HasPrecision(3, 2);
-            
-            entity.HasIndex(e => new { e.CityId, e.StarRating });
         });
     }
 
@@ -401,12 +399,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         });
 
         modelBuilder.Entity<RoomInventory>(entity =>
-        {
-            entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
-            entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
-        });
-
-        modelBuilder.Entity<RoomType>(entity =>
         {
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
             entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
