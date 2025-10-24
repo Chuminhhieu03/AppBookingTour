@@ -17,13 +17,12 @@ public class Accommodation : BaseEntity
     public string? Regulation { get; set; } // Rich text
     public string? Amenities { get; set; } // JSON
     public bool IsActive { get; set; } = true;
+    public string? CoverImgUrl { get; set; }
 
     #endregion
 
     #region Extends props
 
-    [NotMapped]
-    public Image? HotelImageCoverUrl { get; set; }
     [NotMapped]
     public List<Image>? Images { get; set; }
     [NotMapped]

@@ -1,5 +1,6 @@
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Share.DTOS;
+using Microsoft.AspNetCore.Http;
 
 namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
 {
@@ -15,6 +16,8 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
         public string? Regulation { get; set; }
         public string? Amenities { get; set; }
         public bool IsActive { get; set; } = true;
+        public IFormFile? CoverImgFile { get; set; }
+        public IFormFile? InfoImgFile { get; set; }
     }
 
     public class AddNewAccommodationResponse : BaseResponse

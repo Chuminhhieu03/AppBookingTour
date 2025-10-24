@@ -10,6 +10,12 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
     {
         public AccomodationRepository(ApplicationDbContext context) : base(context) { }
 
+        public async Task<Accommodation> GetById(int id)
+        {
+            IQueryable<Accommodation> query = _dbSet.Include(x => x.City);
+            return await query.FirstOrDefaultAsync(e => e.Id == id);
+        }
+
         public async Task<List<Accommodation>> SearchAccommodation(SearchAccommodationFilter accommodationFilter, int pageIndex, int pageSize)
         {
             IQueryable<Accommodation> query = _dbSet.Include(x => x.City);
