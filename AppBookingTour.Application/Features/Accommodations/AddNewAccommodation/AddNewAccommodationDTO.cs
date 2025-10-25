@@ -17,7 +17,7 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
         public string? Amenities { get; set; }
         public bool IsActive { get; set; } = true;
         public IFormFile? CoverImgFile { get; set; }
-        public IFormFile? InfoImgFile { get; set; }
+        public List<IFormFile>? InfoImgFile { get; set; }
     }
 
     public class AddNewAccommodationResponse : BaseResponse

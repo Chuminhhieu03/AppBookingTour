@@ -20,6 +20,8 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationD
             {
                 throw new Exception(Message.NotFound);
             }
+            var listInfoImg = await _unitOfWork.Images.GetListAccommodationImageByEntityId(request.id);
+            accommodation.ListInfoImage = listInfoImg;
             accommodation.StatusName = Constants.ActiveStatus.dctName[Convert.ToInt32(accommodation.IsActive)];
             if (accommodation.Type.HasValue)
                 accommodation.TypeName = Constants.AccommodationType.dctName[accommodation.Type.Value];

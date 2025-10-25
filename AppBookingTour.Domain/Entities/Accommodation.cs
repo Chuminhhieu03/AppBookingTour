@@ -24,11 +24,11 @@ public class Accommodation : BaseEntity
     #region Extends props
 
     [NotMapped]
-    public List<Image>? Images { get; set; }
-    [NotMapped]
     public string? StatusName { get; set; }
     [NotMapped]
     public string? TypeName { get; set; }
+    [NotMapped]
+    public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties
     public virtual City? City { get; set; }

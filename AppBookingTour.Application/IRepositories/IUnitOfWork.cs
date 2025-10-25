@@ -18,6 +18,7 @@ public interface IUnitOfWork : IDisposable
     IRoomInventoryRepository RoomInventories { get; }
     IRoomTypeRepository RoomTypes { get; }
     ICityRepository Cities { get; }
+    IImageRepository Images { get; }
 
     #endregion
     

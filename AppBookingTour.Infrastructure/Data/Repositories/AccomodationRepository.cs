@@ -12,7 +12,8 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
 
         public async Task<Accommodation> GetById(int id)
         {
-            IQueryable<Accommodation> query = _dbSet.Include(x => x.City);
+            IQueryable<Accommodation> query = _dbSet.
+                Include(x => x.City);
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
 
@@ -30,7 +31,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             if (accommodationFilter.CityId.HasValue)
                 query = query.Where(x => x.CityId == accommodationFilter.CityId);
             query = query
-                .OrderBy(x => x.Id)
+                .OrderBy(x => - x.Id)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize);
             return await query.ToListAsync();

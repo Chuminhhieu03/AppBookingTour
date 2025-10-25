@@ -25,20 +25,42 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
             var dto = request.Accommodation ?? new AddNewAccommodationDTO();
             var accommodation = _mapper.Map<Accommodation>(dto);
             var coverImgFile = dto.CoverImgFile;
-            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
-            if (!allowedTypes.Contains(coverImgFile?.ContentType))
-                throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+            var infoImgFile = dto.InfoImgFile;
 
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            
             if (coverImgFile != null)
             {
+                if (!allowedTypes.Contains(coverImgFile?.ContentType))
+                    throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
                 var fileUrl = await _fileStorageService.UploadFileAsync(coverImgFile.OpenReadStream());
                 accommodation.CoverImgUrl = fileUrl;
             }
+            var listImage = new List<Image>();
+            await _unitOfWork.BeginTransactionAsync(cancellationToken);
             await _unitOfWork.Accommodations.AddAsync(accommodation, cancellationToken);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             accommodation.Code = $"CS{accommodation.Id:D5}";
             _unitOfWork.Accommodations.Update(accommodation);
+
+            if (infoImgFile != null)
+            {
+                foreach (var item in infoImgFile)
+                {
+                    if (!allowedTypes.Contains(item?.ContentType))
+                        throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+
+                    var fileUrl = await _fileStorageService.UploadFileAsync(item.OpenReadStream());
+                    var image = new Image
+                    {
+                        EntityId = accommodation.Id,
+                        EntityType = Domain.Enums.EntityType.Accommodation,
+                        Url = fileUrl
+                    };
+                    listImage.Add(image);
+                }
+            }
+            await _unitOfWork.Images.AddRangeAsync(listImage);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 

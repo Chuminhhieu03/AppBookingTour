@@ -1,6 +1,7 @@
-using AppBookingTour.Domain.Entities;
+﻿using AppBookingTour.Domain.Entities;
 using AppBookingTour.Share.DTOS;
 using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 
 namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
 {
@@ -16,8 +17,10 @@ namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
         public string? Regulation { get; set; }
         public string? Amenities { get; set; }
         public bool IsActive { get; set; } = true;
+        public string? CoverImgUrl { get; set; }
         public IFormFile? CoverImgFile { get; set; }
-        public IFormFile? InfoImgFile { get; set; }
+        public List<int>? ListInfoImageId { get; set; } // Nhận qua Form
+        public List<IFormFile>? ListNewInfoImage { get; set; }
     }
 
     public class UpdateAccommodationResponse : BaseResponse
