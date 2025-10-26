@@ -11,10 +11,10 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Cần phải nhập email để tiếp tục")
-            .EmailAddress().WithMessage("Invalid email format");
+            .EmailAddress().WithMessage("Email không đúng định dạng");
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(6).WithMessage("Password must be at least 6 characters");
+            .NotEmpty().WithMessage("Cần phải nhập mật khẩu để đăng nhậ")
+            .MinimumLength(6).WithMessage("Mật khẩu phải có độ dài là 6 ký tự");
     }
 }
