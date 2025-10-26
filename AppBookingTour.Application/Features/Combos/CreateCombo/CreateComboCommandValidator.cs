@@ -33,7 +33,7 @@ public class CreateComboCommandValidator : AbstractValidator<CreateComboCommand>
             .GreaterThan(0).WithMessage("BasePriceAdult must be greater than 0");
 
         RuleFor(x => x.ComboRequest.Vehicle)
-                .NotNull().WithMessage("Vehicle is required")
-                .IsInEnum().WithMessage("Invalid Vehicle value");
+            .NotNull().WithMessage("Vehicle is required")
+            .InclusiveBetween(1, 2).WithMessage("Vehicle must be a valid enum value (1 = Car, 2 = Plane)");
     }
 }

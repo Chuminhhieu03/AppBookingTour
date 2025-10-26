@@ -17,10 +17,6 @@ public class ComboProfile : Profile
             .ForMember(dest => dest.FromCityName, opt => opt.MapFrom(src => src.FromCity.Name))
             .ForMember(dest => dest.ToCityName, opt => opt.MapFrom(src => src.ToCity.Name))
             .ForMember(dest => dest.Vehicle, opt => opt.MapFrom(src => src.Vehicle.ToString()))
-            .ForMember(dest => dest.HotelImages, opt => opt.MapFrom(src =>
-                string.IsNullOrEmpty(src.HotelImages)
-                ? new List<string>()
-                : src.HotelImages.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
             .ForMember(dest => dest.Amenities, opt => opt.MapFrom(src =>
                 string.IsNullOrEmpty(src.Amenities)
                 ? new List<string>()

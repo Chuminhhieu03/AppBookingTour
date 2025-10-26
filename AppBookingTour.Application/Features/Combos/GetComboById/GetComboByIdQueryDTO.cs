@@ -25,7 +25,7 @@ public class ComboDTO
     public string? ShortDescription { get; set; }
     public string Vehicle { get; set; } = null!;
     public string? ComboImageCover { get; set; }
-    public List<string> HotelImages { get; set; } = [];
+    public List<string> ComboImages { get; set; } = [];
     public int DurationDays { get; set; }
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChildren { get; set; }

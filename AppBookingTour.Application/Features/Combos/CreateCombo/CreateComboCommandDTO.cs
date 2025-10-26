@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Application.Features.Combos.GetComboById;
 using AppBookingTour.Application.Features.ComboSchedules.CreateComboSchedule;
+using Microsoft.AspNetCore.Http;
 
 namespace AppBookingTour.Application.Features.Combos.CreateCombo;
 
@@ -24,8 +25,8 @@ public class ComboRequestDTO
     public int? ToCityId { get; set; }
     public string? ShortDescription { get; set; }
     public int? Vehicle { get; set; }
-    public string? ComboImageCover { get; set; }
-    public string? HotelImages { get; set; }
+    public string? ComboImageCover { get; set; } // TODO: sửa lại type => vì gửi lên sẽ là IFormFile
+    public string? ComboImages { get; set; } //TODO: sửa lại type => vì gửi lên sẽ là IFormFile[] 
     public int? DurationDays { get; set; }
     public decimal? BasePriceAdult { get; set; }
     public decimal? BasePriceChildren { get; set; }
