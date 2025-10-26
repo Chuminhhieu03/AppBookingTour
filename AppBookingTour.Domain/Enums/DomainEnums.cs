@@ -276,3 +276,8 @@ public enum EntityType
     Review = 5,
     RoomType = 6
 }
+
+public enum FeatureCode
+{
+    Region = 1
+}
