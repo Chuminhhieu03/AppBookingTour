@@ -191,12 +191,8 @@ public enum Region
 
 public enum Vehicle
 {
-    Bus = 1,
-    Car = 2,
-    Plane = 3,
-    Train = 4,
-    Boat = 5,
-    Motorbike = 6
+    Car = 1,
+    Plane = 2
 }
 
 public enum Currency
