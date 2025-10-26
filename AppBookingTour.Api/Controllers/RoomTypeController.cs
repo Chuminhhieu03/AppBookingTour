@@ -36,7 +36,7 @@ namespace AppBookingTour.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoomType(int id, [FromBody] UpdateRoomTypeDTO dto)
+        public async Task<IActionResult> UpdateRoomType(int id, [FromForm] UpdateRoomTypeDTO dto)
         {
             var command = new UpdateRoomTypeCommand(id, dto);
             var response = await _mediator.Send(command);

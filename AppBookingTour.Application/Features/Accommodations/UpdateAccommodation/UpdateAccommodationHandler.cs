@@ -40,7 +40,7 @@ namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
                 accommodation.CoverImgUrl = fileUrl;
             }
 
-            var listInfoImgOfAccommodation = await _unitOfWork.Images.GetListAccommodationImageByEntityId(request.AccommodationId); // Hiện có
+            var listInfoImgOfAccommodation = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(request.AccommodationId, Domain.Enums.EntityType.Accommodation); // Hiện có
             var ListInfoImageId = dto.ListInfoImageId ?? new List<int>();
             var listInfoImageToDelete = listInfoImgOfAccommodation?
                 .Where(x => !ListInfoImageId.Contains(x.Id))

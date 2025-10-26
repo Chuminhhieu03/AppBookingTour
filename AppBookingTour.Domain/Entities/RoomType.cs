@@ -26,6 +26,10 @@ public class RoomType : BaseEntity
     #region Extend props
     [NotMapped]
     public string? StatusName { get; set; }
+    [NotMapped]
+    public string? StatusColor { get; set; }
+    [NotMapped]
+    public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties
     public virtual ICollection<RoomInventory> RoomInventories { get; set; } = [];

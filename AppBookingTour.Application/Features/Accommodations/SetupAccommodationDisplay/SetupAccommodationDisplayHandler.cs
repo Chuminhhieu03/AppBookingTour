@@ -20,17 +20,23 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationD
             {
                 throw new Exception(Message.NotFound);
             }
-            var listInfoImg = await _unitOfWork.Images.GetListAccommodationImageByEntityId(request.id);
+            var listInfoImg = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(request.id, Domain.Enums.EntityType.Accommodation);
             accommodation.ListInfoImage = listInfoImg;
             accommodation.StatusName = Constants.ActiveStatus.dctName[Convert.ToInt32(accommodation.IsActive)];
             if (accommodation.Type.HasValue)
                 accommodation.TypeName = Constants.AccommodationType.dctName[accommodation.Type.Value];
             var listRoomType = accommodation.ListRoomType?.OrderBy(x => -x.Id).ToList();
-            listRoomType?.ForEach(item =>
+            if (listRoomType != null)
             {
-                if (item.Status.HasValue && Constants.RoomTypeStatus.dctName.ContainsKey((int)item.Status))
-                    item.StatusName = Constants.RoomTypeStatus.dctName[(int)item.Status];
-            });
+                foreach (var item in listRoomType)
+                {
+                    if (item.Status.HasValue && Constants.RoomTypeStatus.dctName.ContainsKey((int)item.Status))
+                        item.StatusName = Constants.RoomTypeStatus.dctName[(int)item.Status];
+                    if (item.Status.HasValue && Constants.RoomTypeStatus.dctColor.ContainsKey((int)item.Status))
+                        item.StatusColor = Constants.RoomTypeStatus.dctColor[(int)item.Status];
+                    item.ListInfoImage = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(item.Id, Domain.Enums.EntityType.RoomType);
+                }
+            }
             accommodation.ListRoomType = listRoomType;
             return new SetupAccommodationDisplayDTO
             {

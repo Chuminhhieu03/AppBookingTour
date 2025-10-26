@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Domain.Enums;
 using AppBookingTour.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,12 +16,12 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
         {
         }
 
-        public async Task<List<Image>> GetListAccommodationImageByEntityId(int? entityId)
+        public async Task<List<Image>> GetListImageByEntityIdAndEntityType(int? entityId, EntityType entityType)
         {
             IQueryable<Image> query = _dbSet;
             return await _dbSet
                 .Where(x => x.EntityId == entityId)
-                .Where(x => x.EntityType == Domain.Enums.EntityType.Accommodation)
+                .Where(x => x.EntityType == entityType)
                 .OrderBy(x => x.Id)
                 .ToListAsync();
         }

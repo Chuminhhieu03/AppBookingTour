@@ -61,6 +61,13 @@ namespace AppBookingTour.Domain.Constants
                 { Inactive, "Hết hiệu lực" },
                 { Draft, "Nháp" }
             };
+
+            public static readonly Dictionary<int, string> dctColor = new()
+            {
+                { Active, "green" },
+                { Inactive, "red" },
+                { Draft, "blue" }
+            };
         }
 
         #endregion
