@@ -11,5 +11,4 @@ public class TourItinerary : BaseEntity
 
     // Navigation properties
     public virtual Tour Tour { get; set; } = null!;
-    public virtual ICollection<TourItineraryDestination> Destinations { get; set; } = [];
 }

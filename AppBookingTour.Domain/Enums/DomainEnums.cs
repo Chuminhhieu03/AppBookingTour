@@ -275,3 +275,9 @@ public enum EntityType
     User = 4,
     Review = 5
 }
+
+public enum FeatureCode
+{
+    Region = 1,
+    // TODO: Add other feature codes as needed
+}
