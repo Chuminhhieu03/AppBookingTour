@@ -30,8 +30,8 @@ public class TourRequestDTO
     public decimal? BasePriceAdult { get; set; }
     public decimal? BasePriceChild { get; set; }
     public bool? IsActive { get; set; }
-    public string? ImageMain { get; set; }
-    public string? ImageGallery { get; set; }
+    public string? ImageMain { get; set; } //TODO: sửa lại type => vì gửi lên sẽ là IFormFile
+    public string? ImageGallery { get; set; } //TODO: sửa lại type => vì gửi lên sẽ là IFormFile[]
     public string? Description { get; set; }
     public string? Includes { get; set; }
     public string? Excludes { get; set; }
