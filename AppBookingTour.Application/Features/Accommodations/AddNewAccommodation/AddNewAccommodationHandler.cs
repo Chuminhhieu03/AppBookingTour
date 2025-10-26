@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
+using AppBookingTour.Domain.Constants;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Share.DTOS;
 using AutoMapper;
@@ -32,7 +33,7 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
             if (coverImgFile != null)
             {
                 if (!allowedTypes.Contains(coverImgFile?.ContentType))
-                    throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+                    throw new ArgumentException(Message.InvalidImage);
                 var fileUrl = await _fileStorageService.UploadFileAsync(coverImgFile.OpenReadStream());
                 accommodation.CoverImgUrl = fileUrl;
             }
@@ -48,7 +49,7 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
                 foreach (var item in infoImgFile)
                 {
                     if (!allowedTypes.Contains(item?.ContentType))
-                        throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+                        throw new ArgumentException(Message.InvalidImage);
 
                     var fileUrl = await _fileStorageService.UploadFileAsync(item.OpenReadStream());
                     var image = new Image

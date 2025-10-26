@@ -32,7 +32,7 @@ public class Accommodation : BaseEntity
 
     // Navigation properties
     public virtual City? City { get; set; }
-    public virtual ICollection<RoomType> RoomTypes { get; set; } = [];
+    public virtual ICollection<RoomType>? ListRoomType { get; set; }
     public virtual ICollection<Review> Reviews { get; set; } = [];
 
     #endregion

@@ -273,5 +273,6 @@ public enum EntityType
     Tour = 2,
     Combo = 3,
     User = 4,
-    Review = 5
+    Review = 5,
+    RoomType = 6
 }

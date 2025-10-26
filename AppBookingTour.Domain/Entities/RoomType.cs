@@ -1,10 +1,13 @@
 ﻿using AppBookingTour.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppBookingTour.Domain.Entities;
 
 public class RoomType : BaseEntity
 {
+    #region Primary props
+
     public int AccommodationId { get; set; }
     public string Name { get; set; }
     public int? MaxAdult { get; set; }
@@ -14,10 +17,18 @@ public class RoomType : BaseEntity
     public int? Quantity { get; set; }
     public string? Amenities { get; set; } // JSON
     [Precision(12, 2)]
-    public string? CoverImage { get; set; }
+    public string? CoverImageUrl { get; set; }
     public decimal ExtraAdultPrice { get; set; }
     public decimal ExtraChildrenPrice { get; set; }
 
+    #endregion
+
+    #region Extend props
+    [NotMapped]
+    public string? StatusName { get; set; }
+
     // Navigation properties
     public virtual ICollection<RoomInventory> RoomInventories { get; set; } = [];
+
+    #endregion
 }

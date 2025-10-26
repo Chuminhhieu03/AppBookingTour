@@ -35,7 +35,7 @@ namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
             if (coverImgFile != null)
             {
                 if (!allowedTypes.Contains(coverImgFile?.ContentType))
-                    throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+                    throw new ArgumentException(Message.InvalidImage);
                 var fileUrl = await _fileStorageService.UploadFileAsync(coverImgFile.OpenReadStream());
                 accommodation.CoverImgUrl = fileUrl;
             }
@@ -52,7 +52,7 @@ namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
                 foreach (var item in newListInfoImg)
                 {
                     if (!allowedTypes.Contains(item?.ContentType))
-                        throw new ArgumentException("File tải lên không đúng định dạng jpeg, png, webp");
+                        throw new ArgumentException(Message.InvalidImage);
 
                     var fileUrl = await _fileStorageService.UploadFileAsync(item.OpenReadStream());
                     var image = new Image

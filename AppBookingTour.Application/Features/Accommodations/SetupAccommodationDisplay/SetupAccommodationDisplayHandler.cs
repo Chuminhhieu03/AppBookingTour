@@ -25,6 +25,13 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationD
             accommodation.StatusName = Constants.ActiveStatus.dctName[Convert.ToInt32(accommodation.IsActive)];
             if (accommodation.Type.HasValue)
                 accommodation.TypeName = Constants.AccommodationType.dctName[accommodation.Type.Value];
+            var listRoomType = accommodation.ListRoomType?.OrderBy(x => -x.Id).ToList();
+            listRoomType?.ForEach(item =>
+            {
+                if (item.Status.HasValue && Constants.RoomTypeStatus.dctName.ContainsKey((int)item.Status))
+                    item.StatusName = Constants.RoomTypeStatus.dctName[(int)item.Status];
+            });
+            accommodation.ListRoomType = listRoomType;
             return new SetupAccommodationDisplayDTO
             {
                 Accommodation = accommodation,
