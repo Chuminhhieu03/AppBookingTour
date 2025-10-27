@@ -24,7 +24,7 @@ public class GlobalExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred");
+            _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -33,44 +33,37 @@ public class GlobalExceptionHandlingMiddleware
     {
         context.Response.ContentType = "application/json";
 
-        var response = exception switch
+        var (statusCode, response) = exception switch
         {
-            ValidationException validationEx => new ApiResponse<object>
-            {
-                Success = false,
-                Message = "Validation failed",
-                Data = validationEx.Errors.Select(e => new { e.PropertyName, e.ErrorMessage })
-            },
-            UnauthorizedAccessException => new ApiResponse<object>
-            {
-                Success = false,
-                Message = "Unauthorized access"
-            },
-            KeyNotFoundException => new ApiResponse<object>
-            {
-                Success = false,
-                Message = "Resource not found"
-            },
-            ArgumentException argEx => new ApiResponse<object>
-            {
-                Success = false,
-                Message = argEx.Message
-            },
-            _ => new ApiResponse<object>
-            {
-                Success = false,
-                Message = "An internal server error occurred"
-            }
+            ValidationException validationEx => (
+                (int)HttpStatusCode.BadRequest,
+                ApiResponse<object>.Fail(
+                    string.Join("; ", validationEx.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"))
+                )
+            ),
+            UnauthorizedAccessException unauthorizedEx => (
+                (int)HttpStatusCode.Unauthorized,
+                ApiResponse<object>.Fail(unauthorizedEx.Message)
+            ),
+            KeyNotFoundException notFoundEx => (
+                (int)HttpStatusCode.NotFound,
+                ApiResponse<object>.Fail(notFoundEx.Message)
+            ),
+            ArgumentException argEx => (
+                (int)HttpStatusCode.BadRequest,
+                ApiResponse<object>.Fail(argEx.Message)
+            ),
+            InvalidOperationException invalidOpEx => (
+                (int)HttpStatusCode.BadRequest,
+                ApiResponse<object>.Fail(invalidOpEx.Message)
+            ),
+            _ => (
+                (int)HttpStatusCode.InternalServerError,
+                ApiResponse<object>.Fail("Có l?i x?y ra trong h? th?ng. Vui lòng th? l?i sau.")
+            )
         };
 
-        context.Response.StatusCode = exception switch
-        {
-            ValidationException => (int)HttpStatusCode.BadRequest,
-            UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-            KeyNotFoundException => (int)HttpStatusCode.NotFound,
-            ArgumentException => (int)HttpStatusCode.BadRequest,
-            _ => (int)HttpStatusCode.InternalServerError
-        };
+        context.Response.StatusCode = statusCode;
 
         var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
         {

@@ -27,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
     private IRoomInventoryRepository _roomInventoryRepository;
     private IRoomTypeRepository _roomTypeRepository;
     private ICityRepository _cityRepository;
+    private IBlogPostRepository? _blogPostRepository;
     private IImageRepository _imageRepository;
     private ISystemParameterRepository _systemParameterRepository;
 
@@ -52,6 +53,7 @@ public class UnitOfWork : IUnitOfWork
     public IRoomTypeRepository RoomTypes => _roomTypeRepository ?? new RoomTypeRepository(_context);
     public IRoomInventoryRepository RoomInventories => _roomInventoryRepository ?? new RoomInventoryRepository(_context);
     public ICityRepository Cities => _cityRepository ?? new CityRepository(_context);
+    public IBlogPostRepository BlogPosts => _blogPostRepository ??= new BlogPostRepository(_context);
     public IImageRepository Images => _imageRepository ?? new ImageRepository(_context);
     public ISystemParameterRepository SystemParameters => _systemParameterRepository ?? new SystemParameterRepository(_context);
 

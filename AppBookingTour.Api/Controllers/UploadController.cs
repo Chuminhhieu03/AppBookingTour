@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AppBookingTour.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/upload")]
     //[Authorize]
     public class FilesController : ControllerBase
     {
@@ -19,37 +19,20 @@ namespace AppBookingTour.Api.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpPost("upload")]
+        [HttpPost("image")]
         public async Task<ActionResult<ApiResponse<string>>> UploadFile(
-            IFormFile file,
-            //[FromQuery] ImageType imageType,
-            [FromQuery] int? entityId = null)
+            IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest(ApiResponse<string>.Fail("No file uploaded"));
+                return BadRequest(ApiResponse<string>.Fail("Không có file nào được chọn để upload"));
 
             // Validate file type
             var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
             if (!allowedTypes.Contains(file.ContentType))
-                return BadRequest(ApiResponse<string>.Fail("Invalid file type"));
+                return BadRequest(ApiResponse<string>.Fail("Kiểu ảnh không phù hợp"));
 
             // Upload to cloud
             var fileUrl = await _fileStorage.UploadFileAsync(file.OpenReadStream());
-
-            //// Save to database
-            //var image = new Image
-            //{
-            //    FileName = Path.GetFileName(fileUrl),
-            //    OriginalFileName = file.FileName,
-            //    Url = fileUrl,
-            //    ContentType = file.ContentType,
-            //    FileSize = file.Length,
-            //    ImageType = imageType,
-            //    EntityId = entityId
-            //};
-
-            //await _unitOfWork.Repository<Image>().AddAsync(image);
-            //await _unitOfWork.SaveChangesAsync();
 
             return Ok(ApiResponse<string>.Ok(fileUrl));
         }
