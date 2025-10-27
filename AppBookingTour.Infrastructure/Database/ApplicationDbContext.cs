@@ -382,6 +382,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.ToTable("SystemParameters");
             entity.Property(e => e.Code).HasMaxLength(100);
             entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.FeatureCode).HasConversion<string>();
             entity.Property(e => e.FeatureCode).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(200);
         });
