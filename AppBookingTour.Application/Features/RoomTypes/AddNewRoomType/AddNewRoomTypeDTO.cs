@@ -16,6 +16,7 @@ namespace AppBookingTour.Application.Features.RoomTypes.AddNewRoomType
         public decimal? Price { get; set; }
         public decimal? ExtraAdultPrice { get; set; }
         public decimal? ExtraChildrenPrice { get; set; }
+        public string? Amenities { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<IFormFile>? InfoImgFile { get; set; }
     }

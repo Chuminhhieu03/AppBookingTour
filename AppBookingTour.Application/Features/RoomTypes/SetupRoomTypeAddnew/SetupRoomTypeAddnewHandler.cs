@@ -15,9 +15,11 @@ namespace AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeAddnew
         public async Task<SetupRoomTypeAddnewDTO> Handle(SetupRoomTypeAddnewQuery request, CancellationToken cancellationToken)
         {
             var listCity = await _unitOfWork.Cities.GetAllAsync(cancellationToken);
+            var listAmenity = await _unitOfWork.SystemParameters.GetListSystemParameterByFeatureCode(Domain.Enums.FeatureCode.RoomTypeAmenity);
             return new SetupRoomTypeAddnewDTO
             {
                 ListStatus = Constants.RoomTypeStatus.dctName.ToList(),
+                ListAmenity = listAmenity,
                 Success = true
             };
         }

@@ -20,6 +20,7 @@ public interface IUnitOfWork : IDisposable
     ICityRepository Cities { get; }
     IBlogPostRepository BlogPosts { get; }
     IImageRepository Images { get; }
+    ISystemParameterRepository SystemParameters { get; }
 
     #endregion
     

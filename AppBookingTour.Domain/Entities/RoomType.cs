@@ -15,7 +15,7 @@ public class RoomType : BaseEntity
     public int? Status { get; set; }
     public decimal? Price { get; set; }
     public int? Quantity { get; set; }
-    public string? Amenities { get; set; } // JSON
+    public string? Amenities { get; set; } // List id: 1, 2, 3, ..
     [Precision(12, 2)]
     public string? CoverImageUrl { get; set; }
     public decimal ExtraAdultPrice { get; set; }
@@ -28,6 +28,8 @@ public class RoomType : BaseEntity
     public string? StatusName { get; set; }
     [NotMapped]
     public string? StatusColor { get; set; }
+    [NotMapped]
+    public string? AmenityName { get; set; }
     [NotMapped]
     public List<Image>? ListInfoImage { get; set; }
 
