@@ -28,6 +28,8 @@ public class Accommodation : BaseEntity
     [NotMapped]
     public string? TypeName { get; set; }
     [NotMapped]
+    public string? AmenityName { get; set; }
+    [NotMapped]
     public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties

@@ -19,6 +19,7 @@ public interface IUnitOfWork : IDisposable
     IRoomTypeRepository RoomTypes { get; }
     ICityRepository Cities { get; }
     IImageRepository Images { get; }
+    ISystemParameterRepository SystemParameters { get; }
 
     #endregion
     

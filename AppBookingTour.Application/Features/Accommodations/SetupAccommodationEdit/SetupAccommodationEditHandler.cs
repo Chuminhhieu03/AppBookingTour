@@ -22,9 +22,7 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationE
             }
             var listInfoImg = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(request.id, Domain.Enums.EntityType.Accommodation);
             accommodation.ListInfoImage = listInfoImg;
-            accommodation.StatusName = Constants.ActiveStatus.dctName[Convert.ToInt32(accommodation.IsActive)];
-            if (accommodation.Type.HasValue)
-                accommodation.TypeName = Constants.AccommodationType.dctName[accommodation.Type.Value];
+            var listAmenity = await _unitOfWork.SystemParameters.GetListSystemParameterByFeatureCode(Domain.Enums.FeatureCode.AccommodationAmenity);
             var listRoomType = accommodation.ListRoomType?.OrderBy(x => -x.Id).ToList();
             if (listRoomType != null)
             {
@@ -45,6 +43,7 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationE
                 ListStatus = Constants.ActiveStatus.dctName.ToList(),
                 ListType = Constants.AccommodationType.dctName.ToList(),
                 ListCity = listCity.OrderBy(x => x.Name).ToList(),
+                ListAmenity = listAmenity,
                 Success = true
             };
         }

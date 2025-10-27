@@ -15,11 +15,13 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationA
         public async Task<SetupAccommodationAddnewDTO> Handle(SetupAccommodationAddnewQuery request, CancellationToken cancellationToken)
         {
             var listCity = await _unitOfWork.Cities.GetAllAsync(cancellationToken);
+            var listAmenity = await _unitOfWork.SystemParameters.GetListSystemParameterByFeatureCode(Domain.Enums.FeatureCode.AccommodationAmenity);
             return new SetupAccommodationAddnewDTO
             {
                 ListStatus = Constants.ActiveStatus.dctName.ToList(),
                 ListType = Constants.AccommodationType.dctName.ToList(),
                 ListCity = listCity.OrderBy(x => x.Name).ToList(),
+                ListAmenity = listAmenity,
                 Success = true
             };
         }

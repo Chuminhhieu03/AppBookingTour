@@ -275,5 +275,8 @@ public enum EntityType
 
 public enum FeatureCode
 {
-    Region = 1
+    [Description("RoomTypeAmenity")]
+    RoomTypeAmenity,
+    [Description("AccommodationAmenity")]
+    AccommodationAmenity
 }
