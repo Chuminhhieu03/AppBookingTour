@@ -20,41 +20,33 @@ namespace AppBookingTour.Application.Features.Tours.SearchTours
 
         public async Task<SearchToursResponse> Handle(SearchToursQuery request, CancellationToken cancellationToken)
         {
-            try
+            int pageIndex = request.PageIndex.HasValue ? request.PageIndex.Value : 1;
+            int pageSize = request.PageSize.HasValue ? request.PageSize.Value : 10;
+
+            _logger.LogInformation("Searching tours with filter: {@Filter} for Page: {Page}, PageSize: {PageSize}",
+                request.Filter, pageIndex, pageSize);
+
+            var (tours, totalCount) = await _unitOfWork.Tours.SearchToursAsync(
+                request.Filter,
+                pageIndex,
+                pageSize,
+                cancellationToken);
+
+            var tourListItems = _mapper.Map<List<TourListItem>>(tours);
+
+            var totalPages = (request.PageSize == 0) ? 0 : (int)Math.Ceiling((double)totalCount / pageSize);
+
+            return new SearchToursResponse
             {
-                int pageIndex = request.PageIndex.HasValue ? request.PageIndex.Value : 1;
-                int pageSize = request.PageSize.HasValue ? request.PageSize.Value : 10;
-
-                _logger.LogInformation("Searching tours with filter: {@Filter} for Page: {Page}, PageSize: {PageSize}",
-                    request.Filter, pageIndex, pageSize);
-
-                var (tours, totalCount) = await _unitOfWork.Tours.SearchToursAsync(
-                    request.Filter,
-                    pageIndex,
-                    pageSize,
-                    cancellationToken);
-
-                var tourListItems = _mapper.Map<List<TourListItem>>(tours);
-
-                var totalPages = (request.PageSize == 0) ? 0 : (int)Math.Ceiling((double)totalCount / pageSize);
-
-                return new SearchToursResponse
+                Tours = tourListItems,
+                Meta = new PaginationMeta
                 {
-                    Tours = tourListItems,
-                    Meta = new PaginationMeta
-                    {
-                        TotalCount = totalCount,
-                        Page = pageIndex,
-                        PageSize = pageSize,
-                        TotalPages = totalPages
-                    }
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while searching tours in handler for filter: {@Filter}", request.Filter);
-                throw;
-            }
+                    TotalCount = totalCount,
+                    Page = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = totalPages
+                }
+            };
         }
     }
 }

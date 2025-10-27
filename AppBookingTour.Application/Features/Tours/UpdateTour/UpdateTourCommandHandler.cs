@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.Features.Tours.GetTourById;
+using AppBookingTour.Application.IRepositories;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace AppBookingTour.Application.Features.Tours.UpdateTour;
 
 #region Handler
-public sealed class UpdateTourComandHandler : IRequestHandler<UpdateTourCommand, UpdateTourResponse>
+public sealed class UpdateTourComandHandler : IRequestHandler<UpdateTourCommand, TourDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateTourComandHandler> _logger;
@@ -22,31 +23,23 @@ public sealed class UpdateTourComandHandler : IRequestHandler<UpdateTourCommand,
         _mapper = mapper;
     }
 
-    public async Task<UpdateTourResponse> Handle(UpdateTourCommand request, CancellationToken cancellationToken)
+    public async Task<TourDTO> Handle(UpdateTourCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Tour updating with ID: {TourId}", request.TourId);
-        try
+        var existingTour = await _unitOfWork.Tours.GetByIdAsync(request.TourId, cancellationToken);
+        if (existingTour == null)
         {
-            var existingTour = await _unitOfWork.Tours.GetByIdAsync(request.TourId, cancellationToken);
-            if (existingTour == null)
-            {
-                return UpdateTourResponse.Failed($"Tour with ID {request.TourId} not found.");
-            }
-
-            _mapper.Map(request.TourRequest, existingTour);
-            existingTour.UpdatedAt = DateTime.UtcNow;
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Tour updated with ID: {TourId}", request.TourId);
-
-            return UpdateTourResponse.Success();
+            throw new KeyNotFoundException($"Tour with ID {request.TourId} not found.");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while updating tour.");
-            return UpdateTourResponse.Failed("An error occurred while updating the tour.");
-        }
+
+        _mapper.Map(request.TourRequest, existingTour);
+        existingTour.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Tour updated with ID: {TourId}", request.TourId);
+        var tourDto = _mapper.Map<TourDTO>(existingTour);
+        return tourDto;
     }
 };
 #endregion

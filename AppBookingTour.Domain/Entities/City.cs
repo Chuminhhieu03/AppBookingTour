@@ -15,7 +15,8 @@ public class City : BaseEntity
 
     //// Navigation properties
     //public virtual ICollection<Accommodation> Hotels { get; set; } = [];
-    public virtual ICollection<Tour> Tours { get; set; } = [];
+    public virtual ICollection<Tour> DepartureTours { get; set; } = [];
+    public virtual ICollection<Tour> DestinationTours { get; set; } = [];
     public virtual ICollection<BlogPost> BlogPosts { get; set; } = [];
     public virtual ICollection<Combo> FromCombos { get; set; } = [];
     public virtual ICollection<Combo> ToCombos { get; set; } = [];
