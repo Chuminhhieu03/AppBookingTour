@@ -22,19 +22,11 @@ public sealed class CitiesController : ControllerBase
     [HttpGet("get-list")]
     public async Task<ActionResult<ApiResponse<object>>> GetCitiesList()
     {
-        try
-        {
-            var query = new GetListCityQuery();
-            var result = await _mediator.Send(query);
+        var query = new GetListCityQuery();
+        var result = await _mediator.Send(query);
 
-            _logger.LogInformation("Retrieved all cities");
-            return Ok(ApiResponse<object>.Ok(result.Cities));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting cities list");
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while retrieving cities list"));
-        }
+        _logger.LogInformation("Retrieved all cities");
+        return Ok(ApiResponse<object>.Ok(result.Cities));
     }
 
     [HttpGet("{id:int}")]

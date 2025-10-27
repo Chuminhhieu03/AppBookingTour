@@ -47,7 +47,7 @@ public class BlogPostsController : ControllerBase
     /// Update existing blog post (Admin/Staff only)
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<ApiResponse<UpdateBlogPostResponse>>> UpdateBlogPost(int id, [FromBody] UpdateBlogPostRequest request)
     {
         if (id != request.Id)

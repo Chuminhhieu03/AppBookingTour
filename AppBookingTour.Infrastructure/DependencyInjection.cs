@@ -158,6 +158,9 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
 
+        // Current user service for accessing authenticated user from JWT
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         // Content security services
         services.AddScoped<IHtmlSanitizerService, HtmlSanitizerService>();
 
