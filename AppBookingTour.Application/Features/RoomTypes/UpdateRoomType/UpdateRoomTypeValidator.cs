@@ -17,7 +17,6 @@ namespace AppBookingTour.Application.Features.RoomTypes.UpdateRoomType
         {
             RuleFor(x => x.Name).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Tên loại phòng"));
             RuleFor(x => x.AccommodationId).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Chỗ ở"));
-            RuleFor(x => x.Capacity).GreaterThanOrEqualTo(1).WithMessage("Sức chứa phải >= 1");
         }
     }
 }

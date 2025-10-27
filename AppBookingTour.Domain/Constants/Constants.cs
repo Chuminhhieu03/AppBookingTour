@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Domain.Constants
 {
@@ -24,15 +25,11 @@ namespace AppBookingTour.Domain.Constants
 
         public static class ServiceType
         {
-            public const int Accommodation = 1;
-            public const int Tour = 2;
-            public const int Combo = 3;
-
             public static readonly Dictionary<int, string> dctName = new()
             {
-                { Accommodation, "Cơ sở lưu trú" },
-                { Tour, "Tour" },
-                { Combo, "Combo" }
+                { (int) EntityType.Accommodation, "Cơ sở lưu trú" },
+                { (int) EntityType.Tour, "Tour" },
+                { (int) EntityType.Combo, "Combo" }
             };
         }
 
@@ -63,6 +60,13 @@ namespace AppBookingTour.Domain.Constants
                 { Active, "Hiệu lực" },
                 { Inactive, "Hết hiệu lực" },
                 { Draft, "Nháp" }
+            };
+
+            public static readonly Dictionary<int, string> dctColor = new()
+            {
+                { Active, "green" },
+                { Inactive, "red" },
+                { Draft, "blue" }
             };
         }
 

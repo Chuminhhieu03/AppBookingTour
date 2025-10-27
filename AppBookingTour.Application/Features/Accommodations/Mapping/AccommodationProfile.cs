@@ -10,7 +10,8 @@ namespace AppBookingTour.Application.Features.Accommodations.Mapping
         public AccommodationProfile()
         {
             CreateMap<AddNewAccommodationDTO, Accommodation>();
-            CreateMap<UpdateAccommodationDTO, Accommodation>();
+            CreateMap<UpdateAccommodationDTO, Accommodation>()
+                .ForMember(dest => dest.ListInfoImage, opt => opt.Ignore());
         }
     }
 }

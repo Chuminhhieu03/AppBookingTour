@@ -20,7 +20,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             if (filter.Status.HasValue)
                 query = query.Where(x => x.Status == filter.Status.Value);
             query = query
-                .OrderBy(x => x.Id)
+                .OrderBy(x => - x.Id)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize);
             return await query.ToListAsync();

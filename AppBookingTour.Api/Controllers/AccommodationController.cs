@@ -2,11 +2,9 @@
 using AppBookingTour.Application.Features.Accommodations.SearchAccommodation;
 using AppBookingTour.Application.Features.Accommodations.SetupAccommodationAddnew;
 using AppBookingTour.Application.Features.Accommodations.SetupAccommodationDefault;
+using AppBookingTour.Application.Features.Accommodations.SetupAccommodationDisplay;
+using AppBookingTour.Application.Features.Accommodations.SetupAccommodationEdit;
 using AppBookingTour.Application.Features.Accommodations.UpdateAccommodation;
-using AppBookingTour.Application.Features.Discounts.SetupDiscountAddnew;
-using AppBookingTour.Application.Features.Discounts.SetupDiscountDefault;
-using AppBookingTour.Application.Features.Discounts.SetupDiscountDisplay;
-using AppBookingTour.Application.Features.Discounts.SetupDiscountEdit;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,14 +29,15 @@ namespace AppBookingTour.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddNewAccommodation([FromBody] AddNewAccommodationCommand command)
+        public async Task<IActionResult> AddNewAccommodation([FromForm] AddNewAccommodationDTO dto)
         {
+            var command = new AddNewAccommodationCommand(dto);
             var result = await _mediator.Send(command);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAccommodation(int id, [FromBody] UpdateAccommodationDTO dto)
+        public async Task<IActionResult> UpdateAccommodation(int id, [FromForm] UpdateAccommodationDTO dto)
         {
             var command = new UpdateAccommodationCommand(id, dto);
             var response = await _mediator.Send(command);
@@ -62,7 +61,7 @@ namespace AppBookingTour.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> SetupDisplay(int id)
         {
-            var query = new SetupDiscountDisplayQuery(id);
+            var query = new SetupAccommodationDisplayQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }
@@ -70,7 +69,7 @@ namespace AppBookingTour.Api.Controllers
         [HttpPost("setup-edit/{id}")]
         public async Task<IActionResult> SetupEdit(int id)
         {
-            var query = new SetupDiscountEditQuery(id);
+            var query = new SetupAccommodationEditQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }

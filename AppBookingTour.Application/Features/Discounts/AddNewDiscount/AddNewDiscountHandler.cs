@@ -21,8 +21,8 @@ namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount
         {
             var discountDTO = request.Discount ?? new AddNewDiscountDTO();
             var discount = _mapper.Map<Discount>(discountDTO) ?? new Discount();
-            var existDiscount = _unitOfWork.Discounts.FindAsync(x => x.Code.Trim() == discount.Code.Trim());
-            if (existDiscount != null)
+            var existDiscount = await _unitOfWork.Discounts.FindAsync(x => x.Code.Trim() == discount.Code.Trim());
+            if (existDiscount.FirstOrDefault() != null)
             {
                 throw new ArgumentException(string.Format("Đã tồn tại mã giảm giá [{0}]", discount.Code));
             }

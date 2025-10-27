@@ -27,7 +27,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<TourType> TourTypes { get; set; }
     public DbSet<TourDeparture> TourDepartures { get; set; }
     public DbSet<TourItinerary> TourItineraries { get; set; }
-    public DbSet<TourItineraryDestination> TourItineraryDestinations { get; set; }
     public DbSet<City> Cities { get; set; }
     public DbSet<Accommodation> Accommodations { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
@@ -59,6 +58,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<OutboxMessage> OutboxMessages { get; set; }
     #endregion
 
+    public DbSet<Image> Images { get; set; }
+
     public DbSet<Discount> Discounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -79,6 +80,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         ConfigureContentEntities(modelBuilder);
         ConfigurePromotionEntities(modelBuilder);
         ConfigureComboEntities(modelBuilder);
+        ConfigureSystemParameterEntities(modelBuilder);
         ConfigureAdditionalDecimalEntities(modelBuilder);
 
         // Configure base entity properties
@@ -202,17 +204,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             e.ToTable("TourItineraries");
             e.Property(x => x.DayNumber).HasMaxLength(50).IsRequired();
             e.HasIndex(x => new { x.TourId, x.DayNumber });
-        });
-
-        modelBuilder.Entity<TourItineraryDestination>(e =>
-        {
-            e.ToTable("TourItineraryDestinations");
-            e.Property(x => x.Notes).HasMaxLength(1000);
-
-            e.HasOne(x => x.TourItinerary)
-            .WithMany(ti => ti.Destinations)
-            .HasForeignKey(x => x.TourItineraryId)
-            .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -381,6 +372,19 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
                   .WithMany(c => c.ToCombos)
                   .HasForeignKey(c => c.ToCityId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private void ConfigureSystemParameterEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SystemParameter>(entity =>
+        {
+            entity.ToTable("SystemParameters");
+            entity.Property(e => e.Code).HasMaxLength(100);
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.FeatureCode).HasConversion<string>();
+            entity.Property(e => e.FeatureCode).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(200);
         });
     }
 

@@ -17,23 +17,22 @@ public class Accommodation : BaseEntity
     public string? Regulation { get; set; } // Rich text
     public string? Amenities { get; set; } // JSON
     public bool IsActive { get; set; } = true;
+    public string? CoverImgUrl { get; set; }
 
     #endregion
 
     #region Extends props
 
     [NotMapped]
-    public Image? HotelImageCoverUrl { get; set; }
-    [NotMapped]
-    public List<Image>? Images { get; set; }
-    [NotMapped]
     public string? StatusName { get; set; }
     [NotMapped]
     public string? TypeName { get; set; }
+    [NotMapped]
+    public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties
     public virtual City? City { get; set; }
-    public virtual ICollection<RoomType> RoomTypes { get; set; } = [];
+    public virtual ICollection<RoomType>? ListRoomType { get; set; }
     public virtual ICollection<Review> Reviews { get; set; } = [];
 
     #endregion

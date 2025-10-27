@@ -191,12 +191,8 @@ public enum Region
 
 public enum Vehicle
 {
-    Bus = 1,
-    Car = 2,
-    Plane = 3,
-    Train = 4,
-    Boat = 5,
-    Motorbike = 6
+    Car = 1,
+    Plane = 2
 }
 
 public enum Currency
@@ -269,9 +265,15 @@ public enum PriceLevel
 
 public enum EntityType
 {
-    Tour = 1,
-    Hotel = 2,
+    Accommodation = 1,
+    Tour = 2,
     Combo = 3,
     User = 4,
-    Review = 5
+    Review = 5,
+    RoomType = 6
+}
+
+public enum FeatureCode
+{
+    Region = 1
 }
