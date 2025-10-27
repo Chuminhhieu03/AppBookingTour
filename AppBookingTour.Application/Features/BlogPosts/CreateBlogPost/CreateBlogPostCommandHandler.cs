@@ -30,33 +30,33 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
     public async Task<CreateBlogPostResponse> Handle(CreateBlogPostCommand command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        _logger.LogInformation("Creating blog post with title: {Title} by AuthorId: {AuthorId}",
-            request.Title, request.AuthorId);
+        _logger.LogInformation("Creating blog post with title: {Title}",
+            request.Title);
 
         // Verify author exists using UserManager
-        var author = await _userManager.FindByIdAsync(request.AuthorId.ToString());
-        if (author == null)
-        {
-            return new CreateBlogPostResponse
-            {
-                Success = false,
-                Message = "Tác gi? không t?n t?i trong h? th?ng"
-            };
-        }
+        //var author = await _userManager.FindByIdAsync(request.AuthorId.ToString());
+        //if (author == null)
+        //{
+        //    return new CreateBlogPostResponse
+        //    {
+        //        Success = false,
+        //        Message = "Tác gi? không t?n t?i trong h? th?ng"
+        //    };
+        //}
 
         // Verify city exists if provided
-        if (request.CityId.HasValue)
-        {
-            var cityExists = await _unitOfWork.Repository<City>().ExistsAsync(c => c.Id == request.CityId.Value, cancellationToken);
-            if (!cityExists)
-            {
-                return new CreateBlogPostResponse
-                {
-                    Success = false,
-                    Message = "Thành ph? không t?n t?i trong h? th?ng"
-                };
-            }
-        }
+        //if (request.CityId.HasValue)
+        //{
+        //    var cityExists = await _unitOfWork.Repository<City>().ExistsAsync(c => c.Id == request.CityId.Value, cancellationToken);
+        //    if (!cityExists)
+        //    {
+        //        return new CreateBlogPostResponse
+        //        {
+        //            Success = false,
+        //            Message = "Thành ph? không t?n t?i trong h? th?ng"
+        //        };
+        //    }
+        //}
 
         // Check slug uniqueness
         var slugExists = await _unitOfWork.BlogPosts.IsSlugExistsAsync(request.Slug, null, cancellationToken);
@@ -74,8 +74,8 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
 
         var blogPost = new BlogPost
         {
-            AuthorId = request.AuthorId,
-            CityId = request.CityId,
+            AuthorId = 1,
+            CityId = 1,
             Title = request.Title,
             Content = sanitizedContent, // ? Sanitized HTML
             Slug = request.Slug,

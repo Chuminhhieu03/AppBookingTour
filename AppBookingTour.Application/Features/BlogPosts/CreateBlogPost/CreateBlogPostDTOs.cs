@@ -4,7 +4,7 @@ namespace AppBookingTour.Application.Features.BlogPosts.CreateBlogPost;
 
 public class CreateBlogPostRequest
 {
-    public int AuthorId { get; set; }
+    //public int AuthorId { get; set; }
     public int? CityId { get; set; }
     public string Title { get; set; } = null!;
     public string Content { get; set; } = null!;

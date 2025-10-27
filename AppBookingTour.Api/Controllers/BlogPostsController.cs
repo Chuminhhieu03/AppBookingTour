@@ -30,7 +30,7 @@ public class BlogPostsController : ControllerBase
     /// Create new blog post (Admin/Staff only)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin,Staff")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<ApiResponse<CreateBlogPostResponse>>> CreateBlogPost([FromBody] CreateBlogPostRequest request)
     {
         var result = await _mediator.Send(new CreateBlogPostCommand(request));

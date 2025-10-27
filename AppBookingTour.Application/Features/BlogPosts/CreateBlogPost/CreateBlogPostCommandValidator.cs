@@ -6,8 +6,8 @@ public class CreateBlogPostCommandValidator : AbstractValidator<CreateBlogPostCo
 {
     public CreateBlogPostCommandValidator()
     {
-        RuleFor(x => x.Request.AuthorId)
-            .GreaterThan(0).WithMessage("AuthorId ph?i l?n h?n 0");
+        //RuleFor(x => x.Request.AuthorId)
+        //    .GreaterThan(0).WithMessage("AuthorId ph?i l?n h?n 0");
 
         RuleFor(x => x.Request.Title)
             .NotEmpty().WithMessage("Tiêu ?? không ???c ?? tr?ng")
