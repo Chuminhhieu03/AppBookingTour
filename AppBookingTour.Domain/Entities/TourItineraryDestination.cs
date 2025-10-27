@@ -1,3 +1,4 @@
+
 namespace AppBookingTour.Domain.Entities;
 
 public class TourItineraryDestination : BaseEntity

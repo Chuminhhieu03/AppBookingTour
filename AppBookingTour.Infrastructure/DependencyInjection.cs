@@ -146,6 +146,7 @@ public static class DependencyInjection
         services.AddScoped<ITourRepository, TourRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IAccommodationRepository, AccomodationRepository>();
+        services.AddScoped<IBlogPostRepository, BlogPostRepository>();
 
         // Register generic repository
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -157,9 +158,13 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAuthService, AuthService>();
 
-        // Add other business services here as needed
+        // Content security services
+        services.AddScoped<IHtmlSanitizerService, HtmlSanitizerService>();
+
+        // Other business services
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+        
         // services.AddScoped<IPaymentGatewayService, VNPayService>();
         // services.AddScoped<INotificationService, NotificationService>();
     }

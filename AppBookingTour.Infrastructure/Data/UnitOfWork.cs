@@ -27,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
     private IRoomInventoryRepository _roomInventoryRepository;
     private IRoomTypeRepository _roomTypeRepository;
     private ICityRepository _cityRepository;
+    private IBlogPostRepository? _blogPostRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -50,6 +51,7 @@ public class UnitOfWork : IUnitOfWork
     public IRoomTypeRepository RoomTypes => _roomTypeRepository ?? new RoomTypeRepository(_context);
     public IRoomInventoryRepository RoomInventories => _roomInventoryRepository ?? new RoomInventoryRepository(_context);
     public ICityRepository Cities => _cityRepository ?? new CityRepository(_context);
+    public IBlogPostRepository BlogPosts => _blogPostRepository ??= new BlogPostRepository(_context);
 
     #endregion
 
