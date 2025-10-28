@@ -1,9 +1,6 @@
-using AppBookingTour.Application.Features.Accommodations.SetupAccommodationAddnew;
-using AppBookingTour.Application.Features.Accommodations.SetupAccommodationDisplay;
-using AppBookingTour.Application.Features.Accommodations.SetupAccommodationEdit;
 using AppBookingTour.Application.Features.RoomTypes.AddNewRoomType;
-using AppBookingTour.Application.Features.RoomTypes.SearchRoomTypes;
 using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeAddnew;
+using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeDisplay;
 using AppBookingTour.Application.Features.RoomTypes.UpdateRoomType;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +15,6 @@ namespace AppBookingTour.Api.Controllers
         public RoomTypeController(IMediator mediator)
         {
             _mediator = mediator;
-        }
-
-        [HttpPost("search")]
-        public async Task<IActionResult> SearchRoomType([FromBody] SearchRoomTypeQuery query)
-        {
-            var result = await _mediator.Send(query);
-            return Ok(result);
         }
 
         [HttpPost]
@@ -53,15 +43,7 @@ namespace AppBookingTour.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> SetupDisplay(int id)
         {
-            var query = new SetupAccommodationDisplayQuery(id);
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [HttpPost("setup-edit/{id}")]
-        public async Task<IActionResult> SetupEdit(int id)
-        {
-            var query = new SetupAccommodationEditQuery(id);
+            var query = new SetupRoomTypeDisplayQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }

@@ -17,6 +17,7 @@ namespace AppBookingTour.Application.Features.RoomTypes.UpdateRoomType
         public decimal? ExtraAdultPrice { get; set; }
         public decimal? ExtraChildrenPrice { get; set; }
         public string? CoverImageUrl { get; set; }
+        public string? Amenities { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<int>? ListInfoImageId { get; set; } // Nhận qua Form
         public List<IFormFile>? ListNewInfoImage { get; set; }

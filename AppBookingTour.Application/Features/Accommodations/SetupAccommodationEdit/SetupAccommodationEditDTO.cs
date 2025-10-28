@@ -8,6 +8,7 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationE
         public Accommodation? Accommodation { get; set; }
         public List<KeyValuePair<int, string>>? ListStatus { get; set; }
         public List<KeyValuePair<int, string>>? ListType { get; set; }
+        public List<SystemParameter> ListAmenity { get; set; }
         public List<City>? ListCity { get; set; }
     }
 }

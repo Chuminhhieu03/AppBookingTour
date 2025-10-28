@@ -45,6 +45,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 #endregion
 
 #region Common Services
+// ✅ Add HttpContextAccessor for accessing current user from JWT
+builder.Services.AddHttpContextAccessor();
+
 // Health Checks
 builder.Services.AddHealthChecks();
 

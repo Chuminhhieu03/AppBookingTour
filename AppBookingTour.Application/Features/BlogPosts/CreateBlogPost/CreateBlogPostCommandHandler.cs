@@ -1,4 +1,4 @@
-using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Domain.Enums;
@@ -12,17 +12,20 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHtmlSanitizerService _htmlSanitizer;
+    private readonly ICurrentUserService _currentUserService;
     private readonly UserManager<User> _userManager;
     private readonly ILogger<CreateBlogPostCommandHandler> _logger;
 
     public CreateBlogPostCommandHandler(
         IUnitOfWork unitOfWork,
         IHtmlSanitizerService htmlSanitizer,
+        ICurrentUserService currentUserService,
         UserManager<User> userManager,
         ILogger<CreateBlogPostCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
         _htmlSanitizer = htmlSanitizer;
+        _currentUserService = currentUserService;
         _userManager = userManager;
         _logger = logger;
     }
@@ -30,17 +33,28 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
     public async Task<CreateBlogPostResponse> Handle(CreateBlogPostCommand command, CancellationToken cancellationToken)
     {
         var request = command.Request;
-        _logger.LogInformation("Creating blog post with title: {Title} by AuthorId: {AuthorId}",
-            request.Title, request.AuthorId);
+        _logger.LogInformation("Creating blog post with title: {Title}", request.Title);
 
-        // Verify author exists using UserManager
-        var author = await _userManager.FindByIdAsync(request.AuthorId.ToString());
-        if (author == null)
+        // Get current user ID from JWT token
+        var currentUserId = _currentUserService.GetCurrentUserId();
+        if (!currentUserId.HasValue)
         {
             return new CreateBlogPostResponse
             {
                 Success = false,
-                Message = "T�c gi? kh�ng t?n t?i trong h? th?ng"
+                Message = "Không thể xác định người dùng hiện tại. Vui lòng đăng nhập lại"
+            };
+        }
+
+        // Verify author exists in database
+        var author = await _userManager.FindByIdAsync(currentUserId.Value.ToString());
+        if (author == null)
+        {
+            _logger.LogWarning("User with ID {UserId} not found in database", currentUserId.Value);
+            return new CreateBlogPostResponse
+            {
+                Success = false,
+                Message = "Tác giả không tồn tại trong hệ thống"
             };
         }
 
@@ -53,7 +67,7 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
                 return new CreateBlogPostResponse
                 {
                     Success = false,
-                    Message = "Th�nh ph? kh�ng t?n t?i trong h? th?ng"
+                    Message = "Thành phố không tồn tại trong hệ thống"
                 };
             }
         }
@@ -65,19 +79,19 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
             return new CreateBlogPostResponse
             {
                 Success = false,
-                Message = "Slug ?� t?n t?i. Vui l�ng ch?n slug kh�c"
+                Message = "Slug đã tồn tại. Vui lòng chọn slug khác"
             };
         }
 
-        // ?? CRITICAL: Sanitize HTML content before saving
+        // Sanitize HTML content before saving
         var sanitizedContent = _htmlSanitizer.Sanitize(request.Content);
 
         var blogPost = new BlogPost
         {
-            AuthorId = request.AuthorId,
+            AuthorId = currentUserId.Value,
             CityId = request.CityId,
             Title = request.Title,
-            Content = sanitizedContent, // ? Sanitized HTML
+            Content = sanitizedContent,
             Slug = request.Slug,
             Status = request.Status,
             Tags = request.Tags,
@@ -88,12 +102,13 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
         await _unitOfWork.BlogPosts.AddAsync(blogPost, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Blog post created successfully with ID: {BlogPostId}", blogPost.Id);
+        _logger.LogInformation("Blog post created successfully with ID: {BlogPostId} by user {UserId}", 
+            blogPost.Id, currentUserId.Value);
 
         return new CreateBlogPostResponse
         {
             Success = true,
-            Message = "T?o b�i vi?t th�nh c�ng",
+            Message = "Tạo bài viết thành công",
             BlogPostId = blogPost.Id
         };
     }
