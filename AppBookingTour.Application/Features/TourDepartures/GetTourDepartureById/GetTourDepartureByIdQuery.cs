@@ -2,4 +2,4 @@
 
 namespace AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 
-public record GetTourDepartureByIdQuery(int TourDepartureId) : IRequest<GetTourDepartureByIdResponse>;
+public record GetTourDepartureByIdQuery(int TourDepartureId) : IRequest<TourDepartureDTO>;

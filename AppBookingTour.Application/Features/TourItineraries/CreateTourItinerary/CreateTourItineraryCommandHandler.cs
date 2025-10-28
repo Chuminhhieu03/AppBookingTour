@@ -8,7 +8,7 @@ using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
 namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 #region Handler
-public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTourItineraryCommand, CreateTourItineraryResponse>
+public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTourItineraryCommand, TourItineraryDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateTourItineraryCommandHandler> _logger;
@@ -22,28 +22,20 @@ public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTo
         _logger = logger;
         _mapper = mapper;
     }
-    public async Task<CreateTourItineraryResponse> Handle(CreateTourItineraryCommand request, CancellationToken cancellationToken)
+    public async Task<TourItineraryDTO> Handle(CreateTourItineraryCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Create tour itinerary from dto request");
-        try
-        {
-            var tourItinerary = _mapper.Map<TourItinerary>(request.TourItineraryRequest);
-            tourItinerary.CreatedAt = DateTime.UtcNow;
 
-            //TODO: làm thế nào để dùng _unitOfWork.TourItinerary ???
-            await _unitOfWork.Repository<TourItinerary>().AddAsync(tourItinerary, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Tour itinerary created successfully with ID: {TourItineraryId}", tourItinerary.Id);
+        var tourItinerary = _mapper.Map<TourItinerary>(request.TourItineraryRequest);
+        tourItinerary.CreatedAt = DateTime.UtcNow;
 
-            var tourItineraryDto = _mapper.Map<TourItineraryDTO>(tourItinerary);
+        await _unitOfWork.Repository<TourItinerary>().AddAsync(tourItinerary, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return CreateTourItineraryResponse.Success(tourItineraryDto);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while creating tour itinerary");
-            return CreateTourItineraryResponse.Failed("An error occurred while creating the tour itinerary.");
-        }
+        _logger.LogInformation("Tour itinerary created successfully with ID: {TourItineraryId}", tourItinerary.Id);
+        var tourItineraryDto = _mapper.Map<TourItineraryDTO>(tourItinerary);
+
+        return tourItineraryDto;
     }
 }
 #endregion

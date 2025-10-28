@@ -2,4 +2,4 @@
 
 namespace AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
-public record GetTourItineraryByIdQuery(int TourItineraryId) : IRequest<GetTourItineraryByIdResponse>;
+public record GetTourItineraryByIdQuery(int TourItineraryId) : IRequest<TourItineraryDTO>;
