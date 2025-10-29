@@ -52,7 +52,7 @@ public sealed class TourCategoriesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTourCategory([FromBody] TourCategoryRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> CreateTourCategory([FromForm] TourCategoryRequestDTO requestBody)
     {
         var command = new CreateTourCategoryCommand(requestBody);
         var result = await _mediator.Send(command);
@@ -63,7 +63,7 @@ public sealed class TourCategoriesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> UpdateTourCategory(int id, [FromBody] TourCategoryRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTourCategory(int id, [FromForm] TourCategoryRequestDTO requestBody)
     {
         var command = new UpdateTourCategoryCommand(id, requestBody);
         var result = await _mediator.Send(command);

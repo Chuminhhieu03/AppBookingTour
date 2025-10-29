@@ -1,6 +1,6 @@
 ﻿using AppBookingTour.Application.Features.TourCategories.GetTourCategoryById;
 using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Entities;
+using AppBookingTour.Application.IServices;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -10,15 +10,18 @@ namespace AppBookingTour.Application.Features.TourCategories.UpdateTourCategory;
 public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTourCategoryCommand, TourCategoryDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<UpdateTourCategoryCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public UpdateTourCategoryCommandHandler(
         IUnitOfWork unitOfWork,
+        IFileStorageService fileStorageService,
         ILogger<UpdateTourCategoryCommandHandler> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
         _logger = logger;
         _mapper = mapper;
     }
@@ -51,6 +54,24 @@ public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTou
         }
 
         _mapper.Map(request.RequestDto, existingCategory);
+
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var imageFile = request.RequestDto.Image;
+        if (imageFile != null)
+        {
+            if (!allowedTypes.Contains(imageFile.ContentType))
+            {
+                _logger.LogWarning("Invalid image type for tour category ID {TourCategoryId}.", request.TourCategoryId);
+                throw new ArgumentException("Invalid image type.");
+            }
+            var oldImageUrl = existingCategory.ImageUrl;
+            if (!string.IsNullOrEmpty(oldImageUrl))
+            {
+                await _fileStorageService.DeleteFileAsync(oldImageUrl);
+            }
+            var fileUrl = await _fileStorageService.UploadFileAsync(imageFile.OpenReadStream());
+            existingCategory.ImageUrl = fileUrl;
+        }
 
         existingCategory.UpdatedAt = DateTime.UtcNow;
 
