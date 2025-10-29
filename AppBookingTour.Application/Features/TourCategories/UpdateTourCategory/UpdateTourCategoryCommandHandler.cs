@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.Features.TourCategories.GetTourCategoryById;
+using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourCategories.UpdateTourCategory;
 
-public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTourCategoryCommand, UpdateTourCategoryResponse>
+public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTourCategoryCommand, TourCategoryDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateTourCategoryCommandHandler> _logger;
@@ -22,49 +23,42 @@ public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTou
         _mapper = mapper;
     }
 
-    public async Task<UpdateTourCategoryResponse> Handle(UpdateTourCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<TourCategoryDTO> Handle(UpdateTourCategoryCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Tour category updating with ID: {TourCategoryId}", request.TourCategoryId);
-        try
+        var existingCategory = await _unitOfWork.TourCategories.GetByIdAsync(request.TourCategoryId, cancellationToken);
+        if (existingCategory == null)
         {
-            var existingCategory = await _unitOfWork.Repository<TourCategory>().GetByIdAsync(request.TourCategoryId, cancellationToken);
-            if (existingCategory == null)
+            _logger.LogWarning("Tour category with ID {TourCategoryId} not found.", request.TourCategoryId);
+            throw new KeyNotFoundException($"Tour category with ID {request.TourCategoryId} not found.");
+        }
+
+        if (request.RequestDto.ParentCategoryId.HasValue)
+        {
+            if (request.RequestDto.ParentCategoryId == request.TourCategoryId)
             {
-                _logger.LogWarning("Tour category with ID {TourCategoryId} not found.", request.TourCategoryId);
-                return UpdateTourCategoryResponse.Failed($"Tour category with ID {request.TourCategoryId} not found.");
+                throw new ArgumentException("A category cannot be its own parent category.");
             }
 
-            if (request.RequestDto.ParentCategoryId.HasValue)
+            var parentExists = await _unitOfWork.TourCategories
+                .ExistsAsync(c => c.Id == request.RequestDto.ParentCategoryId.Value, cancellationToken);
+
+            if (!parentExists)
             {
-                if (request.RequestDto.ParentCategoryId == request.TourCategoryId)
-                {
-                    return UpdateTourCategoryResponse.Failed("Category cannot be its own parent.");
-                }
-
-                var parentExists = await _unitOfWork.Repository<TourCategory>()
-                    .ExistsAsync(c => c.Id == request.RequestDto.ParentCategoryId.Value, cancellationToken);
-
-                if (!parentExists)
-                {
-                    _logger.LogWarning("Invalid ParentCategoryId: {ParentId}", request.RequestDto.ParentCategoryId.Value);
-                    return UpdateTourCategoryResponse.Failed($"Parent category with ID {request.RequestDto.ParentCategoryId.Value} not found.");
-                }
+                _logger.LogWarning("Invalid ParentCategoryId: {ParentId}", request.RequestDto.ParentCategoryId.Value);
+                throw new KeyNotFoundException($"Parent category with ID {request.RequestDto.ParentCategoryId.Value} not found.");
             }
-
-            _mapper.Map(request.RequestDto, existingCategory);
-
-            existingCategory.UpdatedAt = DateTime.UtcNow;
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Tour category updated with ID: {TourCategoryId}", request.TourCategoryId);
-
-            return UpdateTourCategoryResponse.Success();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while updating tour category.");
-            return UpdateTourCategoryResponse.Failed("An error occurred while updating the tour category.");
-        }
+
+        _mapper.Map(request.RequestDto, existingCategory);
+
+        existingCategory.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Tour category updated with ID: {TourCategoryId}", request.TourCategoryId);
+        var tourCategoryDto = _mapper.Map<TourCategoryDTO>(existingCategory);
+
+        return tourCategoryDto;
     }
 }

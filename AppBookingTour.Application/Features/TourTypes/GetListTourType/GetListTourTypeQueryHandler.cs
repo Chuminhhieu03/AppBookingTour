@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourTypes.GetTourTypesList;
 
-public sealed class GetTourTypesListQueryHandler : IRequestHandler<GetTourTypesListQuery, GetTourTypesListResponse>
+public sealed class GetTourTypesListQueryHandler : IRequestHandler<GetTourTypesListQuery, List<TourTypeDTO>>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GetTourTypesListQueryHandler> _logger;
@@ -23,23 +23,15 @@ public sealed class GetTourTypesListQueryHandler : IRequestHandler<GetTourTypesL
         _mapper = mapper;
     }
 
-    public async Task<GetTourTypesListResponse> Handle(GetTourTypesListQuery request, CancellationToken cancellationToken)
+    public async Task<List<TourTypeDTO>> Handle(GetTourTypesListQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting all tour types");
-        try
-        {
-            var tourTypes = await _unitOfWork.Repository<TourType>().GetAllAsync(cancellationToken);
+        var tourTypes = await _unitOfWork.TourTypes.GetAllAsync(cancellationToken);
 
-            var tourTypeDtos = _mapper.Map<List<TourTypeDTO>>(tourTypes);
+        var tourTypeDtos = _mapper.Map<List<TourTypeDTO>>(tourTypes);
 
-            tourTypeDtos = tourTypeDtos.OrderBy(t => t.Name).ToList();
+        tourTypeDtos = tourTypeDtos.OrderBy(t => t.Name).ToList();
 
-            return GetTourTypesListResponse.Success(tourTypeDtos);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while getting all tour types");
-            return GetTourTypesListResponse.Failed("An error occurred while retrieving tour types.");
-        }
+        return tourTypeDtos;
     }
 }
