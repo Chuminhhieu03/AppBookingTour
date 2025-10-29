@@ -110,6 +110,17 @@ namespace AppBookingTour.Infrastructure.Services
                     Message = "Email đăng nhập không tồn tại trong hệ thống"
                 };
             }
+
+            // Kiểm tra user đã confirm mail chưa 
+            if(!user.EmailConfirmed)
+            {
+                return new LoginCommandResponse
+                {
+                    Success = false,
+                    Message = "Bạn cần xác nhận email trước khi dùng tiếp hệ thống"
+                };
+            };
+
             var checkValidUser = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!checkValidUser)
             {
@@ -119,6 +130,8 @@ namespace AppBookingTour.Infrastructure.Services
                     Message = "Mật khẩu bạn nhập không chính xác"
                 };
             }
+
+
 
             // Lấy ra roles của user 
             var roles = await _userManager.GetRolesAsync(user);
