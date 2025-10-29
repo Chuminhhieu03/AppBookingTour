@@ -1,6 +1,6 @@
 ﻿using AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
 using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Entities;
+using AppBookingTour.Application.IServices;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -10,15 +10,18 @@ namespace AppBookingTour.Application.Features.TourTypes.UpdateTourType;
 public sealed class UpdateTourTypeCommandHandler : IRequestHandler<UpdateTourTypeCommand, TourTypeDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
+    
     private readonly ILogger<UpdateTourTypeCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public UpdateTourTypeCommandHandler(
         IUnitOfWork unitOfWork,
+        IFileStorageService fileStorageService,
         ILogger<UpdateTourTypeCommandHandler> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
         _logger = logger;
         _mapper = mapper;
     }
@@ -34,8 +37,26 @@ public sealed class UpdateTourTypeCommandHandler : IRequestHandler<UpdateTourTyp
         }
 
         _mapper.Map(request.RequestDto, existingTourType);
-        existingTourType.UpdatedAt = DateTime.UtcNow;
+        
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var imageFile = request.RequestDto.Image;
+        if (imageFile != null)
+        {
+            if (!allowedTypes.Contains(imageFile.ContentType))
+            {
+                _logger.LogWarning("Invalid image type for tour type ID {TourTypeId}.", request.TourTypeId);
+                throw new ArgumentException("Invalid image type.");
+            }
+            var oldImageUrl = existingTourType.ImageUrl;
+            if(!string.IsNullOrEmpty(oldImageUrl))
+            {
+                await _fileStorageService.DeleteFileAsync(oldImageUrl);
+            }
+            var fileUrl = await _fileStorageService.UploadFileAsync(imageFile.OpenReadStream());
+            existingTourType.ImageUrl = fileUrl;
+        }
 
+        existingTourType.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var tourTypeDto = _mapper.Map<TourTypeDTO>(existingTourType);

@@ -51,7 +51,7 @@ public sealed class TourTypesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTourType([FromBody] TourTypeRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> CreateTourType([FromForm] TourTypeRequestDTO requestBody)
     {
         var command = new CreateTourTypeCommand(requestBody);
         var result = await _mediator.Send(command);
@@ -61,7 +61,7 @@ public sealed class TourTypesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> UpdateTourType(int id, [FromBody] TourTypeRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTourType(int id, [FromForm] TourTypeRequestDTO requestBody)
     {
         var command = new UpdateTourTypeCommand(id, requestBody);
         var result = await _mediator.Send(command);
