@@ -11,18 +11,14 @@ namespace AppBookingTour.Application.Features.Tours.Mapping
         public TourProfile()
         {
             #region Tour mapping
-            CreateMap<TourRequestDTO, Tour>()
+            CreateMap<TourCreateRequestDTO, Tour>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Tour, TourDTO>()
-                .ForMember(dest => dest.DepartureCityName, opt => opt.MapFrom(src => src.DepartureCity.Name)) //TODO: fix khong hien thi
-                .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type.Name)) //TODO: fix khong hien thi
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null)) //TODO: fix khong hien thi
-
-                //.ForMember(dest => dest.ImageGallery, opt => opt.MapFrom(src =>
-                //    string.IsNullOrEmpty(src.ImageGallery)
-                //    ? new List<string>()
-                //    : src.ImageGallery.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
+                .ForMember(dest => dest.DepartureCityName, opt => opt.MapFrom(src => src.DepartureCity.Name))
+                .ForMember(dest => dest.DestinationCityName, opt => opt.MapFrom(src => src.DestinationCity.Name))
+                .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : null))
 
                 .ForMember(dest => dest.Includes, opt => opt.MapFrom(src =>
                     string.IsNullOrEmpty(src.Includes)
@@ -36,6 +32,7 @@ namespace AppBookingTour.Application.Features.Tours.Mapping
 
             CreateMap<Tour, TourListItem>()
                 .ForMember(dest => dest.DepartureCityName, opt => opt.MapFrom(src => src.DepartureCity != null ? src.DepartureCity.Name : "N/A"))
+                .ForMember(dest => dest.DestinationCityName, opt => opt.MapFrom(src => src.DestinationCity != null ? src.DestinationCity.Name : "N/A"))
                 .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type != null ? src.Type.Name : "N/A"))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : "N/A"));
 

@@ -26,6 +26,7 @@ namespace AppBookingTour.Application.Features.Tours.SearchTours
         public string Name { get; set; } = null!;
         public string Code { get; set; } = null!;
         public string DepartureCityName { get; set; } = null!;
+        public string DestinationCityName { get; set; } = null!;
         public string? ImageMainUrl { get; set; }
         public decimal BasePriceAdult { get; set; }
         public decimal BasePriceChild { get; set; }

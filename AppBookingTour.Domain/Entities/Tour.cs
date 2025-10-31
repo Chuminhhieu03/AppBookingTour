@@ -1,4 +1,3 @@
-using AppBookingTour.Domain.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppBookingTour.Domain.Entities;
@@ -10,6 +9,7 @@ public class Tour : BaseEntity
     public int TypeId { get; set; }
     public int CategoryId { get; set; }
     public int DepartureCityId { get; set; }
+    public int DestinationCityId { get; set; }
     public int DurationDays { get; set; }
     public int DurationNights { get; set; }
     public int MaxParticipants { get; set; }
@@ -33,6 +33,7 @@ public class Tour : BaseEntity
     public virtual TourType Type { get; set; } = null!;
     public virtual TourCategory Category { get; set; } = null!;
     public virtual City DepartureCity { get; set; } = null!;
+    public virtual City DestinationCity { get; set; } = null!;
     public virtual ICollection<TourDeparture> Departures { get; set; } = [];
     public virtual ICollection<TourItinerary> Itineraries { get; set; } = [];
 }

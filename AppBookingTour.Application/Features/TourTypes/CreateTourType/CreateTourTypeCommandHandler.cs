@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
 using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
@@ -7,50 +8,52 @@ using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourTypes.CreateTourType;
 
-public sealed class CreateTourTypeCommandHandler : IRequestHandler<CreateTourTypeCommand, CreateTourTypeResponse>
+public sealed class CreateTourTypeCommandHandler : IRequestHandler<CreateTourTypeCommand, TourTypeDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<CreateTourTypeCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public CreateTourTypeCommandHandler(
         IUnitOfWork unitOfWork,
+        IFileStorageService fileStorageService,
         ILogger<CreateTourTypeCommandHandler> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
         _logger = logger;
         _mapper = mapper;
     }
 
-    public async Task<CreateTourTypeResponse> Handle(CreateTourTypeCommand request, CancellationToken cancellationToken)
+    public async Task<TourTypeDTO> Handle(CreateTourTypeCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating a new tour type");
-        try
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var tourType = _mapper.Map<TourType>(request.RequestDto);
+        var image = request.RequestDto.Image;
+
+        if (image != null)
         {
-            var tourType = _mapper.Map<TourType>(request.RequestDto);
-
-            tourType.CreatedAt = DateTime.UtcNow;
-            tourType.IsActive = request.RequestDto.IsActive ?? true;
-
-            await _unitOfWork.Repository<TourType>().AddAsync(tourType, cancellationToken);
-            var records = await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            if (records == 0)
+            if (!allowedTypes.Contains(image.ContentType))
             {
-                _logger.LogWarning("Create tour type failed, no records affected");
-                return CreateTourTypeResponse.Fail("Create tour type failed, no records affected");
+                _logger.LogWarning("Invalid image type: {ImageType}", image.ContentType);
+                throw new ArgumentException("Invalid image type. Allowed types are JPEG, PNG, WEBP.");
             }
-
-            var tourTypeDto = _mapper.Map<TourTypeDTO>(tourType);
-
-            _logger.LogInformation("Tour type created successfully with ID: {TourTypeId}", tourType.Id);
-            return CreateTourTypeResponse.Success(tourTypeDto);
+            var fileUrl = await _fileStorageService.UploadFileAsync(image.OpenReadStream());
+            tourType.ImageUrl = fileUrl;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating tour type");
-            return CreateTourTypeResponse.Fail("Create tour type failed: " + ex.Message);
-        }
+
+        tourType.CreatedAt = DateTime.UtcNow;
+        tourType.IsActive = request.RequestDto.IsActive ?? true;
+
+        await _unitOfWork.TourTypes.AddAsync(tourType, cancellationToken);
+        var records = await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var tourTypeDto = _mapper.Map<TourTypeDTO>(tourType);
+
+        _logger.LogInformation("Tour type created successfully with ID: {TourTypeId}", tourType.Id);
+        return tourTypeDto;
     }
 }

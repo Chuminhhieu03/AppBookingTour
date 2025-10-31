@@ -1,13 +1,13 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using AutoMapper;
-
+﻿using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 using AppBookingTour.Application.IRepositories;
+using AutoMapper;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourItineraries.UpdateTourItinerary;
 
 #region Handler
-public sealed class UpdateTourItineraryCommandHandler : IRequestHandler<UpdateTourItineraryCommand, UpdateTourItineraryResponse>
+public sealed class UpdateTourItineraryCommandHandler : IRequestHandler<UpdateTourItineraryCommand, TourItineraryDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateTourItineraryCommandHandler> _logger;
@@ -21,32 +21,24 @@ public sealed class UpdateTourItineraryCommandHandler : IRequestHandler<UpdateTo
         _logger = logger;
         _mapper = mapper;
     }
-    public async Task<UpdateTourItineraryResponse> Handle(UpdateTourItineraryCommand request, CancellationToken cancellationToken)
+    public async Task<TourItineraryDTO> Handle(UpdateTourItineraryCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating tour itinerary with ID: {TourItineraryId}", request.TourItineraryId);
-        try
+        var existingItinerary = await _unitOfWork.Repository<Domain.Entities.TourItinerary>().GetByIdAsync(request.TourItineraryId, cancellationToken);
+        if (existingItinerary == null)
         {
-            var existingItinerary = await _unitOfWork.Repository<Domain.Entities.TourItinerary>()
-                .GetByIdAsync(request.TourItineraryId, cancellationToken);
-            if (existingItinerary == null)
-            {
-                return UpdateTourItineraryResponse.Failed($"Tour itinerary with ID {request.TourItineraryId} not found.");
-            }
-
-            // Map updated fields from request to existing entity
-            _mapper.Map(request.TourItineraryRequest, existingItinerary);
-            existingItinerary.UpdatedAt = DateTime.UtcNow;
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            _logger.LogInformation("Tour itinerary updated with ID: {TourItineraryId}", request.TourItineraryId);
-            return UpdateTourItineraryResponse.Success();
+            throw new KeyNotFoundException($"Tour itinerary with ID {request.TourItineraryId} not found.");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating tour itinerary with ID: {TourItineraryId}", request.TourItineraryId);
-            return UpdateTourItineraryResponse.Failed("An error occurred while updating the tour itinerary.");
-        }
+
+        _mapper.Map(request.TourItineraryRequest, existingItinerary);
+        existingItinerary.UpdatedAt = DateTime.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("Tour itinerary updated with ID: {TourItineraryId}", request.TourItineraryId);
+
+        var updatedItineraryDto = _mapper.Map<TourItineraryDTO>(existingItinerary);
+
+        return updatedItineraryDto;
     }
 }
 #endregion

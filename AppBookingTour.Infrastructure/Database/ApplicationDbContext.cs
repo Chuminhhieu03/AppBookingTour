@@ -174,6 +174,16 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
                   .WithMany(c => c.Tours)
                   .HasForeignKey(t => t.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(t => t.DepartureCity)
+                  .WithMany(c => c.DepartureTours)
+                  .HasForeignKey(t => t.DepartureCityId)
+                  .OnDelete(DeleteBehavior.Restrict);           
+
+            entity.HasOne(t => t.DestinationCity)
+                  .WithMany(c => c.DestinationTours)
+                  .HasForeignKey(t => t.DestinationCityId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TourCategory>(e =>

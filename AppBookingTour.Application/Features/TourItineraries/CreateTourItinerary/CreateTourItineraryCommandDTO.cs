@@ -1,17 +1,5 @@
-﻿using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
-
+﻿
 namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
-
-public class CreateTourItineraryResponse
-{
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
-    public TourItineraryDTO? TourItinerary { get; init; }
-    public static CreateTourItineraryResponse Success(TourItineraryDTO tourItinerary) =>
-        new() { IsSuccess = true, TourItinerary = tourItinerary };
-    public static CreateTourItineraryResponse Failed(string errorMessage) =>
-        new() { IsSuccess = false, ErrorMessage = errorMessage };
-}
 
 public class TourItineraryRequestDTO
 {

@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Application.Features.TourCategories.GetTourCategoryById;
 using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
@@ -7,62 +8,72 @@ using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourCategories.CreateTourCategory;
 
-public sealed class CreateTourCategoryCommandHandler : IRequestHandler<CreateTourCategoryCommand, CreateTourCategoryResponse>
+public sealed class CreateTourCategoryCommandHandler : IRequestHandler<CreateTourCategoryCommand, TourCategoryDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<CreateTourCategoryCommandHandler> _logger;
     private readonly IMapper _mapper;
 
     public CreateTourCategoryCommandHandler(
         IUnitOfWork unitOfWork,
+        IFileStorageService fileStorageService,
         ILogger<CreateTourCategoryCommandHandler> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
         _logger = logger;
         _mapper = mapper;
     }
 
-    public async Task<CreateTourCategoryResponse> Handle(CreateTourCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<TourCategoryDTO> Handle(CreateTourCategoryCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating a new tour category");
         try
         {
+            _logger.LogInformation("Creating a new tour category");
             if (request.RequestDto.ParentCategoryId.HasValue)
             {
-                var parentExists = await _unitOfWork.Repository<TourCategory>()
+                var parentExists = await _unitOfWork.TourCategories
                     .ExistsAsync(c => c.Id == request.RequestDto.ParentCategoryId.Value, cancellationToken);
 
                 if (!parentExists)
                 {
                     _logger.LogWarning("Invalid ParentCategoryId: {ParentId}", request.RequestDto.ParentCategoryId.Value);
-                    return CreateTourCategoryResponse.Failed($"Parent category with ID {request.RequestDto.ParentCategoryId.Value} not found.");
+                    throw new KeyNotFoundException($"Parent category with ID {request.RequestDto.ParentCategoryId.Value} not found");
                 }
             }
 
+            var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+            var image = request.RequestDto.Image;
+
             var tourCategory = _mapper.Map<TourCategory>(request.RequestDto);
+
+            if (image != null)
+            {
+                if (!allowedTypes.Contains(image.ContentType))
+                {
+                    _logger.LogWarning("Invalid image type: {ImageType}", image.ContentType);
+                    throw new ArgumentException("Invalid image type. Allowed types are JPEG, PNG, WEBP.");
+                }
+                var fileUrl = await _fileStorageService.UploadFileAsync(image.OpenReadStream());
+                tourCategory.ImageUrl = fileUrl;
+            }
 
             tourCategory.CreatedAt = DateTime.UtcNow;
             tourCategory.IsActive = request.RequestDto.IsActive ?? true;
 
-            await _unitOfWork.Repository<TourCategory>().AddAsync(tourCategory, cancellationToken);
+            await _unitOfWork.TourCategories.AddAsync(tourCategory, cancellationToken);
             int records = await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            if (records == 0)
-            {
-                _logger.LogWarning("Create tour category failed, no records affected");
-                return CreateTourCategoryResponse.Failed("Create tour category failed, no records affected");
-            }
 
             var categoryDto = _mapper.Map<TourCategoryDTO>(tourCategory);
 
             _logger.LogInformation("Tour category created successfully with ID: {TourCategoryId}", tourCategory.Id);
-            return CreateTourCategoryResponse.Success(categoryDto);
+            return categoryDto;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating tour category");
-            return CreateTourCategoryResponse.Failed("Create tour category failed: " + ex.Message);
+            return new TourCategoryDTO();
         }
     }
 }

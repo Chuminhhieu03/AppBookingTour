@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AppBookingTour.Domain.Constants;
+using FluentValidation;
 
 namespace AppBookingTour.Application.Features.TourTypes.CreateTourType;
 
@@ -9,7 +10,7 @@ public class CreateTourTypeCommandValidator : AbstractValidator<CreateTourTypeCo
         RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x.RequestDto.Name)
-            .NotEmpty().WithMessage("Name is required")
+            .NotEmpty().WithMessage(string.Format(Message.RequiredField, "Tên loại tour"))
             .MaximumLength(100).WithMessage("Name must not exceed 100 characters");
 
         RuleFor(x => x.RequestDto.PriceLevel)
