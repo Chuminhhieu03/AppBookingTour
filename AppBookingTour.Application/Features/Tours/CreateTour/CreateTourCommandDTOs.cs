@@ -20,6 +20,7 @@ public class TourCreateRequestDTO
     public bool? IsActive { get; set; }
     public IFormFile? ImageMain { get; set; }
     public List<IFormFile>? Images { get; set; }
+    public List<string>? RemoveImageUrls { get; set; }
     public string? Description { get; set; }
     public string? Includes { get; set; }
     public string? Excludes { get; set; }

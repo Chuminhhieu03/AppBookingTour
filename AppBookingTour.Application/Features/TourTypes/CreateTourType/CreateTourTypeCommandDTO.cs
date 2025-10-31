@@ -5,7 +5,7 @@ namespace AppBookingTour.Application.Features.TourTypes.CreateTourType;
 
 public class TourTypeRequestDTO
 {
-    public string Name { get; set; } = null!;
+    public string? Name { get; set; }
     public PriceLevel? PriceLevel { get; set; }
     public string? Description { get; set; }
     public IFormFile? Image { get; set; }

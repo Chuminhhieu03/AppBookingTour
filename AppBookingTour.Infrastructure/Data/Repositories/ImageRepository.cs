@@ -25,5 +25,12 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 .OrderBy(x => x.Id)
                 .ToListAsync();
         }
+
+        public async Task<int> RemoveRangeByImgUrls(List<string> imageUrls)
+        {
+            return await _dbSet
+                .Where(x => imageUrls.Contains(x.Url))
+                .ExecuteDeleteAsync();
+        }
     }
 }

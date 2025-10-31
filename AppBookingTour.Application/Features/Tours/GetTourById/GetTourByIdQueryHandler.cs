@@ -32,12 +32,18 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
             throw new KeyNotFoundException($"Tour with ID {request.TourId} not found.");
         }
 
-        // TODO: update lại cái này
-        tour.ViewCount++;
-        _unitOfWork.Tours.Update(tour);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var images = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(request.TourId, Domain.Enums.EntityType.Tour);
+        List<string> imageUrls = new List<string>();
+        if (images != null && images.Count > 0)
+        {
+            foreach (var image in images)
+            {
+                imageUrls.Add(image.Url);
+            }
+        }
 
         var tourDto = _mapper.Map<TourDTO>(tour);
+        tourDto.Images = imageUrls;
 
         _logger.LogInformation("Successfully retrieved tour details for ID: {TourId}", request.TourId);
         return tourDto;

@@ -26,8 +26,7 @@ public sealed class GetTourCategoriesListQueryHandler : IRequestHandler<GetTourC
     {
         _logger.LogInformation("Getting all tour categories");
         var tourCategories = await _unitOfWork.TourCategories
-                                       .FindAsync(predicate: c => true,
-                                                  includes: c => c.ParentCategory);
+                                       .FindAsync(predicate: c => true, includes: c => c.ParentCategory);
 
         var tourCategoryItems = _mapper.Map<List<TourCategoryDTO>>(tourCategories);
 

@@ -32,9 +32,10 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
     public async Task<TourDTO> Handle(CreateTourCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating a new tour using AutoMapper");
-        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
 
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
         var tour = _mapper.Map<Tour>(request.TourRequest);
+
         tour.Rating = 0;
         tour.TotalBookings = 0;
         tour.ViewCount = 0;
@@ -44,43 +45,81 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
         var imageMain = request.TourRequest.ImageMain;
         var images = request.TourRequest.Images;
 
+        string? mainImageUrl = null;
+        var newImageList = new List<Image>();
+
         if (imageMain != null)
         {
-            if (!allowedTypes.Contains(imageMain?.ContentType))
+            if (!allowedTypes.Contains(imageMain.ContentType))
+            {
                 throw new ArgumentException(Message.InvalidImage);
+            }
 
-            var fileUrl = await _fileStorageService.UploadFileAsync(imageMain!.OpenReadStream());
-            tour.ImageMainUrl = fileUrl;
+            mainImageUrl = await _fileStorageService.UploadFileAsync(imageMain.OpenReadStream());
+        }
+
+        if (images != null && images.Count > 0)
+        {
+            foreach (var img in images)
+            {
+                if (!allowedTypes.Contains(img.ContentType))
+                {
+                    throw new ArgumentException(Message.InvalidImage);
+                }
+            }
+
+            foreach (var img in images)
+            {
+                var fileUrl = await _fileStorageService.UploadFileAsync(img.OpenReadStream());
+                newImageList.Add(new Image
+                {
+                    EntityType = Domain.Enums.EntityType.Tour,
+                    Url = fileUrl
+                });
+            }
         }
 
         await _unitOfWork.BeginTransactionAsync(cancellationToken);
-        await _unitOfWork.Tours.AddAsync(tour, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-        var listImage = new List<Image>();
-        if (images != null && images.Count > 0)
+        try
         {
-            foreach (var item in images)
+            if (mainImageUrl != null)
             {
-                if (!allowedTypes.Contains(item?.ContentType))
-                    throw new ArgumentException(Message.InvalidImage);
-                var fileUrl = await _fileStorageService.UploadFileAsync(item.OpenReadStream());
-                var image = new Image
-                {
-                    EntityId = tour.Id,
-                    EntityType = Domain.Enums.EntityType.Tour,
-                    Url = fileUrl
-                };
-                listImage.Add(image);
+                tour.ImageMainUrl = mainImageUrl;
             }
+
+            await _unitOfWork.Tours.AddAsync(tour, cancellationToken);
+
+            foreach (var img in newImageList)
+            {
+                img.EntityId = tour.Id;
+            }
+                
+            if (newImageList.Count > 0)
+            {
+                await _unitOfWork.Images.AddRangeAsync(newImageList, cancellationToken);
+            }   
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.CommitTransactionAsync(cancellationToken);
         }
-        await _unitOfWork.Images.AddRangeAsync(listImage, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _unitOfWork.CommitTransactionAsync(cancellationToken);
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
+            // Xóa các file đã tải lên trong trường hợp lỗi
+            if (mainImageUrl != null)
+            {
+                await _fileStorageService.DeleteFileAsync(mainImageUrl);
+            }
+            foreach (var img in newImageList)
+            {
+                await _fileStorageService.DeleteFileAsync(img.Url);
+            }
 
-        var tourDto = _mapper.Map<TourDTO>(tour);
+            throw;
+        }
 
-        return tourDto;
+        _logger.LogInformation("Tour created with ID: {TourId}", tour.Id);
+        return _mapper.Map<TourDTO>(tour);
     }
 }
 #endregion

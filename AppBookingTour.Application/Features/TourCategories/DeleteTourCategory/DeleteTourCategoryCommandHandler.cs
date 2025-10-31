@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,13 +9,16 @@ namespace AppBookingTour.Application.Features.TourCategories.DeleteTourCategory;
 public sealed class DeleteTourCategoryCommandHandler : IRequestHandler<DeleteTourCategoryCommand, Unit>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<DeleteTourCategoryCommandHandler> _logger;
 
     public DeleteTourCategoryCommandHandler(
         IUnitOfWork unitOfWork,
+        IFileStorageService fileStorageService,
         ILogger<DeleteTourCategoryCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
+        _fileStorageService = fileStorageService;
         _logger = logger;
     }
 
@@ -56,6 +60,12 @@ public sealed class DeleteTourCategoryCommandHandler : IRequestHandler<DeleteTou
         {
             child.ParentCategoryId = null;
             _unitOfWork.TourCategories.Update(child);
+        }
+
+        var oldImageUrl = existingCategory.ImageUrl;
+        if (!string.IsNullOrEmpty(oldImageUrl))
+        {
+            await _fileStorageService.DeleteFileAsync(oldImageUrl);
         }
 
         _unitOfWork.TourCategories.Remove(existingCategory);

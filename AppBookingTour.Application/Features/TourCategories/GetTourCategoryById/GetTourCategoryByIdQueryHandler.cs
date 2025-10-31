@@ -26,7 +26,7 @@ public sealed class GetTourCategoryByIdQueryHandler : IRequestHandler<GetTourCat
         _logger.LogInformation("Getting tour category details for ID: {TourCategoryId}", request.TourCategoryId);
 
         var tourCategory = await _unitOfWork.TourCategories
-                .GetByIdAsync(request.TourCategoryId);
+                .GetByIdAsync(request.TourCategoryId, includes: c => c.ParentCategory);
 
         if (tourCategory == null)
         {
