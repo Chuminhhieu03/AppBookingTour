@@ -88,16 +88,17 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
             }
 
             await _unitOfWork.Tours.AddAsync(tour, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             foreach (var img in newImageList)
             {
                 img.EntityId = tour.Id;
             }
-                
+
             if (newImageList.Count > 0)
             {
                 await _unitOfWork.Images.AddRangeAsync(newImageList, cancellationToken);
-            }   
+            }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             await _unitOfWork.CommitTransactionAsync(cancellationToken);

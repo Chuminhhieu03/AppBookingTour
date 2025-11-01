@@ -43,7 +43,7 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
         }
 
         var tourDto = _mapper.Map<TourDTO>(tour);
-        tourDto.Images = imageUrls;
+        tourDto.ImageUrls = imageUrls;
 
         _logger.LogInformation("Successfully retrieved tour details for ID: {TourId}", request.TourId);
         return tourDto;

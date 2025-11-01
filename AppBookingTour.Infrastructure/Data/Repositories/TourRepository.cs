@@ -61,6 +61,11 @@ public class TourRepository : Repository<Tour>, ITourRepository
             query = query.Where(t => t.BasePriceAdult <= filter.PriceTo.Value);
         }
 
+        if (filter.Active.HasValue)
+        {
+            query = query.Where(t => t.IsActive == filter.Active.Value);
+        }    
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query

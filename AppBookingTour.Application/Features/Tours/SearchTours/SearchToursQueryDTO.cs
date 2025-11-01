@@ -11,6 +11,7 @@ namespace AppBookingTour.Application.Features.Tours.SearchTours
         public int? CityId { get; set; }
         public decimal? PriceFrom { get; set; }
         public decimal? PriceTo { get; set; }
+        public bool? Active { get; set; }
     }
 
     public class PaginationMeta

@@ -12,6 +12,8 @@ namespace AppBookingTour.Application.Features.Tours.Mapping
         {
             #region Tour mapping
             CreateMap<TourCreateRequestDTO, Tour>()
+                .ForMember(dest => dest.ImageMainUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.Images, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Tour, TourDTO>()
