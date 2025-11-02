@@ -8,7 +8,7 @@ using AppBookingTour.Domain.Entities;
 namespace AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 
 #region Handler
-public sealed class GetTourDepartureByIdQueryHandler : IRequestHandler<GetTourDepartureByIdQuery, GetTourDepartureByIdResponse>
+public sealed class GetTourDepartureByIdQueryHandler : IRequestHandler<GetTourDepartureByIdQuery, TourDepartureDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GetTourDepartureByIdQueryHandler> _logger;
@@ -22,28 +22,20 @@ public sealed class GetTourDepartureByIdQueryHandler : IRequestHandler<GetTourDe
         _logger = logger;
         _mapper = mapper;
     }
-    public async Task<GetTourDepartureByIdResponse> Handle(GetTourDepartureByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TourDepartureDTO> Handle(GetTourDepartureByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting tour departure details for ID: {TourDepartureId}", request.TourDepartureId);
-        try
+        var departure = await _unitOfWork.Repository<TourDeparture>().GetByIdAsync(request.TourDepartureId, cancellationToken);
+        if (departure == null)
         {
-            var departure = await _unitOfWork.Repository<TourDeparture>().GetByIdAsync(request.TourDepartureId, cancellationToken);
-            if (departure == null)
-            {
-                _logger.LogWarning("Tour departure not found with ID: {TourDepartureId}", request.TourDepartureId);
-                return GetTourDepartureByIdResponse.Failed($"Tour departure with ID {request.TourDepartureId} not found");
-            }
-
-            var departureDto = _mapper.Map<TourDepartureDTO>(departure);
-
-            _logger.LogInformation("Successfully retrieved departure for ID: {TourDepartureId}", request.TourDepartureId);
-            return GetTourDepartureByIdResponse.Success(departureDto);
+            _logger.LogWarning("Tour departure not found with ID: {TourDepartureId}", request.TourDepartureId);
+            throw new KeyNotFoundException($"Tour departure with ID {request.TourDepartureId} not found.");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while getting tour departure with ID: {TourDepartureId}", request.TourDepartureId);
-            return GetTourDepartureByIdResponse.Failed("An error occurred while processing your request.");
-        }
+
+        var departureDto = _mapper.Map<TourDepartureDTO>(departure);
+
+        _logger.LogInformation("Successfully retrieved departure for ID: {TourDepartureId}", request.TourDepartureId);
+        return departureDto;
     }
 }
 #endregion

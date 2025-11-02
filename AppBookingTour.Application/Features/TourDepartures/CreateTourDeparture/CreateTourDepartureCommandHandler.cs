@@ -10,7 +10,7 @@ using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 namespace AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
 
 #region Handler
-public sealed class CreateTourDepartureCommandHandler : IRequestHandler<CreateTourDepartureCommand, CreateTourDepartureResponse>
+public sealed class CreateTourDepartureCommandHandler : IRequestHandler<CreateTourDepartureCommand, TourDepartureDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateTourDepartureCommandHandler> _logger;
@@ -24,27 +24,19 @@ public sealed class CreateTourDepartureCommandHandler : IRequestHandler<CreateTo
         _logger = logger;
         _mapper = mapper;
     }
-    public async Task<CreateTourDepartureResponse> Handle(CreateTourDepartureCommand request, CancellationToken cancellationToken)
+    public async Task<TourDepartureDTO> Handle(CreateTourDepartureCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Create tour departure from dto request");
-        try
-        {
-            var tourDeparture = _mapper.Map<TourDeparture>(request.TourDepartureRequest);
-            tourDeparture.CreatedAt = DateTime.UtcNow;
+        var tourDeparture = _mapper.Map<TourDeparture>(request.TourDepartureRequest);
+        tourDeparture.CreatedAt = DateTime.UtcNow;
 
-            await _unitOfWork.Repository<TourDeparture>().AddAsync(tourDeparture, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.Repository<TourDeparture>().AddAsync(tourDeparture, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Tour departure created successfully with ID: {TourDepartureId}", tourDeparture.Id);
-            var tourDepartureDto = _mapper.Map<TourDepartureDTO>(tourDeparture);
+        _logger.LogInformation("Tour departure created successfully with ID: {TourDepartureId}", tourDeparture.Id);
+        var tourDepartureDto = _mapper.Map<TourDepartureDTO>(tourDeparture);
 
-            return CreateTourDepartureResponse.Success(tourDepartureDto);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while creating tour departure");
-            return CreateTourDepartureResponse.Failed("An error occurred while creating the tour departure.");
-        }
+        return tourDepartureDto;
     }
 }
 #endregion

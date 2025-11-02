@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
 
 #region Handler
-public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, GetTourByIdResponse>
+public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, TourDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GetTourByIdQueryHandler> _logger;
@@ -22,35 +22,31 @@ public sealed class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, 
         _mapper = mapper;
     }
 
-    public async Task<GetTourByIdResponse> Handle(GetTourByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TourDTO> Handle(GetTourByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting tour details for ID: {TourId}", request.TourId);
+        var tour = await _unitOfWork.Tours.GetTourWithDetailsAsync(request.TourId, cancellationToken);
 
-        try
+        if (tour == null)
         {
-            var tour = await _unitOfWork.Tours.GetTourWithDetailsAsync(request.TourId, cancellationToken);
+            throw new KeyNotFoundException($"Tour with ID {request.TourId} not found.");
+        }
 
-            if (tour == null)
+        var images = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(request.TourId, Domain.Enums.EntityType.Tour);
+        List<string> imageUrls = new List<string>();
+        if (images != null && images.Count > 0)
+        {
+            foreach (var image in images)
             {
-                _logger.LogWarning("Tour not found with ID: {TourId}", request.TourId);
-                return GetTourByIdResponse.Failed($"Tour with ID {request.TourId} not found");
+                imageUrls.Add(image.Url);
             }
-
-            // TODO: update lại cái này
-            tour.ViewCount++;
-            _unitOfWork.Tours.Update(tour);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            var tourDto = _mapper.Map<TourDTO>(tour);
-
-            _logger.LogInformation("Successfully retrieved tour details for ID: {TourId}", request.TourId);
-            return GetTourByIdResponse.Success(tourDto);
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while getting tour details for ID: {TourId}", request.TourId);
-            return GetTourByIdResponse.Failed("An error occurred while retrieving tour details");
-        }
+
+        var tourDto = _mapper.Map<TourDTO>(tour);
+        tourDto.ImageUrls = imageUrls;
+
+        _logger.LogInformation("Successfully retrieved tour details for ID: {TourId}", request.TourId);
+        return tourDto;
     }
 }
 #endregion

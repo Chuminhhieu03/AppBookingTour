@@ -1,18 +1,6 @@
-﻿
-using AppBookingTour.Domain.Enums;
+﻿using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
-
-public class GetTourTypeByIdResponse
-{
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
-    public TourTypeDTO? TourType { get; init; }
-    public static GetTourTypeByIdResponse Success(TourTypeDTO tourType) =>
-        new() { IsSuccess = true, TourType = tourType };
-    public static GetTourTypeByIdResponse Failed(string errorMessage) =>
-        new() { IsSuccess = false, ErrorMessage = errorMessage };
-}
 
 public class TourTypeDTO
 {

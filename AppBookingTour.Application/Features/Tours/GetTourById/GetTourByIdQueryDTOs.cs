@@ -2,18 +2,6 @@ using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 
 namespace AppBookingTour.Application.Features.Tours.GetTourById;
-public class GetTourByIdResponse
-{
-    public bool IsSuccess { get; init; }
-    public string? ErrorMessage { get; init; }
-    public TourDTO? Tour { get; init; }
-
-    public static GetTourByIdResponse Success(TourDTO tour) =>
-        new() { IsSuccess = true, Tour = tour };
-
-    public static GetTourByIdResponse Failed(string errorMessage) =>
-        new() { IsSuccess = false, ErrorMessage = errorMessage };
-}
 
 public class TourDTO
 {
@@ -30,13 +18,18 @@ public class TourDTO
     public decimal? Rating { get; set; }
     public int TotalBookings { get; set; }
     public int ViewCount { get; set; }
-    public string? ImageMain { get; set; }
-    public List<string> ImageGallery { get; set; } = [];
+    public string? ImageMainUrl { get; set; }
+    public List<string>? ImageUrls { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public int DepartureCityId { get; set; }
     public string DepartureCityName { get; set; } = null!;
+    public int DestinationCityId { get; set; }
+    public string DestinationCityName { get; set; } = null!;
+    public int TypeId { get; set; }
     public string TypeName { get; set; } = null!;
+    public int CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public List<TourItineraryDTO> Itineraries { get; set; } = [];
     public List<TourDepartureDTO> Departures { get; set; } = [];

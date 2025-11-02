@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
 
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Tours.CreateTour;
@@ -25,137 +24,54 @@ public sealed class ToursController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromBody] TourRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromForm] TourCreateRequestDTO requestBody)
     {
-        try
-        {
-            var command = new CreateTourCommand(requestBody);
-            var result = await _mediator.Send(command);
+        var command = new CreateTourCommand(requestBody);
+        var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
-
-            _logger.LogInformation("Created new tour with ID: {TourId}", result.Tour?.Id);
-            return Created("", ApiResponse<object>.Ok(result.Tour!));
-        }
-        catch (ValidationException vex)
-        {
-            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-            _logger.LogWarning(vex, "Validation failed for create tour: {Errors}", messages);
-            return BadRequest(ApiResponse<object>.Fail(messages));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating tour");
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while creating the tour"));
-        }
+        _logger.LogInformation("Created new tour with ID: {TourId}", result.Id);
+        return Created("", ApiResponse<object>.Ok(result));
     }
 
     [HttpPost("search")]
     public async Task<ActionResult<ApiResponse<object>>> SearchTours([FromBody] SearchToursQuery query)
     {
-        try
-        {
-            var result = await _mediator.Send(query);
+        var result = await _mediator.Send(query);
 
-            return Ok(ApiResponse<object>.Ok(result));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching tours");
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while searching for tours"));
-        }
+        return Ok(ApiResponse<object>.Ok(result));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetTourById(int id)
     {
-        try
-        {
-            var query = new GetTourByIdQuery(id);
-            var result = await _mediator.Send(query);
+        var query = new GetTourByIdQuery(id);
+        var result = await _mediator.Send(query);
 
-            if (!result.IsSuccess)
-            {
-                if (result.ErrorMessage?.Contains("not found") == true)
-                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
-
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
-            }
-
-            _logger.LogInformation("Retrieved tour details for ID: {TourId}", id);
-            return Ok(ApiResponse<object>.Ok(result.Tour!));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting tour details for ID: {TourId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while retrieving tour details"));
-        }
+        _logger.LogInformation("Retrieved tour details for ID: {TourId}", id);
+        return Ok(ApiResponse<object>.Ok(result));
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromBody] TourRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromForm] TourCreateRequestDTO requestBody)
     {
-        try
-        {
-            var command = new UpdateTourCommand(id, requestBody);
-            var result = await _mediator.Send(command);
+        var command = new UpdateTourCommand(id, requestBody);
+        var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
-            {
-                if (result.Message?.Contains("not found") == true)
-                    return NotFound(ApiResponse<object>.Fail(result.Message!));
-
-                return BadRequest(ApiResponse<object>.Fail(result.Message!));
-            }
-
-            _logger.LogInformation("Updated tour with ID: {TourId}", id);
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Update tour successfully"
-            });
-        }
-        catch (ValidationException vex)
-        {
-            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-            _logger.LogWarning(vex, "Validation failed for update tour: {Errors}", messages);
-            return BadRequest(ApiResponse<object>.Fail(messages));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating tour with ID: {TourId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while updating the tour"));
-        }
+        _logger.LogInformation("Updated tour with ID: {TourId}", id);
+        return Ok(ApiResponse<object>.Ok(result));
     }
 
     [HttpDelete("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteTour(int id)
     {
-        try
+        var command = new DeleteTourCommand(id);
+        var result = await _mediator.Send(command);
+
+        _logger.LogInformation("Deleted tour with ID: {TourId}", id);
+        return Ok(new ApiResponse<object>
         {
-            var command = new DeleteTourCommand(id);
-            var result = await _mediator.Send(command);
-
-            if (!result.IsSuccess)
-            {
-                if (result.Message?.Contains("not found") == true)
-                    return NotFound(ApiResponse<object>.Fail(result.Message!));
-
-                return BadRequest(ApiResponse<object>.Fail(result.Message!));
-            }
-
-            _logger.LogInformation("Deleted tour with ID: {TourId}", id);
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Delete tour successfully"
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting tour with ID: {TourId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while deleting the tour"));
-        }
+            Success = true,
+            Message = "Delete tour successfully"
+        });
     }
 }

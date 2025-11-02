@@ -22,6 +22,8 @@ public class UnitOfWork : IUnitOfWork
     // Repository instances
     //private IUserRepository? _userRepository;
     private ITourRepository? _tourRepository;
+    private ITourCategoryRepository? _tourCategoryRepository;
+    private ITourTypeRepository? _tourTypeRepository;
     private IDiscountRepository _discountRepository;
     private IAccommodationRepository _accommodationRepository;
     private IRoomInventoryRepository _roomInventoryRepository;
@@ -47,6 +49,12 @@ public class UnitOfWork : IUnitOfWork
 
     public ITourRepository Tours =>
         _tourRepository ??= new TourRepository(_context);
+
+    public ITourCategoryRepository TourCategories =>
+        _tourCategoryRepository ??= new TourCategoryRepository(_context);
+
+    public ITourTypeRepository TourTypes =>
+        _tourTypeRepository ??= new TourTypeRepository(_context);
 
     public IDiscountRepository Discounts => _discountRepository ?? new DiscountRepository(_context);
     public IAccommodationRepository Accommodations => _accommodationRepository ?? new AccomodationRepository(_context);

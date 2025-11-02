@@ -14,10 +14,12 @@ public class TourRepository : Repository<Tour>, ITourRepository
     {
         return await _dbSet
             .Include(t => t.DepartureCity)
+            .Include(t => t.DestinationCity)
             .Include(t => t.Type)
+            .Include(t => t.Category)
             .Include(t => t.Itineraries)
             .Include(t => t.Departures)
-            .FirstOrDefaultAsync(t => t.Id == tourId && t.IsActive, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == tourId, cancellationToken);
     }
 
     public async Task<(List<Tour> Tours, int TotalCount)> SearchToursAsync(SearchTourFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default)
@@ -58,6 +60,11 @@ public class TourRepository : Repository<Tour>, ITourRepository
         {
             query = query.Where(t => t.BasePriceAdult <= filter.PriceTo.Value);
         }
+
+        if (filter.Active.HasValue)
+        {
+            query = query.Where(t => t.IsActive == filter.Active.Value);
+        }    
 
         var totalCount = await query.CountAsync(cancellationToken);
 

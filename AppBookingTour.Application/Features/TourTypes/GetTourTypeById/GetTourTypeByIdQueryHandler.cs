@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
 
-public sealed class GetTourTypeByIdQueryHandler : IRequestHandler<GetTourTypeByIdQuery, GetTourTypeByIdResponse>
+public sealed class GetTourTypeByIdQueryHandler : IRequestHandler<GetTourTypeByIdQuery, TourTypeDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<GetTourTypeByIdQueryHandler> _logger;
@@ -22,29 +22,20 @@ public sealed class GetTourTypeByIdQueryHandler : IRequestHandler<GetTourTypeByI
         _mapper = mapper;
     }
 
-    public async Task<GetTourTypeByIdResponse> Handle(GetTourTypeByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TourTypeDTO> Handle(GetTourTypeByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting tour type details for ID: {TourTypeId}", request.TourTypeId);
+        var tourType = await _unitOfWork.TourTypes.GetByIdAsync(request.TourTypeId, cancellationToken);
 
-        try
+        if (tourType == null)
         {
-            var tourType = await _unitOfWork.Repository<TourType>().GetByIdAsync(request.TourTypeId, cancellationToken);
-
-            if (tourType == null)
-            {
-                _logger.LogWarning("Tour type not found with ID: {TourTypeId}", request.TourTypeId);
-                return GetTourTypeByIdResponse.Failed($"Tour type with ID {request.TourTypeId} not found");
-            }
-
-            var tourTypeDto = _mapper.Map<TourTypeDTO>(tourType);
-
-            _logger.LogInformation("Successfully retrieved tour type details for ID: {TourTypeId}", request.TourTypeId);
-            return GetTourTypeByIdResponse.Success(tourTypeDto);
+            _logger.LogWarning("Tour type not found with ID: {TourTypeId}", request.TourTypeId);
+            throw new KeyNotFoundException($"Tour type with ID {request.TourTypeId} not found.");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while getting tour type details for ID: {TourTypeId}", request.TourTypeId);
-            return GetTourTypeByIdResponse.Failed("An error occurred while retrieving tour type details");
-        }
+
+        var tourTypeDto = _mapper.Map<TourTypeDTO>(tourType);
+
+        _logger.LogInformation("Successfully retrieved tour type details for ID: {TourTypeId}", request.TourTypeId);
+        return tourTypeDto;
     }
 }
