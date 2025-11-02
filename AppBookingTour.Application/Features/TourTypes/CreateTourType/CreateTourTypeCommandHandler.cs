@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
+using AppBookingTour.Domain.Constants;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
@@ -30,6 +31,13 @@ public sealed class CreateTourTypeCommandHandler : IRequestHandler<CreateTourTyp
     public async Task<TourTypeDTO> Handle(CreateTourTypeCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating a new tour type");
+
+        var existingTourTypeByName = await _unitOfWork.TourTypes.FirstOrDefaultAsync(x => x.Name == request.RequestDto.Name);
+        if (existingTourTypeByName != null)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Tên loại tour"));
+        }
+
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
         var tourType = _mapper.Map<TourType>(request.RequestDto);
         var image = request.RequestDto.Image;
@@ -39,7 +47,7 @@ public sealed class CreateTourTypeCommandHandler : IRequestHandler<CreateTourTyp
             if (!allowedTypes.Contains(image.ContentType))
             {
                 _logger.LogWarning("Invalid image type: {ImageType}", image.ContentType);
-                throw new ArgumentException("Invalid image type. Allowed types are JPEG, PNG, WEBP.");
+                throw new ArgumentException(Message.InvalidImage);
             }
             var fileUrl = await _fileStorageService.UploadFileAsync(image.OpenReadStream());
             tourType.ImageUrl = fileUrl;

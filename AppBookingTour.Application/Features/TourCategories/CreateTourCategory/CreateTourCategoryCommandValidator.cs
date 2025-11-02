@@ -16,5 +16,8 @@ public class CreateTourCategoryCommandValidator : AbstractValidator<CreateTourCa
         RuleFor(x => x.RequestDto.ParentCategoryId)
             .GreaterThan(0).WithMessage("ParentCategoryId must be greater than 0")
             .When(x => x.RequestDto.ParentCategoryId.HasValue);
+
+        RuleFor(x => x.RequestDto.Description)
+            .MaximumLength(500).WithMessage("Description must not exceed 500 characters");
     }
 }

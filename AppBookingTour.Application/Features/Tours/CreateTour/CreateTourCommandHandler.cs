@@ -33,6 +33,12 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
     {
         _logger.LogInformation("Creating a new tour using AutoMapper");
 
+        var existingTourByCode = await _unitOfWork.Tours.FirstOrDefaultAsync(x => x.Code == request.TourRequest.Code);
+        if (existingTourByCode != null)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Mã tour"));
+        }
+
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
         var tour = _mapper.Map<Tour>(request.TourRequest);
 

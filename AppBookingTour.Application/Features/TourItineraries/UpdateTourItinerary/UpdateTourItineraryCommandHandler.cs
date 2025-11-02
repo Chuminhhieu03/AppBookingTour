@@ -1,5 +1,7 @@
 ﻿using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Domain.Constants;
+using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -28,6 +30,15 @@ public sealed class UpdateTourItineraryCommandHandler : IRequestHandler<UpdateTo
         if (existingItinerary == null)
         {
             throw new KeyNotFoundException($"Tour itinerary with ID {request.TourItineraryId} not found.");
+        }
+
+        var existingTourItineraryByName = await _unitOfWork.Repository<TourItinerary>()
+            .FirstOrDefaultAsync(x =>
+                x.DayNumber == request.TourItineraryRequest.DayNumber
+                && x.TourId == request.TourItineraryRequest.TourId);
+        if (existingTourItineraryByName != null && existingTourItineraryByName.Id != existingItinerary.Id)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Ngày lịch trình"));
         }
 
         _mapper.Map(request.TourItineraryRequest, existingItinerary);

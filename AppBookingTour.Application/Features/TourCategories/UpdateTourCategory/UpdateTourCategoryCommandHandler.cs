@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Application.Features.TourCategories.GetTourCategoryById;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
+using AppBookingTour.Domain.Constants;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -36,6 +37,12 @@ public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTou
             throw new KeyNotFoundException($"Tour category with ID {request.TourCategoryId} not found.");
         }
 
+        var existingTourCategoryByName = await _unitOfWork.TourCategories.FirstOrDefaultAsync(x => x.Name == request.RequestDto.Name);
+        if (existingTourCategoryByName != null && existingTourCategoryByName.Id != existingCategory.Id)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Tên danh mục tour"));
+        }
+
         if (request.RequestDto.ParentCategoryId.HasValue)
         {
             if (request.RequestDto.ParentCategoryId == request.TourCategoryId)
@@ -62,7 +69,7 @@ public sealed class UpdateTourCategoryCommandHandler : IRequestHandler<UpdateTou
             if (!allowedTypes.Contains(imageFile.ContentType))
             {
                 _logger.LogWarning("Invalid image type for tour category ID {TourCategoryId}.", request.TourCategoryId);
-                throw new ArgumentException("Invalid image type.");
+                throw new ArgumentException(Message.InvalidImage);
             }
             var oldImageUrl = existingCategory.ImageUrl;
             if (!string.IsNullOrEmpty(oldImageUrl))

@@ -1,10 +1,10 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using AutoMapper;
-
-using AppBookingTour.Domain.Entities;
+﻿using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
 using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Application.Features.TourItineraries.GetTourItineraryById;
+using AppBookingTour.Domain.Constants;
+using AppBookingTour.Domain.Entities;
+using AutoMapper;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 #region Handler
@@ -25,6 +25,15 @@ public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTo
     public async Task<TourItineraryDTO> Handle(CreateTourItineraryCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Create tour itinerary from dto request");
+
+        var existingTourItineraryByName = await _unitOfWork.Repository<TourItinerary>()
+            .FirstOrDefaultAsync(x =>
+                x.DayNumber == request.TourItineraryRequest.DayNumber
+                && x.TourId == request.TourItineraryRequest.TourId);
+        if (existingTourItineraryByName != null)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Ngày lịch trình"));
+        }
 
         var tourItinerary = _mapper.Map<TourItinerary>(request.TourItineraryRequest);
         tourItinerary.CreatedAt = DateTime.UtcNow;

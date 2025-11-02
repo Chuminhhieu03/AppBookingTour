@@ -20,5 +20,14 @@ public class CreateTourItineraryCommandValidator : AbstractValidator<CreateTourI
         RuleFor(x => x.TourItineraryRequest.Title)
             .NotEmpty().WithMessage(string.Format(Message.RequiredField, "Tiêu đề"))
             .MaximumLength(200).WithMessage("Title must not exceed 200 characters");
+
+        RuleFor(x => x.TourItineraryRequest.Description)
+            .MaximumLength(500).WithMessage("Description must not exceed 500 characters");
+
+        RuleFor(x => x.TourItineraryRequest.Activity)
+            .MaximumLength(1000).WithMessage("Activity must not exceed 1000 characters");
+
+        RuleFor(x => x.TourItineraryRequest.Note)
+            .MaximumLength(500).WithMessage("Note must not exceed 500 characters");
     }
 }

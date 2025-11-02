@@ -39,6 +39,12 @@ public sealed class UpdateTourComandHandler : IRequestHandler<UpdateTourCommand,
             throw new KeyNotFoundException($"Tour with ID {request.TourId} not found.");
         }
 
+        var existingTourByCode = await _unitOfWork.Tours.FirstOrDefaultAsync(x => x.Code == request.TourRequest.Code);
+        if (existingTourByCode != null && existingTourByCode.Id != existingTour.Id)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Mã tour"));
+        }
+
         _mapper.Map(request.TourRequest, existingTour);
 
         var imageMain = request.TourRequest.ImageMain;

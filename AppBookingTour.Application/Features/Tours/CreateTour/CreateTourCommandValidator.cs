@@ -29,6 +29,14 @@ namespace AppBookingTour.Application.Features.Tours.CreateTour
                 .NotNull().WithMessage(string.Format(Message.RequiredField, "Thành phố khởi hành"))
                 .GreaterThan(0).WithMessage("DepartureCityId must be greater than 0");
 
+            RuleFor(x => x.TourRequest.DestinationCityId)
+                .NotNull().WithMessage(string.Format(Message.RequiredField, "Thành phố tham quan"))
+                .GreaterThan(0).WithMessage("DestinationCityId must be greater than 0");
+
+            RuleFor(x => x)
+                .Must(x => x.TourRequest.DepartureCityId != x.TourRequest.DestinationCityId)
+                .WithMessage("DepartureCityId must not be the same as DestinationCityId.");
+
             RuleFor(x => x.TourRequest.DurationDays)
                 .NotNull().WithMessage(string.Format(Message.RequiredField, "Số ngày lưu trú"))
                 .GreaterThan(0).WithMessage("DurationDays must be greater than 0");
@@ -54,6 +62,18 @@ namespace AppBookingTour.Application.Features.Tours.CreateTour
             RuleFor(x => x.TourRequest.BasePriceChild)
                 .NotNull().WithMessage(string.Format(Message.RequiredField, "Giá vé cơ bản trẻ em"))
                 .GreaterThanOrEqualTo(0).WithMessage("BasePriceChild must be greater than or equal to 0");
+
+            RuleFor(x => x.TourRequest.Description)
+            .MaximumLength(3000).WithMessage("Description must not exceed 3000 characters");
+
+            RuleFor(x => x.TourRequest.Includes)
+            .MaximumLength(1500).WithMessage("Includes must not exceed 1500 characters");
+
+            RuleFor(x => x.TourRequest.Excludes)
+            .MaximumLength(1500).WithMessage("Excludes must not exceed 1500 characters");
+
+            RuleFor(x => x.TourRequest.TermsConditions)
+            .MaximumLength(2000).WithMessage("TermsConditions must not exceed 2000 characters");
 
         }
     }

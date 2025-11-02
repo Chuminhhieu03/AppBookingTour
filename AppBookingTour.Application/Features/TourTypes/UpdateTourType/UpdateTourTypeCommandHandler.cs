@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Application.Features.TourTypes.GetTourTypeById;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
+using AppBookingTour.Domain.Constants;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -36,6 +37,12 @@ public sealed class UpdateTourTypeCommandHandler : IRequestHandler<UpdateTourTyp
             throw new KeyNotFoundException($"Tour type with ID {request.TourTypeId} not found.");
         }
 
+        var existingTourTypeByName = await _unitOfWork.TourTypes.FirstOrDefaultAsync(x => x.Name == request.RequestDto.Name);
+        if (existingTourTypeByName != null && existingTourTypeByName.Id != existingTourType.Id)
+        {
+            throw new ArgumentException(string.Format(Message.AlreadyExists, "Tên loại tour"));
+        }
+
         _mapper.Map(request.RequestDto, existingTourType);
         
         var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
@@ -45,7 +52,7 @@ public sealed class UpdateTourTypeCommandHandler : IRequestHandler<UpdateTourTyp
             if (!allowedTypes.Contains(imageFile.ContentType))
             {
                 _logger.LogWarning("Invalid image type for tour type ID {TourTypeId}.", request.TourTypeId);
-                throw new ArgumentException("Invalid image type.");
+                throw new ArgumentException(Message.InvalidImage);
             }
             var oldImageUrl = existingTourType.ImageUrl;
             if(!string.IsNullOrEmpty(oldImageUrl))
