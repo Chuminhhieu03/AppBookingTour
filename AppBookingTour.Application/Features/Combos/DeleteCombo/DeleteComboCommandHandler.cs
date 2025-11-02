@@ -19,32 +19,49 @@ public sealed class DeleteComboCommandHandler : IRequestHandler<DeleteComboComma
     public async Task<DeleteComboResponse> Handle(DeleteComboCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Deleting combo with ID: {ComboId}", request.ComboId);
-        try
+        
+        var existingCombo = await _unitOfWork.Repository<Combo>()
+            .GetByIdAsync(request.ComboId, cancellationToken);
+            
+        if (existingCombo == null)
         {
-            var existingCombo = await _unitOfWork.Repository<Combo>().GetByIdAsync(request.ComboId, cancellationToken);
-            if (existingCombo == null)
-            {
-                return DeleteComboResponse.Failed($"Combo with ID {request.ComboId} not found.");
-            }
-
-            await _unitOfWork.BeginTransactionAsync();
-
-            var comboSchedules = await _unitOfWork.Repository<ComboSchedule>()
-                .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
-
-            _unitOfWork.Repository<ComboSchedule>().RemoveRange(comboSchedules);
-            _unitOfWork.Repository<Combo>().Remove(existingCombo);
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            await _unitOfWork.CommitTransactionAsync();
-
-            return DeleteComboResponse.Success();
+            return DeleteComboResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
         }
-        catch (Exception ex)
+
+        // Kiểm tra combo có booking nào chưa
+        var hasActiveBookings = await _unitOfWork.Repository<Booking>()
+            .ExistsAsync(b => b.BookingType == Domain.Enums.BookingType.Combo 
+                && b.ItemId == request.ComboId 
+                && (b.Status == Domain.Enums.BookingStatus.Confirmed 
+                    || b.Status == Domain.Enums.BookingStatus.Paid
+                    || b.Status == Domain.Enums.BookingStatus.Pending), 
+                cancellationToken);
+
+        if (hasActiveBookings)
         {
-            _logger.LogError(ex, "Error deleting combo with ID {ComboId}", request.ComboId);
-            await _unitOfWork.RollbackTransactionAsync();
-            return DeleteComboResponse.Failed("An error occurred while deleting the combo.");
+            return DeleteComboResponse.Failed("Không thể xóa combo đã có booking active. Vui lòng hủy tất cả booking trước.");
         }
+
+        await _unitOfWork.BeginTransactionAsync();
+
+        // Soft delete: set IsActive = false thay vì xóa hẳn
+        existingCombo.IsActive = false;
+        existingCombo.UpdatedAt = DateTime.UtcNow;
+
+        // Cũng set status = Cancelled cho tất cả schedules
+        var comboSchedules = await _unitOfWork.Repository<ComboSchedule>()
+            .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
+
+        foreach (var schedule in comboSchedules)
+        {
+            schedule.Status = Domain.Enums.ComboStatus.Cancelled;
+            schedule.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.CommitTransactionAsync();
+
+        _logger.LogInformation("Successfully soft deleted combo with ID: {ComboId}", request.ComboId);
+        return DeleteComboResponse.Success();
     }
 }

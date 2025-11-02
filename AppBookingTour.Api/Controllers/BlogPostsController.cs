@@ -4,6 +4,7 @@ using AppBookingTour.Application.Features.BlogPosts.DeleteBlogPost;
 using AppBookingTour.Application.Features.BlogPosts.GetBlogPostById;
 using AppBookingTour.Application.Features.BlogPosts.GetListBlogPosts;
 using AppBookingTour.Application.Features.BlogPosts.UpdateBlogPost;
+using AppBookingTour.Share.DTOS;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -118,7 +119,7 @@ public class BlogPostsController : ControllerBase
     /// Get list of blog posts with filters and pagination (Public)
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<Share.DTOS.PagedResult<BlogPostListDto>>>> GetListBlogPosts(
+    public async Task<ActionResult<ApiResponse<PagedResult<BlogPostListDto>>>> GetListBlogPosts(
         [FromQuery] GetListBlogPostsRequest request)
     {
         var result = await _mediator.Send(new GetListBlogPostsQuery(request));

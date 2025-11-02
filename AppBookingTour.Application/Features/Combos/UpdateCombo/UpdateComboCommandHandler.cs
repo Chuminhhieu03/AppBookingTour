@@ -3,6 +3,7 @@ using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppBookingTour.Application.Features.Combos.UpdateCombo;
 
@@ -25,25 +26,83 @@ public sealed class UpdateComboCommandHandler : IRequestHandler<UpdateComboComma
     public async Task<UpdateComboResponse> Handle(UpdateComboCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Updating combo with ID: {ComboId}", request.ComboId);
-        try
-        {
-            var existingCombo = await _unitOfWork.Repository<Combo>().GetByIdAsync(request.ComboId);
-            if (existingCombo == null)
-            {
-                return UpdateComboResponse.Failed($"Combo with ID {request.ComboId} not found.");
-            }
+        
+        await _unitOfWork.BeginTransactionAsync();
+        
+        // Load combo
+        var existingCombo = await _unitOfWork.Repository<Combo>()
+            .FirstOrDefaultAsync(c => c.Id == request.ComboId, cancellationToken);
 
+        if (existingCombo == null)
+        {
+            return UpdateComboResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
+        }
+
+        // Load schedules separately
+        var schedules = await _unitOfWork.Repository<ComboSchedule>()
+            .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
+        existingCombo.Schedules = schedules.ToList();
+
+        // Kiểm tra combo có booking nào chưa
+        var hasBookings = await _unitOfWork.Repository<Booking>()
+            .ExistsAsync(b => b.BookingType == Domain.Enums.BookingType.Combo 
+                && b.ItemId == request.ComboId 
+                && b.Status != Domain.Enums.BookingStatus.Cancelled, 
+                cancellationToken);
+
+        if (hasBookings)
+        {
+            // Nếu có booking, chỉ cho phép update một số field
+            _logger.LogWarning("Combo {ComboId} has active bookings. Limited update only.", request.ComboId);
+            
+            existingCombo.Description = request.ComboRequest.Description ?? existingCombo.Description;
+            existingCombo.Includes = request.ComboRequest.Includes ?? existingCombo.Includes;
+            existingCombo.Excludes = request.ComboRequest.Excludes ?? existingCombo.Excludes;
+            existingCombo.TermsConditions = request.ComboRequest.TermsConditions ?? existingCombo.TermsConditions;
+            existingCombo.IsActive = request.ComboRequest.IsActive ?? existingCombo.IsActive;
+        }
+        else
+        {
+            // Nếu chưa có booking, cho phép update toàn bộ
             _mapper.Map(request.ComboRequest, existingCombo);
-            existingCombo.UpdatedAt = DateTime.UtcNow;
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return UpdateComboResponse.Success();
+            
+            // Xử lý schedules nếu có update
+            if (request.ComboRequest.Schedules != null && request.ComboRequest.Schedules.Any())
+            {
+                // Xóa schedules cũ
+                if (existingCombo.Schedules.Any())
+                {
+                    _unitOfWork.Repository<ComboSchedule>().RemoveRange(existingCombo.Schedules);
+                }
+                
+                // Thêm schedules mới
+                var newSchedules = new List<ComboSchedule>();
+                foreach (var scheduleDto in request.ComboRequest.Schedules)
+                {
+                    var schedule = _mapper.Map<ComboSchedule>(scheduleDto);
+                    schedule.ComboId = existingCombo.Id;
+                    schedule.BookedSlots = 0;
+                    schedule.Status = Domain.Enums.ComboStatus.Available;
+                    schedule.CreatedAt = DateTime.UtcNow;
+                    newSchedules.Add(schedule);
+                }
+                await _unitOfWork.Repository<ComboSchedule>().AddRangeAsync(newSchedules, cancellationToken);
+            }
         }
-        catch (Exception ex)
+
+        existingCombo.UpdatedAt = DateTime.UtcNow;
+
+        var recordsAffected = await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
+        if (recordsAffected == 0)
         {
-            _logger.LogError(ex, "Error updating combo with ID {ComboId}", request.ComboId);
-            return UpdateComboResponse.Failed("An error occurred while updating the combo.");
+            await _unitOfWork.RollbackTransactionAsync();
+            return UpdateComboResponse.Failed("Không có thay đổi nào được lưu");
         }
+
+        await _unitOfWork.CommitTransactionAsync();
+
+        _logger.LogInformation("Successfully updated combo with ID: {ComboId}", request.ComboId);
+        return UpdateComboResponse.Success();
     }
 }
