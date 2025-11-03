@@ -32,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
     private IBlogPostRepository? _blogPostRepository;
     private IImageRepository _imageRepository;
     private ISystemParameterRepository _systemParameterRepository;
+    private IBookingRepository _bookingRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -64,6 +65,7 @@ public class UnitOfWork : IUnitOfWork
     public IBlogPostRepository BlogPosts => _blogPostRepository ??= new BlogPostRepository(_context);
     public IImageRepository Images => _imageRepository ?? new ImageRepository(_context);
     public ISystemParameterRepository SystemParameters => _systemParameterRepository ?? new SystemParameterRepository(_context);
+    public IBookingRepository Bookings => _bookingRepository ?? new BookingRepository(_context);
 
     #endregion
 
