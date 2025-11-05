@@ -17,7 +17,7 @@ public class ItemStatisticDTO
     public int totalCompletedBookings { get; set; }
     public int totalCanceledBookings { get; set; }
     public decimal cancellationRate { get; set; }
-    public int ItemScheduleCount { get; set; }
+    public int ItemOptionCount { get; set; }
     public decimal TotalRevenue { get; set; }
     public decimal averageRevenuePerBooking { get; set; }
     public decimal rating { get; set; }

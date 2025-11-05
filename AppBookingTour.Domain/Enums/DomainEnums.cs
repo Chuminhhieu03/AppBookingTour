@@ -238,7 +238,7 @@ public enum ComboStatus
 public enum ItemType
 {
     Tour = 1,
-    Hotel = 2,
+    Accommodation = 2,
     Combo = 3
 }
 

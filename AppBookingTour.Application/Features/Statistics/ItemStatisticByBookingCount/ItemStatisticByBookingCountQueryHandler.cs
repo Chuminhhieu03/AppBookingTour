@@ -24,9 +24,19 @@ public class ItemStatisticByBookingCountQueryHandler : IRequestHandler<ItemStati
         var itemType = request.ItemType;
 
         _logger.LogInformation("Handling ItemStatisticByBookingCountQuery from {StartDate} to {EndDate} for ItemType: {ItemType}", startDate, endDate, itemType);
+        var items = await _unitOfWork.Statistics.GetItemBookingCountStatisticsAsync(
+            startDate,
+            endDate,
+            itemType,
+            cancellationToken);
 
-        // Handler logic to get item statistics by booking count goes here
+        var response = new ItemStatisticByBookingCountResponse
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            Items = items.ToList()
+        };
 
-        return new ItemStatisticByBookingCountResponse();
+        return response;
     }
 }

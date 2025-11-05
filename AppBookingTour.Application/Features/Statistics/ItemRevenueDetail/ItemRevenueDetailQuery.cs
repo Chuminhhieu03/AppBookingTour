@@ -1,5 +1,5 @@
-﻿using MediatR;
+﻿using AppBookingTour.Domain.Enums;
+using MediatR;
 
 namespace AppBookingTour.Application.Features.Statistics.ItemRevenueDetail;
-//TODO: Change ItemType to Enum
-public record ItemRevenueDetailQuery(DateOnly StartDate, DateOnly EndDate, int ItemType, int ItemId) : IRequest<ItemRevenueDetailResponse>;
+public record ItemRevenueDetailQuery(DateOnly StartDate, DateOnly EndDate, ItemType ItemType, int ItemId) : IRequest<ItemRevenueDetailResponse>;

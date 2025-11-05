@@ -18,12 +18,22 @@ public class ItemStatisticByRevenueQueryHandler : IRequestHandler<ItemStatisticB
     }
     public async Task<ItemStatisticByRevenueResponse> Handle(ItemStatisticByRevenueQuery request, CancellationToken cancellationToken)
     {
-        var endDate = request.EndDate;
-        var startDate = request.StartDate;
-        var itemType = request.ItemType;
-        _logger.LogInformation("Handling ItemStatisticByRevenueQuery from {StartDate} to {EndDate} for ItemType: {ItemType}", startDate, endDate, itemType);
-        // Handler logic to get item statistics by revenue goes here
+        _logger.LogInformation("Handling ItemStatisticByRevenueQuery from {StartDate} to {EndDate} for ItemType: {ItemType}",
+            request.StartDate,
+            request.EndDate,
+            request.ItemType.ToString());
 
-        return new ItemStatisticByRevenueResponse();
+        var statisticItems = await _unitOfWork.Statistics.GetItemRevenueStatisticsAsync(
+            request.StartDate,
+            request.EndDate,
+            request.ItemType,
+            cancellationToken);
+
+        return new ItemStatisticByRevenueResponse
+        {
+            StartDate = request.StartDate,
+            EndDate = request.EndDate,
+            Items = statisticItems.ToList()
+        };
     }
 }
