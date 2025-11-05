@@ -8,6 +8,7 @@ using AppBookingTour.Share.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using AppBookingTour.Api.Hubs;
 
 #region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
@@ -28,6 +29,8 @@ builder.Host.UseSerilog();
 
 #region Core Services
 builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
 
 # region Application Layer
 builder.Services.AddApplication();
@@ -174,6 +177,7 @@ app.UseAuthorization();
 app.UseOutputCache();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapHealthChecks("/health");
 
 // Redirect root to Swagger
