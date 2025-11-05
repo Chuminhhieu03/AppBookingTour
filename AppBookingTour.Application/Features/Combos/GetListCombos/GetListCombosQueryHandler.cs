@@ -96,7 +96,7 @@ public sealed class GetListCombosQueryHandler : IRequestHandler<GetListCombosQue
             ToCityId = c.ToCityId,
             ToCityName = cityDict.ContainsKey(c.ToCityId) ? cityDict[c.ToCityId].Name : "N/A",
             ShortDescription = c.ShortDescription,
-            Vehicle = c.Vehicle.ToString(),
+            Vehicle = (int)c.Vehicle,
             DurationDays = c.DurationDays,
             BasePriceAdult = c.BasePriceAdult,
             BasePriceChildren = c.BasePriceChildren,

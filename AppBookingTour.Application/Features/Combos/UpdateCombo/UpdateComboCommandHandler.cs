@@ -38,11 +38,6 @@ public sealed class UpdateComboCommandHandler : IRequestHandler<UpdateComboComma
             return UpdateComboResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
         }
 
-        // Load schedules separately
-        var schedules = await _unitOfWork.Repository<ComboSchedule>()
-            .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
-        existingCombo.Schedules = schedules.ToList();
-
         // Kiểm tra combo có booking nào chưa
         var hasBookings = await _unitOfWork.Repository<Booking>()
             .ExistsAsync(b => b.BookingType == Domain.Enums.BookingType.Combo 
@@ -50,44 +45,34 @@ public sealed class UpdateComboCommandHandler : IRequestHandler<UpdateComboComma
                 && b.Status != Domain.Enums.BookingStatus.Cancelled, 
                 cancellationToken);
 
-        if (hasBookings)
-        {
-            // Nếu có booking, chỉ cho phép update một số field
-            _logger.LogWarning("Combo {ComboId} has active bookings. Limited update only.", request.ComboId);
+        // Nếu chưa có booking, cho phép update toàn bộ
+        _mapper.Map(request.ComboRequest, existingCombo);
             
-            existingCombo.Description = request.ComboRequest.Description ?? existingCombo.Description;
-            existingCombo.Includes = request.ComboRequest.Includes ?? existingCombo.Includes;
-            existingCombo.Excludes = request.ComboRequest.Excludes ?? existingCombo.Excludes;
-            existingCombo.TermsConditions = request.ComboRequest.TermsConditions ?? existingCombo.TermsConditions;
-            existingCombo.IsActive = request.ComboRequest.IsActive ?? existingCombo.IsActive;
-        }
-        else
+        // Xử lý schedules nếu có update
+        if (request.ComboRequest.Schedules != null && request.ComboRequest.Schedules.Any())
         {
-            // Nếu chưa có booking, cho phép update toàn bộ
-            _mapper.Map(request.ComboRequest, existingCombo);
-            
-            // Xử lý schedules nếu có update
-            if (request.ComboRequest.Schedules != null && request.ComboRequest.Schedules.Any())
+            // Load và xóa schedules cũ
+            var existingSchedules = await _unitOfWork.Repository<ComboSchedule>()
+                .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
+
+            // Xóa schedules cũ
+            if (existingSchedules.Any())
             {
-                // Xóa schedules cũ
-                if (existingCombo.Schedules.Any())
-                {
-                    _unitOfWork.Repository<ComboSchedule>().RemoveRange(existingCombo.Schedules);
-                }
-                
-                // Thêm schedules mới
-                var newSchedules = new List<ComboSchedule>();
-                foreach (var scheduleDto in request.ComboRequest.Schedules)
-                {
-                    var schedule = _mapper.Map<ComboSchedule>(scheduleDto);
-                    schedule.ComboId = existingCombo.Id;
-                    schedule.BookedSlots = 0;
-                    schedule.Status = Domain.Enums.ComboStatus.Available;
-                    schedule.CreatedAt = DateTime.UtcNow;
-                    newSchedules.Add(schedule);
-                }
-                await _unitOfWork.Repository<ComboSchedule>().AddRangeAsync(newSchedules, cancellationToken);
+                _unitOfWork.Repository<ComboSchedule>().RemoveRange(existingSchedules);
             }
+                
+            // Thêm schedules mới
+            var newSchedules = new List<ComboSchedule>();
+            foreach (var scheduleDto in request.ComboRequest.Schedules)
+            {
+                var schedule = _mapper.Map<ComboSchedule>(scheduleDto);
+                schedule.ComboId = existingCombo.Id;
+                schedule.BookedSlots = 0;
+                schedule.Status = Domain.Enums.ComboStatus.Available;
+                schedule.CreatedAt = DateTime.UtcNow;
+                newSchedules.Add(schedule);
+            }
+            await _unitOfWork.Repository<ComboSchedule>().AddRangeAsync(newSchedules, cancellationToken);
         }
 
         existingCombo.UpdatedAt = DateTime.UtcNow;

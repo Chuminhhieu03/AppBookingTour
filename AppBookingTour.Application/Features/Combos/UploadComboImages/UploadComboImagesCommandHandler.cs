@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
@@ -31,11 +31,11 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
     {
         _logger.LogInformation("Uploading images for combo {ComboId}", request.ComboId);
 
-        // Ki?m tra combo t?n t?i
+        // Kiểm tra combo tồn tại
         var combo = await _unitOfWork.Repository<Combo>().GetByIdAsync(request.ComboId, cancellationToken);
         if (combo == null)
         {
-            return UploadComboImagesResponse.Failed($"Combo v?i ID {request.ComboId} kh�ng t?n t?i");
+            return UploadComboImagesResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
         }
 
         string? coverImageUrl = null;
@@ -46,9 +46,8 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
         {
             ValidateImageFile(request.CoverImage);
             
-            var fileName = $"combo_{request.ComboId}_cover_{Guid.NewGuid()}{Path.GetExtension(request.CoverImage.FileName)}";
             using var stream = request.CoverImage.OpenReadStream();
-            coverImageUrl = await _fileStorageService.UploadFileAsync(stream, fileName);
+            coverImageUrl = await _fileStorageService.UploadFileAsync(stream);
             
             combo.ComboImageCoverUrl = coverImageUrl;
             _logger.LogInformation("Uploaded cover image for combo {ComboId}: {Url}", request.ComboId, coverImageUrl);
@@ -59,16 +58,15 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
         {
             if (request.Images.Length > 10)
             {
-                return UploadComboImagesResponse.Failed("S? l??ng ?nh kh�ng ???c v??t qu� 10");
+                return UploadComboImagesResponse.Failed("Số lượng ảnh không được vượt quá 10");
             }
 
             foreach (var image in request.Images)
             {
                 ValidateImageFile(image);
                 
-                var fileName = $"combo_{request.ComboId}_{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
                 using var stream = image.OpenReadStream();
-                var imageUrl = await _fileStorageService.UploadFileAsync(stream, fileName);
+                var imageUrl = await _fileStorageService.UploadFileAsync(stream);
                 imageUrls.Add(imageUrl);
 
                 // Save to Images table
@@ -98,26 +96,26 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
         if (!AllowedExtensions.Contains(extension))
         {
             throw new InvalidOperationException(
-                $"??nh d?ng file kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", AllowedExtensions)}");
+                $"Định dạng file không hợp lệ. Chỉ chấp nhận: {string.Join(", ", AllowedExtensions)}");
         }
 
         // Validate content type
         if (!AllowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
         {
             throw new InvalidOperationException(
-                $"Content type kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", AllowedContentTypes)}");
+                $"Content type không hợp lệ. Chỉ chấp nhận: {string.Join(", ", AllowedContentTypes)}");
         }
 
         // Validate file size
         if (file.Length > MaxFileSizeBytes)
         {
-            throw new InvalidOperationException("K�ch th??c file kh�ng ???c v??t qu� 5MB");
+            throw new InvalidOperationException("Kích thước file không được vượt quá 5MB");
         }
 
         // Validate file not empty
         if (file.Length == 0)
         {
-            throw new InvalidOperationException("File kh�ng ???c r?ng");
+            throw new InvalidOperationException("File không được rỗng");
         }
     }
 }

@@ -1,5 +1,3 @@
-using AppBookingTour.Domain.Enums;
-
 namespace AppBookingTour.Application.Features.Combos.GetListCombos;
 
 public class GetListCombosRequest
@@ -29,7 +27,7 @@ public class ComboListDTO
     public int ToCityId { get; set; }
     public string ToCityName { get; set; } = null!;
     public string? ShortDescription { get; set; }
-    public string Vehicle { get; set; } = null!;
+    public int Vehicle { get; set; }
     public int DurationDays { get; set; }
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChildren { get; set; }
