@@ -30,26 +30,26 @@ public sealed class CreateComboCommandHandler : IRequestHandler<CreateComboComma
         
         await _unitOfWork.BeginTransactionAsync();
         
-        // Kiểm tra FromCity và ToCity tồn tại
-        var fromCity = await _unitOfWork.Repository<City>()
-            .GetByIdAsync(request.ComboRequest.FromCityId!.Value, cancellationToken);
+        // Kiểm tra FromCity và ToCity tồn tại sử dụng CityRepository
+        var fromCity = await _unitOfWork.Cities.GetByIdAsync(request.ComboRequest.FromCityId!.Value, cancellationToken);
         if (fromCity == null)
         {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             return CreateComboResponse.Failed($"Thành phố xuất phát với ID {request.ComboRequest.FromCityId} không tồn tại");
         }
 
-        var toCity = await _unitOfWork.Repository<City>()
-            .GetByIdAsync(request.ComboRequest.ToCityId!.Value, cancellationToken);
+        var toCity = await _unitOfWork.Cities.GetByIdAsync(request.ComboRequest.ToCityId!.Value, cancellationToken);
         if (toCity == null)
         {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             return CreateComboResponse.Failed($"Thành phố đến với ID {request.ComboRequest.ToCityId} không tồn tại");
         }
 
-        // Kiểm tra Code trùng
-        var codeExists = await _unitOfWork.Repository<Combo>()
-            .ExistsAsync(c => c.Code == request.ComboRequest.Code, cancellationToken);
+        // Kiểm tra Code trùng sử dụng ComboRepository
+        var codeExists = await _unitOfWork.Combos.IsCodeExistsAsync(request.ComboRequest.Code!, cancellationToken: cancellationToken);
         if (codeExists)
         {
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             return CreateComboResponse.Failed($"Mã combo '{request.ComboRequest.Code}' đã tồn tại");
         }
 
@@ -86,28 +86,20 @@ public sealed class CreateComboCommandHandler : IRequestHandler<CreateComboComma
             combo.Schedules = combo.Schedules.OrderBy(s => s.DepartureDate).ToList();
         }
 
-        // Lưu vào database
-        await _unitOfWork.Repository<Combo>().AddAsync(combo, cancellationToken);
+        // Lưu vào database sử dụng ComboRepository
+        await _unitOfWork.Combos.AddAsync(combo, cancellationToken);
         var recordsAffected = await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         if (recordsAffected == 0)
         {
-            await _unitOfWork.RollbackTransactionAsync();
+            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
             return CreateComboResponse.Failed("Không thể tạo combo. Vui lòng thử lại.");
         }
 
-        await _unitOfWork.CommitTransactionAsync();
+        await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
-        // Load lại combo với navigation properties
-        var createdCombo = await _unitOfWork.Repository<Combo>()
-            .FirstOrDefaultAsync(c => c.Id == combo.Id, cancellationToken);
-
-        if (createdCombo != null)
-        {
-            // Load navigation properties manually
-            createdCombo.FromCity = fromCity;
-            createdCombo.ToCity = toCity;
-        }
+        // Load lại combo với navigation properties sử dụng ComboRepository
+        var createdCombo = await _unitOfWork.Combos.GetComboWithDetailsAsync(combo.Id, cancellationToken);
 
         var comboDto = _mapper.Map<ComboDTO>(createdCombo);
         if (comboDto.Schedules != null)

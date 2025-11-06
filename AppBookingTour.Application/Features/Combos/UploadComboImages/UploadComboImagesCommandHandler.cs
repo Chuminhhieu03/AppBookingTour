@@ -31,8 +31,8 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
     {
         _logger.LogInformation("Uploading images for combo {ComboId}", request.ComboId);
 
-        // Kiểm tra combo tồn tại
-        var combo = await _unitOfWork.Repository<Combo>().GetByIdAsync(request.ComboId, cancellationToken);
+        // Kiểm tra combo tồn tại sử dụng ComboRepository
+        var combo = await _unitOfWork.Combos.GetByIdAsync(request.ComboId, cancellationToken);
         if (combo == null)
         {
             return UploadComboImagesResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
@@ -49,7 +49,8 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
             using var stream = request.CoverImage.OpenReadStream();
             coverImageUrl = await _fileStorageService.UploadFileAsync(stream);
             
-            combo.ComboImageCoverUrl = coverImageUrl;
+            // Cập nhật cover image sử dụng repository method
+            await _unitOfWork.Combos.UpdateCoverImageAsync(request.ComboId, coverImageUrl, cancellationToken);
             _logger.LogInformation("Uploaded cover image for combo {ComboId}: {Url}", request.ComboId, coverImageUrl);
         }
 
@@ -69,7 +70,7 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
                 var imageUrl = await _fileStorageService.UploadFileAsync(stream);
                 imageUrls.Add(imageUrl);
 
-                // Save to Images table
+                // Save to Images table sử dụng ImageRepository
                 var imageEntity = new Image
                 {
                     Url = imageUrl,
@@ -77,7 +78,7 @@ public sealed class UploadComboImagesCommandHandler : IRequestHandler<UploadComb
                     EntityId = request.ComboId,
                     CreatedAt = DateTime.UtcNow
                 };
-                await _unitOfWork.Repository<Image>().AddAsync(imageEntity, cancellationToken);
+                await _unitOfWork.Images.AddAsync(imageEntity, cancellationToken);
             }
 
             _logger.LogInformation("Uploaded {Count} images for combo {ComboId}", imageUrls.Count, request.ComboId);

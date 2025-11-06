@@ -3,7 +3,6 @@ using AppBookingTour.Domain.Entities;
 using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 
 namespace AppBookingTour.Application.Features.Combos.UpdateCombo;
 
@@ -29,50 +28,59 @@ public sealed class UpdateComboCommandHandler : IRequestHandler<UpdateComboComma
         
         await _unitOfWork.BeginTransactionAsync();
         
-        // Load combo
-        var existingCombo = await _unitOfWork.Repository<Combo>()
-            .FirstOrDefaultAsync(c => c.Id == request.ComboId, cancellationToken);
+        // Load combo sử dụng ComboRepository
+        var existingCombo = await _unitOfWork.Combos.GetByIdAsync(request.ComboId, cancellationToken);
 
         if (existingCombo == null)
         {
+            await _unitOfWork.RollbackTransactionAsync();
             return UpdateComboResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
         }
 
-        // Kiểm tra combo có booking nào chưa
-        var hasBookings = await _unitOfWork.Repository<Booking>()
-            .ExistsAsync(b => b.BookingType == Domain.Enums.BookingType.Combo 
-                && b.ItemId == request.ComboId 
-                && b.Status != Domain.Enums.BookingStatus.Cancelled, 
-                cancellationToken);
+        // Kiểm tra combo có booking nào chưa sử dụng ComboRepository
+        var hasBookings = await _unitOfWork.Combos.HasActiveBookingsAsync(request.ComboId, cancellationToken);
 
-        // Nếu chưa có booking, cho phép update toàn bộ
-        _mapper.Map(request.ComboRequest, existingCombo);
-            
-        // Xử lý schedules nếu có update
-        if (request.ComboRequest.Schedules != null && request.ComboRequest.Schedules.Any())
+        if (hasBookings)
         {
-            // Load và xóa schedules cũ
-            var existingSchedules = await _unitOfWork.Repository<ComboSchedule>()
-                .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
-
-            // Xóa schedules cũ
-            if (existingSchedules.Any())
+            // Nếu có booking, chỉ cho phép update một số field
+            _logger.LogWarning("Combo {ComboId} has active bookings. Limited update only.", request.ComboId);
+            
+            existingCombo.Description = request.ComboRequest.Description ?? existingCombo.Description;
+            existingCombo.Includes = request.ComboRequest.Includes ?? existingCombo.Includes;
+            existingCombo.Excludes = request.ComboRequest.Excludes ?? existingCombo.Excludes;
+            existingCombo.TermsConditions = request.ComboRequest.TermsConditions ?? existingCombo.TermsConditions;
+            existingCombo.IsActive = request.ComboRequest.IsActive ?? existingCombo.IsActive;
+        }
+        else
+        {
+            // Nếu chưa có booking, cho phép update toàn bộ
+            _mapper.Map(request.ComboRequest, existingCombo);
+            
+            // Xử lý schedules nếu có update
+            if (request.ComboRequest.Schedules != null && request.ComboRequest.Schedules.Any())
             {
-                _unitOfWork.Repository<ComboSchedule>().RemoveRange(existingSchedules);
-            }
+                // Load và xóa schedules cũ
+                var existingSchedules = await _unitOfWork.Repository<ComboSchedule>()
+                    .FindAsync(s => s.ComboId == request.ComboId, cancellationToken);
                 
-            // Thêm schedules mới
-            var newSchedules = new List<ComboSchedule>();
-            foreach (var scheduleDto in request.ComboRequest.Schedules)
-            {
-                var schedule = _mapper.Map<ComboSchedule>(scheduleDto);
-                schedule.ComboId = existingCombo.Id;
-                schedule.BookedSlots = 0;
-                schedule.Status = Domain.Enums.ComboStatus.Available;
-                schedule.CreatedAt = DateTime.UtcNow;
-                newSchedules.Add(schedule);
+                if (existingSchedules.Any())
+                {
+                    _unitOfWork.Repository<ComboSchedule>().RemoveRange(existingSchedules);
+                }
+                
+                // Thêm schedules mới
+                var newSchedules = new List<ComboSchedule>();
+                foreach (var scheduleDto in request.ComboRequest.Schedules)
+                {
+                    var schedule = _mapper.Map<ComboSchedule>(scheduleDto);
+                    schedule.ComboId = existingCombo.Id;
+                    schedule.BookedSlots = 0;
+                    schedule.Status = Domain.Enums.ComboStatus.Available;
+                    schedule.CreatedAt = DateTime.UtcNow;
+                    newSchedules.Add(schedule);
+                }
+                await _unitOfWork.Repository<ComboSchedule>().AddRangeAsync(newSchedules, cancellationToken);
             }
-            await _unitOfWork.Repository<ComboSchedule>().AddRangeAsync(newSchedules, cancellationToken);
         }
 
         existingCombo.UpdatedAt = DateTime.UtcNow;

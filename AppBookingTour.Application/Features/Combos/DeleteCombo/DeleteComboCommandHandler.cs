@@ -20,31 +20,25 @@ public sealed class DeleteComboCommandHandler : IRequestHandler<DeleteComboComma
     {
         _logger.LogInformation("Deleting combo with ID: {ComboId}", request.ComboId);
         
-        var existingCombo = await _unitOfWork.Repository<Combo>()
-            .GetByIdAsync(request.ComboId, cancellationToken);
+        // Sử dụng ComboRepository
+        var existingCombo = await _unitOfWork.Combos.GetByIdAsync(request.ComboId, cancellationToken);
             
         if (existingCombo == null)
         {
             return DeleteComboResponse.Failed($"Combo với ID {request.ComboId} không tồn tại");
         }
 
-        // Kiểm tra combo có booking nào chưa
-        var hasActiveBookings = await _unitOfWork.Repository<Booking>()
-            .ExistsAsync(b => b.BookingType == Domain.Enums.BookingType.Combo 
-                && b.ItemId == request.ComboId 
-                && (b.Status == Domain.Enums.BookingStatus.Confirmed 
-                    || b.Status == Domain.Enums.BookingStatus.Paid
-                    || b.Status == Domain.Enums.BookingStatus.Pending), 
-                cancellationToken);
+        // Kiểm tra combo có booking active nào không sử dụng ComboRepository
+        var hasActiveBookings = await _unitOfWork.Combos.HasActiveBookingsAsync(request.ComboId, cancellationToken);
 
         if (hasActiveBookings)
         {
             return DeleteComboResponse.Failed("Không thể xóa combo đã có booking active. Vui lòng hủy tất cả booking trước.");
         }
 
-        await _unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-        // Soft delete: set IsActive = false thay vì xóa hẳn
+        // Soft delete Temporary way
         existingCombo.IsActive = false;
         existingCombo.UpdatedAt = DateTime.UtcNow;
 
@@ -59,7 +53,7 @@ public sealed class DeleteComboCommandHandler : IRequestHandler<DeleteComboComma
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _unitOfWork.CommitTransactionAsync();
+        await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
         _logger.LogInformation("Successfully soft deleted combo with ID: {ComboId}", request.ComboId);
         return DeleteComboResponse.Success();

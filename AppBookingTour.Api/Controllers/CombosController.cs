@@ -7,6 +7,8 @@ using AppBookingTour.Application.Features.Combos.UpdateCombo;
 using AppBookingTour.Application.Features.Combos.DeleteCombo;
 using AppBookingTour.Application.Features.Combos.GetListCombos;
 using AppBookingTour.Application.Features.Combos.UploadComboImages;
+using AppBookingTour.Application.Features.Combos.DeleteComboCoverImage;
+using AppBookingTour.Application.Features.Combos.DeleteComboGalleryImages;
 using AppBookingTour.Share.DTOS;
 
 namespace AppBookingTour.Api.Controllers;
@@ -139,5 +141,60 @@ public sealed class CombosController : ControllerBase
             id, result.CoverImageUrl != null, result.ImageUrls.Count);
         
         return Ok(ApiResponse<UploadComboImagesResponse>.Ok(result));
+    }
+
+    /// <summary>
+    /// Delete cover image for combo
+    /// </summary>
+    /// <param name="id">Combo ID</param>
+    [HttpDelete("{id:int}/cover-image")]
+    //[Authorize(Roles = "Admin,Staff")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteCoverImage(int id)
+    {
+        var command = new DeleteComboCoverImageCommand(id);
+        var result = await _mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("không tồn tại") == true)
+            {
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage));
+            }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
+
+        _logger.LogInformation("Deleted cover image for combo {ComboId}", id);
+        return Ok(new ApiResponse<object> { Success = true, Message = "Đã xóa ảnh bìa thành công" });
+    }
+
+    /// <summary>
+    /// Delete gallery images for combo
+    /// </summary>
+    /// <param name="id">Combo ID</param>
+    /// <param name="request">List of image URLs to delete</param>
+    [HttpDelete("{id:int}/gallery-images")]
+    //[Authorize(Roles = "Admin,Staff")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteGalleryImages(
+        int id, 
+        [FromBody] DeleteComboGalleryImagesRequest request)
+    {
+        var command = new DeleteComboGalleryImagesCommand(id, request.ImageUrls);
+        var result = await _mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("không tồn tại") == true)
+            {
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage));
+            }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
+
+        _logger.LogInformation("Deleted {Count} gallery images for combo {ComboId}", result.DeletedCount, id);
+        return Ok(new ApiResponse<object> 
+        { 
+            Success = true, 
+            Message = $"Đã xóa {result.DeletedCount} ảnh thành công" 
+        });
     }
 }

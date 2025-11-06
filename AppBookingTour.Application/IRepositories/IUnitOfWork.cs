@@ -23,9 +23,11 @@ public interface IUnitOfWork : IDisposable
     IBlogPostRepository BlogPosts { get; }
     IImageRepository Images { get; }
     ISystemParameterRepository SystemParameters { get; }
+    IBookingRepository Bookings { get; }
+    IComboRepository Combos { get; }
 
     #endregion
-    
+
     #region Generic Repository Access
     /// <summary>
     /// Get generic repository for any entity type
