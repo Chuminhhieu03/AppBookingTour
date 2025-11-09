@@ -1,12 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using FluentValidation;
-
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Combos.CreateCombo;
 using AppBookingTour.Application.Features.Combos.GetComboById;
 using AppBookingTour.Application.Features.Combos.UpdateCombo;
 using AppBookingTour.Application.Features.Combos.DeleteCombo;
+using AppBookingTour.Application.Features.Combos.GetListCombos;
+using AppBookingTour.Application.Features.Combos.UploadComboImages;
+using AppBookingTour.Application.Features.Combos.DeleteComboCoverImage;
+using AppBookingTour.Application.Features.Combos.DeleteComboGalleryImages;
+using AppBookingTour.Share.DTOS;
 
 namespace AppBookingTour.Api.Controllers;
 
@@ -24,118 +27,174 @@ public sealed class CombosController : ControllerBase
     }
 
     [HttpPost]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<ApiResponse<object>>> CreateCombo([FromBody] ComboRequestDTO requestBody)
     {
-        try
-        {
-            var command = new CreateComboCommand(requestBody);
-            var result = await _mediator.Send(command);
+        var command = new CreateComboCommand(requestBody);
+        var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
-            {
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
-            }
+        if (!result.IsSuccess)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
 
-            _logger.LogInformation("Created new combo with ID: {ComboId}", result.Combo!.Id);
-            return CreatedAtAction(nameof(GetComboById), new { id = result.Combo!.Id }, ApiResponse<object>.Ok(result.Combo!));
-        }
-        catch (ValidationException vex)
-        {
-            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-            _logger.LogWarning(vex, "Validation failed for create combo: {Errors}", messages);
-            return BadRequest(ApiResponse<object>.Fail(messages));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating combo");
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while creating the combo."));
-        }
+        _logger.LogInformation("Created new combo with ID: {ComboId}", result.Combo!.Id);
+        return CreatedAtAction(nameof(GetComboById), new { id = result.Combo!.Id }, ApiResponse<object>.Ok(result.Combo!));
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<PagedResult<ComboListDTO>>>> GetListCombos([FromQuery] GetListCombosRequest request)
+    {
+        var query = new GetListCombosQuery(request);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} combos", result.Items.Count);
+        return Ok(ApiResponse<PagedResult<ComboListDTO>>.Ok(result));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetComboById(int id)
     {
-        try
-        {
-            var query = new GetComboByIdQuery(id);
-            var result = await _mediator.Send(query);
+        var query = new GetComboByIdQuery(id);
+        var result = await _mediator.Send(query);
 
-            if (!result.IsSuccess)
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("not found") == true)
             {
-                if (result.ErrorMessage?.Contains("not found") == true)
-                {
-                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
-                }
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
             }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
 
-            _logger.LogInformation("Retrieved combo details for ID: {ComboId}", id);
-            return Ok(ApiResponse<object>.Ok(result.Combo!));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving combo with ID {ComboId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while retrieving the combo."));
-        }
+        _logger.LogInformation("Retrieved combo details for ID: {ComboId}", id);
+        return Ok(ApiResponse<object>.Ok(result.Combo!));
     }
 
     [HttpPut("{id:int}")]
+    //[Authorize(Roles = "Admin,Staff")]
     public async Task<ActionResult<ApiResponse<object>>> UpdateCombo(int id, [FromBody] ComboRequestDTO requestBody)
     {
-        try
-        {
-            var command = new UpdateComboCommand(id, requestBody);
-            var result = await _mediator.Send(command);
+        var command = new UpdateComboCommand(id, requestBody);
+        var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("not found") == true || result.ErrorMessage?.Contains("không tồn tại") == true)
             {
-                if (result.ErrorMessage?.Contains("not found") == true)
-                {
-                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
-                }
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
             }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
 
-            _logger.LogInformation("Updated combo with ID {ComboId}", id);
-            return Ok(new ApiResponse<object> { Success = true, Message = "Update combo successfully" });
-        }
-        catch (ValidationException vex)
-        {
-            var messages = string.Join("; ", vex.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-            _logger.LogWarning(vex, "Validation failed for update combo: {Errors}", messages);
-            return BadRequest(ApiResponse<object>.Fail(messages));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating combo with ID {ComboId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while updating the combo."));
-        }
+        _logger.LogInformation("Updated combo with ID {ComboId}", id);
+        return Ok(new ApiResponse<object> { Success = true, Message = "Update combo successfully" });
     }
 
     [HttpDelete("{id:int}")]
+    //[Authorize(Roles = "Admin")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteCombo(int id)
     {
-        try
-        {
-            var command = new DeleteComboCommand(id);
-            var result = await _mediator.Send(command);
+        var command = new DeleteComboCommand(id);
+        var result = await _mediator.Send(command);
 
-            if (!result.IsSuccess)
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("not found") == true || result.ErrorMessage?.Contains("không tồn tại") == true)
             {
-                if (result.ErrorMessage?.Contains("not found") == true)
-                {
-                    return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
-                }
-                return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage!));
             }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
 
-            _logger.LogInformation("Deleted combo with ID {ComboId}", id);
-            return Ok(new ApiResponse<object> { Success = true, Message = "Delete combo successfully" });
-        }
-        catch (Exception ex)
+        _logger.LogInformation("Deleted combo with ID {ComboId}", id);
+        return Ok(new ApiResponse<object> { Success = true, Message = "Delete combo successfully" });
+    }
+
+    /// <summary>
+    /// Upload images for combo
+    /// </summary>
+    /// <param name="id">Combo ID</param>
+    /// <param name="coverImage">Cover image (optional, max 5MB)</param>
+    /// <param name="images">Additional images (optional, max 10 images, each max 5MB)</param>
+    [HttpPost("{id:int}/upload-images")]
+    //[Authorize(Roles = "Admin,Staff")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<UploadComboImagesResponse>>> UploadComboImages(
+        int id,
+        [FromForm] IFormFile? coverImage,
+        [FromForm] IFormFile[]? images)
+    {
+        var command = new UploadComboImagesCommand(id, coverImage, images);
+        var result = await _mediator.Send(command);
+
+        if (!result.IsSuccess)
         {
-            _logger.LogError(ex, "Error deleting combo with ID {ComboId}", id);
-            return BadRequest(ApiResponse<object>.Fail("An error occurred while deleting the combo."));
+            if (result.ErrorMessage?.Contains("không tồn tại") == true)
+            {
+                return NotFound(ApiResponse<UploadComboImagesResponse>.Fail(result.ErrorMessage));
+            }
+            return BadRequest(ApiResponse<UploadComboImagesResponse>.Fail(result.ErrorMessage!));
         }
+
+        _logger.LogInformation("Uploaded images for combo {ComboId}: Cover={HasCover}, Count={ImageCount}", 
+            id, result.CoverImageUrl != null, result.ImageUrls.Count);
+        
+        return Ok(ApiResponse<UploadComboImagesResponse>.Ok(result));
+    }
+
+    /// <summary>
+    /// Delete cover image for combo
+    /// </summary>
+    /// <param name="id">Combo ID</param>
+    [HttpDelete("{id:int}/cover-image")]
+    //[Authorize(Roles = "Admin,Staff")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteCoverImage(int id)
+    {
+        var command = new DeleteComboCoverImageCommand(id);
+        var result = await _mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("không tồn tại") == true)
+            {
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage));
+            }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
+
+        _logger.LogInformation("Deleted cover image for combo {ComboId}", id);
+        return Ok(new ApiResponse<object> { Success = true, Message = "Đã xóa ảnh bìa thành công" });
+    }
+
+    /// <summary>
+    /// Delete gallery images for combo
+    /// </summary>
+    /// <param name="id">Combo ID</param>
+    /// <param name="request">List of image URLs to delete</param>
+    [HttpDelete("{id:int}/gallery-images")]
+    //[Authorize(Roles = "Admin,Staff")]
+    public async Task<ActionResult<ApiResponse<object>>> DeleteGalleryImages(
+        int id, 
+        [FromBody] DeleteComboGalleryImagesRequest request)
+    {
+        var command = new DeleteComboGalleryImagesCommand(id, request.ImageUrls);
+        var result = await _mediator.Send(command);
+
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorMessage?.Contains("không tồn tại") == true)
+            {
+                return NotFound(ApiResponse<object>.Fail(result.ErrorMessage));
+            }
+            return BadRequest(ApiResponse<object>.Fail(result.ErrorMessage!));
+        }
+
+        _logger.LogInformation("Deleted {Count} gallery images for combo {ComboId}", result.DeletedCount, id);
+        return Ok(new ApiResponse<object> 
+        { 
+            Success = true, 
+            Message = $"Đã xóa {result.DeletedCount} ảnh thành công" 
+        });
     }
 }
