@@ -14,4 +14,5 @@ public class ItemBookingCountDetailDTO
     public string ItemDetailName { get; set; } = string.Empty;
     public int totalCompletedBookings { get; set; }
     public int totalCanceledBookings { get; set; }
+    public decimal cancellationRate { get; set; }
 }

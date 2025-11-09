@@ -15,6 +15,6 @@ public class ItemRevenueDetailDTO
 {
     public string ItemDetailName { get; set; } = string.Empty;
     public int totalCompletedBookings { get; set; }
-    public int totalFailedBookings { get; set; }
     public decimal TotalRevenue { get; set; }
+    public decimal averageRevenuePerBooking { get; set; }
 }

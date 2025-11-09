@@ -32,6 +32,8 @@ public class ItemStatisticByBookingCountQueryHandler : IRequestHandler<ItemStati
 
         var response = new ItemStatisticByBookingCountResponse
         {
+            ItemTypeId = (int)itemType,
+            ItemTypeName = itemType.ToString(),
             StartDate = startDate,
             EndDate = endDate,
             Items = items.ToList()

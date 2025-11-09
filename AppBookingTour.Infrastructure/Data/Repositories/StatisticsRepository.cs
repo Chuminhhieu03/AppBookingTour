@@ -35,7 +35,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 bookingType = (int)itemType
             };
 
-            /* TODO: (Như bạn đã ghi)
+            /* TODO:
              * - Cập nhật lại status (như nào là complete, như nào là cancel => khi code xong booking
              */
 
@@ -50,8 +50,6 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             T.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT TD.Id) AS ItemOptionCount
                         FROM
                             Bookings AS B
@@ -62,7 +60,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                         WHERE
                             B.BookingType = @bookingType
                             AND B.BookingDate BETWEEN @startDate AND @endDate
-                            AND B.Status IN (2, 3, 5, 4, 6)
+                            AND B.Status IN (3, 5, 4, 6)
                         GROUP BY
                             T.Id, T.Code, T.Name, T.Rating
                     ";
@@ -77,8 +75,6 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             A.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT RT.Id) AS ItemOptionCount 
                         FROM
                             Bookings AS B
@@ -89,7 +85,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                         WHERE
                             B.BookingType = @bookingType
                             AND B.BookingDate BETWEEN @startDate AND @endDate 
-                            AND B.Status IN (2, 3, 5, 4, 6)
+                            AND B.Status IN (3, 5, 4, 6)
                         GROUP BY
                             A.Id, A.Code, A.Name, A.Rating
                     ";
@@ -104,8 +100,6 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             C.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT CS.Id) AS ItemOptionCount
                         FROM
                             Bookings AS B
@@ -116,7 +110,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                         WHERE
                             B.BookingType = @bookingType
                             AND B.BookingDate BETWEEN @startDate AND @endDate
-                            AND B.Status IN (2, 3, 5, 4, 6)
+                            AND B.Status IN (3, 5, 4, 6)
                         GROUP BY
                             C.Id, C.Code, C.Name, C.Rating
                     ";
@@ -134,13 +128,11 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 ItemId = r.ItemId,
                 ItemCode = r.ItemCode,
                 ItemName = r.ItemName,
-                totalCompletedBookings = r.totalCompletedBookings,
-                totalCanceledBookings = r.totalCanceledBookings,
-                TotalRevenue = r.TotalRevenue!.Value,
-                ItemOptionCount = r.ItemOptionCount,
                 rating = r.rating,
-                cancellationRate = (r.TotalBookingsCount == 0) ? 0 : Math.Round((decimal)r.totalCanceledBookings / r.TotalBookingsCount, 4),
-                averageRevenuePerBooking = (r.totalCompletedBookings == 0) ? 0 : r.TotalRevenue!.Value / r.totalCompletedBookings
+                totalCompletedBookings = r.totalCompletedBookings,
+                TotalRevenue = r.TotalRevenue!.Value,
+                averageRevenuePerBooking = (r.totalCompletedBookings == 0) ? 0 : r.TotalRevenue!.Value / r.totalCompletedBookings,
+                ItemOptionCount = r.ItemOptionCount,
             })
             .OrderByDescending(r => r.TotalRevenue)
             .ToList();
@@ -169,71 +161,106 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             {
                 case ItemType.Tour:
                     sql = @"
-                        SELECT
-                            FORMAT(TD.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalFailedBookings
-                        FROM
-                            TourDepartures AS TD
-                        LEFT JOIN
-                            Bookings AS B ON TD.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            TD.TourId = @itemId
-                        GROUP BY
-                            TD.Id, TD.DepartureDate
-                        ORDER BY
-                            TD.DepartureDate;
-                    ";
+                WITH RevenueData AS (
+                    SELECT
+                        TD.Id,
+                        TD.DepartureDate,
+                        FORMAT(TD.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue
+                    FROM
+                        TourDepartures AS TD
+                    LEFT JOIN
+                        Bookings AS B ON TD.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        TD.TourId = @itemId
+                    GROUP BY
+                        TD.Id, TD.DepartureDate
+                )
+                SELECT
+                    RD.ItemDetailName,
+                    RD.totalCompletedBookings,
+                    RD.TotalRevenue,
+                    (RD.TotalRevenue / RD.totalCompletedBookings) AS averageRevenuePerBooking
+                FROM
+                    RevenueData AS RD
+                WHERE
+                    RD.totalCompletedBookings > 0
+                ORDER BY
+                    RD.DepartureDate;
+                ";
                     break;
 
                 case ItemType.Accommodation:
                     sql = @"
-                        SELECT
-                            RT.Name AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalFailedBookings
-                        FROM
-                            RoomTypes AS RT
-                        LEFT JOIN
-                            Bookings AS B ON RT.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            RT.AccommodationId = @itemId
-                        GROUP BY
-                            RT.Id, RT.Name
-                        ORDER BY
-                            RT.Name;
-                    ";
+                WITH RevenueData AS (
+                    SELECT
+                        RT.Id,
+                        RT.Name AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue
+                    FROM
+                        RoomTypes AS RT
+                    LEFT JOIN
+                        Bookings AS B ON RT.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        RT.AccommodationId = @itemId
+                    GROUP BY
+                        RT.Id, RT.Name
+                )
+                SELECT
+                    RD.ItemDetailName,
+                    RD.totalCompletedBookings,
+                    RD.TotalRevenue,
+                    (RD.TotalRevenue / RD.totalCompletedBookings) AS averageRevenuePerBooking
+                FROM
+                    RevenueData AS RD
+                WHERE
+                    RD.totalCompletedBookings > 0
+                ORDER BY
+                    RD.ItemDetailName;
+                ";
                     break;
 
                 case ItemType.Combo:
                     sql = @"
-                        SELECT
-                            FORMAT(CS.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalFailedBookings
-                        FROM
-                            ComboSchedules AS CS
-                        LEFT JOIN
-                            Bookings AS B ON CS.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            CS.ComboId = @itemId
-                        GROUP BY
-                            CS.Id, CS.DepartureDate
-                        ORDER BY
-                            CS.DepartureDate;
-                    ";
+                WITH RevenueData AS (
+                    SELECT
+                        CS.Id,
+                        CS.DepartureDate,
+                        FORMAT(CS.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        ISNULL(SUM(CASE WHEN B.Status IN (3, 5) THEN B.FinalAmount ELSE 0 END), 0) AS TotalRevenue
+                    FROM
+                        ComboSchedules AS CS
+                    LEFT JOIN
+                        Bookings AS B ON CS.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        CS.ComboId = @itemId
+                    GROUP BY
+                        CS.Id, CS.DepartureDate
+                )
+                SELECT
+                    RD.ItemDetailName,
+                    RD.totalCompletedBookings,
+                    RD.TotalRevenue,
+                    (RD.TotalRevenue / RD.totalCompletedBookings) AS averageRevenuePerBooking
+                FROM
+                    RevenueData AS RD
+                WHERE
+                    RD.totalCompletedBookings > 0
+                ORDER BY
+                    RD.DepartureDate;
+                ";
                     break;
 
                 default:
@@ -269,7 +296,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             T.Id AS ItemId, T.Code AS ItemCode, T.Name AS ItemName, T.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
+                            COUNT(CASE WHEN B.Status IN (3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT TD.Id) AS ItemOptionCount
                         FROM Bookings AS B
                         JOIN TourDepartures AS TD ON B.ItemId = TD.Id
@@ -287,7 +314,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             A.Id AS ItemId, A.Code AS ItemCode, A.Name AS ItemName, A.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
+                            COUNT(CASE WHEN B.Status IN (3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT RT.Id) AS ItemOptionCount 
                         FROM Bookings AS B
                         JOIN RoomTypes AS RT ON B.ItemId = RT.Id 
@@ -305,14 +332,14 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             C.Id AS ItemId, C.Code AS ItemCode, C.Name AS ItemName, C.Rating AS rating,
                             COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
                             COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
+                            COUNT(CASE WHEN B.Status IN (3, 4, 5, 6) THEN B.Id ELSE NULL END) AS TotalBookingsCount,
                             COUNT(DISTINCT CS.Id) AS ItemOptionCount
                         FROM Bookings AS B
                         JOIN ComboSchedules AS CS ON B.ItemId = CS.Id
                         JOIN Combos AS C ON CS.ComboId = C.Id
                         WHERE B.BookingType = @bookingType
                           AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate 
-                          AND B.Status IN (2, 3, 5, 4, 6)
+                          AND B.Status IN (3, 5, 4, 6)
                         GROUP BY C.Id, C.Code, C.Name, C.Rating
                     ";
                     break;
@@ -330,10 +357,11 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 ItemCode = r.ItemCode,
                 ItemName = r.ItemName,
                 totalCompletedBookings = r.totalCompletedBookings,
-                totalCanceledBookings = r.totalCanceledBookings,
+                totalCanceledBookings = r.totalCanceledBookings.HasValue ? r.totalCanceledBookings.Value : 0,
                 ItemOptionCount = r.ItemOptionCount,
                 rating = r.rating,
-                cancellationRate = (r.TotalBookingsCount == 0) ? 0 : Math.Round((decimal)r.totalCanceledBookings / r.TotalBookingsCount, 4)
+                cancellationRate = (r.totalCanceledBookings.HasValue && r.TotalBookingsCount.HasValue && r.TotalBookingsCount.Value > 0)
+                                    ? Math.Round((decimal)r.totalCanceledBookings.Value / r.TotalBookingsCount.Value, 4) : 0,
             })
             .OrderByDescending(r => r.totalCompletedBookings)
             .ToList();
@@ -341,7 +369,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             return finalResults;
         }
 
-        public async Task<IEnumerable<ItemBookingCountDetailDTO>>    GetItemBookingCountDetailAsync(
+        public async Task<IEnumerable<ItemBookingCountDetailDTO>> GetItemBookingCountDetailAsync(
             DateOnly startDate,
             DateOnly endDate,
             ItemType itemType,
@@ -362,68 +390,109 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             {
                 case ItemType.Tour:
                     sql = @"
-                        SELECT
-                            FORMAT(TD.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
-                        FROM
-                            TourDepartures AS TD
-                        LEFT JOIN
-                            Bookings AS B ON TD.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            TD.TourId = @itemId
-                        GROUP BY
-                            TD.Id, TD.DepartureDate
-                        ORDER BY
-                            TD.DepartureDate;
-                    ";
+                WITH BookingCounts AS (
+                    SELECT
+                        TD.Id,
+                        TD.DepartureDate,
+                        FORMAT(TD.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
+                    FROM
+                        TourDepartures AS TD
+                    LEFT JOIN
+                        Bookings AS B ON TD.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        TD.TourId = @itemId
+                    GROUP BY
+                        TD.Id, TD.DepartureDate
+                )
+                SELECT
+                    BC.ItemDetailName,
+                    BC.totalCompletedBookings,
+                    BC.totalCanceledBookings,
+                    -- Đã loại bỏ CASE vì tổng luôn > 0
+                    (BC.totalCanceledBookings * 100.0) / (BC.totalCompletedBookings + BC.totalCanceledBookings) AS cancellationRate
+                FROM
+                    BookingCounts AS BC
+                WHERE
+                    (BC.totalCompletedBookings + BC.totalCanceledBookings) > 0
+                ORDER BY
+                    BC.DepartureDate;
+                ";
                     break;
 
                 case ItemType.Accommodation:
                     sql = @"
-                        SELECT
-                            RT.Name AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
-                        FROM
-                            RoomTypes AS RT
-                        LEFT JOIN
-                            Bookings AS B ON RT.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            RT.AccommodationId = @itemId
-                        GROUP BY
-                            RT.Id, RT.Name
-                        ORDER BY
-                            RT.Name;
-                    ";
+                WITH BookingCounts AS (
+                    SELECT
+                        RT.Id,
+                        RT.Name AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
+                    FROM
+                        RoomTypes AS RT
+                    LEFT JOIN
+                        Bookings AS B ON RT.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        RT.AccommodationId = @itemId
+                    GROUP BY
+                        RT.Id, RT.Name
+                )
+                SELECT
+                    BC.ItemDetailName,
+                    BC.totalCompletedBookings,
+                    BC.totalCanceledBookings,
+                    -- Đã loại bỏ CASE vì tổng luôn > 0
+                    (BC.totalCanceledBookings * 100.0) / (BC.totalCompletedBookings + BC.totalCanceledBookings) AS cancellationRate
+                FROM
+                    BookingCounts AS BC
+                WHERE
+                    (BC.totalCompletedBookings + BC.totalCanceledBookings) > 0
+                ORDER BY
+                    BC.ItemDetailName;
+                ";
                     break;
 
                 case ItemType.Combo:
                     sql = @"
-                        SELECT
-                            FORMAT(CS.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
-                            COUNT(CASE WHEN B.Status IN (2, 3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
-                            COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
-                        FROM
-                            ComboSchedules AS CS
-                        LEFT JOIN
-                            Bookings AS B ON CS.Id = B.ItemId
-                                AND B.BookingType = @bookingType
-                                AND B.Status IN (2, 3, 5, 4, 6)
-                                AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
-                        WHERE
-                            CS.ComboId = @itemId
-                        GROUP BY
-                            CS.Id, CS.DepartureDate
-                        ORDER BY
-                            CS.DepartureDate;
-                    ";
+                WITH BookingCounts AS (
+                    SELECT
+                        CS.Id,
+                        CS.DepartureDate,
+                        FORMAT(CS.DepartureDate, 'yyyy-MM-dd') AS ItemDetailName,
+                        COUNT(CASE WHEN B.Status IN (3, 5) THEN B.Id ELSE NULL END) AS totalCompletedBookings,
+                        COUNT(CASE WHEN B.Status IN (4, 6) THEN B.Id ELSE NULL END) AS totalCanceledBookings
+                    FROM
+                        ComboSchedules AS CS
+                    LEFT JOIN
+                        Bookings AS B ON CS.Id = B.ItemId
+                            AND B.BookingType = @bookingType
+                            AND B.Status IN (3, 5, 4, 6)
+                            AND CAST(B.BookingDate AS DATE) BETWEEN @startDate AND @endDate
+                    WHERE
+                        CS.ComboId = @itemId
+                    GROUP BY
+                        CS.Id, CS.DepartureDate
+                )
+                SELECT
+                    BC.ItemDetailName,
+                    BC.totalCompletedBookings,
+                    BC.totalCanceledBookings,
+                    -- Đã loại bỏ CASE vì tổng luôn > 0
+                    (BC.totalCanceledBookings * 100.0) / (BC.totalCompletedBookings + BC.totalCanceledBookings) AS cancellationRate
+                FROM
+                    BookingCounts AS BC
+                WHERE
+                    (BC.totalCompletedBookings + BC.totalCanceledBookings) > 0
+                ORDER BY
+                    BC.DepartureDate;
+                ";
                     break;
 
                 default:
@@ -447,8 +516,8 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             public decimal rating { get; set; }
             public int totalCompletedBookings { get; set; }
             public decimal? TotalRevenue { get; set; }
-            public int totalCanceledBookings { get; set; }
-            public int TotalBookingsCount { get; set; }
+            public int? totalCanceledBookings { get; set; }
+            public int? TotalBookingsCount { get; set; }
             public int ItemOptionCount { get; set; }
         }
     }

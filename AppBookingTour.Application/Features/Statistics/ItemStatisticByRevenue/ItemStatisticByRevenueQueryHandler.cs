@@ -31,6 +31,8 @@ public class ItemStatisticByRevenueQueryHandler : IRequestHandler<ItemStatisticB
 
         return new ItemStatisticByRevenueResponse
         {
+            ItemTypeId = (int)request.ItemType,
+            ItemTypeName = request.ItemType.ToString(),
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             Items = statisticItems.ToList()
