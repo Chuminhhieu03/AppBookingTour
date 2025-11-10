@@ -8,5 +8,5 @@ public class ListTourDepartureItem
     public DateTime ReturnDate { get; set; }
     public decimal PriceAdult { get; set; }
     public int AvailableSlots { get; set; }
-    public string Status { get; set; } = null!;
+    public int Status { get; set; }
 }
