@@ -15,5 +15,6 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
     public class SearchAccommodationResponse : BaseResponse
     {
         public List<Accommodation>? ListAccommodation { get; set; }
+        public int? TotalCount { get; set; }
     }
 }

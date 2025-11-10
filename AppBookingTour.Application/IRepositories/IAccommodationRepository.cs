@@ -5,7 +5,7 @@ namespace AppBookingTour.Application.IRepositories
 {
     public interface IAccommodationRepository : IRepository<Accommodation>
     {
-        Task<List<Accommodation>> SearchAccommodation(SearchAccommodationFilter accommodationFilter, int pageIndex, int pageSize);
+        Task<(List<Accommodation> ListAccommodation, int TotalCount)> SearchAccommodation(SearchAccommodationFilter accommodationFilter, int pageIndex, int pageSize);
         Task<Accommodation> GetById(int id);
     }
 }

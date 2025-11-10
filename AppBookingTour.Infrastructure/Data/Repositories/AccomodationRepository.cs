@@ -18,7 +18,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<List<Accommodation>> SearchAccommodation(SearchAccommodationFilter accommodationFilter, int pageIndex, int pageSize)
+        public async Task<(List<Accommodation> ListAccommodation, int TotalCount)> SearchAccommodation(SearchAccommodationFilter accommodationFilter, int pageIndex, int pageSize)
         {
             IQueryable<Accommodation> query = _dbSet.Include(x => x.City);
             if (!string.IsNullOrEmpty(accommodationFilter.Name))
@@ -31,11 +31,13 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 query = query.Where(x => x.Type == accommodationFilter.Type.Value);
             if (accommodationFilter.CityId.HasValue)
                 query = query.Where(x => x.CityId == accommodationFilter.CityId);
+            int totalCount = await query.CountAsync();
             query = query
                 .OrderBy(x => - x.Id)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize);
-            return await query.ToListAsync();
+            var listAccommodation = await query.ToListAsync();
+            return (listAccommodation, totalCount);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace AppBookingTour.Domain.Enums;
 
@@ -273,6 +274,7 @@ public enum EntityType
     RoomType = 6
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FeatureCode
 {
     [Description("RoomTypeAmenity")]

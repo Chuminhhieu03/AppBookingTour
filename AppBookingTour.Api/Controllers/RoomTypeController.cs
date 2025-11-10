@@ -1,6 +1,4 @@
 using AppBookingTour.Application.Features.RoomTypes.AddNewRoomType;
-using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeAddnew;
-using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeDisplay;
 using AppBookingTour.Application.Features.RoomTypes.UpdateRoomType;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,21 +29,6 @@ namespace AppBookingTour.Api.Controllers
             var command = new UpdateRoomTypeCommand(id, dto);
             var response = await _mediator.Send(command);
             return Ok(response);
-        }
-
-        [HttpPost("setup-addnew")]
-        public async Task<IActionResult> SetupAddnew([FromBody] SetupRoomTypeAddnewQuery query)
-        {
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> SetupDisplay(int id)
-        {
-            var query = new SetupRoomTypeDisplayQuery(id);
-            var result = await _mediator.Send(query);
-            return Ok(result);
         }
     }
 }
