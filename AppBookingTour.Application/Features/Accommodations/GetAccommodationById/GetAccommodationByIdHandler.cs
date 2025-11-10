@@ -3,18 +3,18 @@ using AppBookingTour.Domain.Constants;
 using AppBookingTour.Domain.Entities;
 using MediatR;
 
-namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationDisplay
+namespace AppBookingTour.Application.Features.Accommodations.GetAccommodationById
 {
-    public class SetupAccommodationDisplayHandler : IRequestHandler<SetupAccommodationDisplayQuery, SetupAccommodationDisplayDTO>
+    public class GetAccommodationByIdHandler : IRequestHandler<GetAccommodationByIdQuery, GetAccommodationByIdDTO>
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public SetupAccommodationDisplayHandler(IUnitOfWork unitOfWork)
+        public GetAccommodationByIdHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<SetupAccommodationDisplayDTO> Handle(SetupAccommodationDisplayQuery request, CancellationToken cancellationToken)
+        public async Task<GetAccommodationByIdDTO> Handle(GetAccommodationByIdQuery request, CancellationToken cancellationToken)
         {
             var accommodation = await _unitOfWork.Accommodations.GetById(request.id);
             if (accommodation == null)
@@ -29,7 +29,7 @@ namespace AppBookingTour.Application.Features.Accommodations.SetupAccommodationD
                 accommodation.TypeName = Constants.AccommodationType.dctName[accommodation.Type.Value];
             var listRoomType = accommodation.ListRoomType?.OrderBy(x => -x.Id).ToList();
             accommodation.ListRoomType = listRoomType;
-            return new SetupAccommodationDisplayDTO
+            return new GetAccommodationByIdDTO
             {
                 Accommodation = accommodation,
                 Success = true
