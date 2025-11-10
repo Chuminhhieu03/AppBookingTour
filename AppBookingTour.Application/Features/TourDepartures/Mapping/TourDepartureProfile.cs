@@ -15,8 +15,7 @@ namespace AppBookingTour.Application.Features.TourDepartures.Mapping
 
             CreateMap<TourDeparture, TourDepartureDTO>();
 
-            CreateMap<TourDeparture, ListTourDepartureItem>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            CreateMap<TourDeparture, ListTourDepartureItem>();
         }
     }
 }

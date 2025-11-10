@@ -25,6 +25,7 @@ public interface IUnitOfWork : IDisposable
     ISystemParameterRepository SystemParameters { get; }
     IBookingRepository Bookings { get; }
     IComboRepository Combos { get; }
+    IStatisticsRepository Statistics { get; }
 
     #endregion
 

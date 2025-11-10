@@ -34,6 +34,7 @@ public class UnitOfWork : IUnitOfWork
     private ISystemParameterRepository _systemParameterRepository;
     private IBookingRepository _bookingRepository;
     private IComboRepository? _comboRepository;
+    private IStatisticsRepository _statisticsRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -68,6 +69,7 @@ public class UnitOfWork : IUnitOfWork
     public ISystemParameterRepository SystemParameters => _systemParameterRepository ?? new SystemParameterRepository(_context);
     public IBookingRepository Bookings => _bookingRepository ?? new BookingRepository(_context);
     public IComboRepository Combos => _comboRepository ??= new ComboRepository(_context);
+    public IStatisticsRepository Statistics => _statisticsRepository ?? new StatisticsRepository(_context);
 
     #endregion
 
