@@ -2,4 +2,4 @@
 
 namespace AppBookingTour.Application.Features.Statistics.OverviewStatistic;
 
-public record OverviewStatisticQuery(int year, int month) : IRequest<OverviewStatisticDTO>;
+public record OverviewStatisticQuery() : IRequest<OverviewStatisticDTO>;
