@@ -2,6 +2,7 @@
 using AppBookingTour.Application.Features.Statistics.ItemRevenueDetail;
 using AppBookingTour.Application.Features.Statistics.ItemStatisticByBookingCount;
 using AppBookingTour.Application.Features.Statistics.ItemStatisticByRevenue;
+using AppBookingTour.Application.Features.Statistics.OverviewStatistic;
 using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Application.IRepositories
@@ -33,6 +34,14 @@ namespace AppBookingTour.Application.IRepositories
             DateOnly endDate,
             ItemType itemType,
             int itemId,
+            CancellationToken cancellationToken = default);
+
+        Task<OverviewStatisticDTO> GetOverviewStatisticsAsync(
+            DateTime currentPeriodStart,
+            DateTime currentPeriodEnd,
+            DateTime previousPeriodStart,
+            DateTime previousPeriodEnd,
+            DateTime yearStart,
             CancellationToken cancellationToken = default);
     }
 }

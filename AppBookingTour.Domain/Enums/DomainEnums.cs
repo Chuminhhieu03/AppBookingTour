@@ -49,9 +49,8 @@ public enum TourDepartureStatus
 public enum BookingType
 {
     Tour = 1,
-    Hotel = 2,
+    Accommodation = 2,
     Combo = 3,
-    Flight = 4
 }
 
 public enum BookingStatus

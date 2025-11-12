@@ -8,9 +8,9 @@ public class OverviewStatisticDTO
     public decimal TotalRevenue { get; set; }
     public decimal PreviousMonthRevenue { get; set; }
     public double GrowthRate { get; set; }
-    public int TotalOrders { get; set; }
-    public int CompletedOrders { get; set; }
-    public int CanceledOrders { get; set; }
+    public int TotalBookings { get; set; }
+    public int CompletedBookings { get; set; }
+    public int CanceledBookings { get; set; }
     public SummaryByTypeDTO? SummaryByType { get; set; }
     public List<MonthlyReportDTO>? MonthlyReport { get; set; }
 }
@@ -24,8 +24,8 @@ public class SummaryByTypeDTO
 
 public class TypeStatisticDTO
 {
-    public int TotalCompletedOrders { get; set; }
-    public int TotalCanceledOrders { get; set; }
+    public int TotalCompletedBooings { get; set; }
+    public int TotalCanceledBookings { get; set; }
     public decimal TotalRevenue { get; set; }
 }
 
@@ -34,12 +34,9 @@ public class MonthlyReportDTO
     public int Month { get; set; }
     public int Year { get; set; }
     public decimal TourRevenue { get; set; }
-    public int TourCompletedOrders { get; set; }
-    public int TourCanceledOrders { get; set; }
+    public int TourCompletedBookings { get; set; }
     public decimal ComboRevenue { get; set; }
-    public decimal ComboCompletedOrders { get; set; }
-    public int ComboCanceledOrders { get; set; }
+    public decimal ComboCompletedBookings { get; set; }
     public decimal AccommodationRevenue { get; set; }
-    public int AccommodationCompletedOrders { get; set; }
-    public int AccommodationCanceledOrders { get; set; }
+    public int AccommodationCompletedBookings { get; set; }
 }

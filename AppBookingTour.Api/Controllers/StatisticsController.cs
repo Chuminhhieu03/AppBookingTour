@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Statistics.OverviewStatistic;
 using AppBookingTour.Application.Features.Statistics.ItemBookingCountDetail;
 using AppBookingTour.Application.Features.Statistics.ItemRevenueDetail;
 using AppBookingTour.Application.Features.Statistics.ItemStatisticByBookingCount;
@@ -20,10 +21,14 @@ public sealed class StatisticsController : ControllerBase
         _mediator = mediator;
         _logger = logger;
     }
-    //[HttpGet("overview")]
-    //public async Task<ActionResult<ApiResponse<object>>> GetOverviewStatistic([FromQuery] int year)
-    //{
-    //}
+
+    [HttpGet("overview")]
+    public async Task<ActionResult<ApiResponse<object>>> GetOverviewStatistic()
+    {
+        var query = new OverviewStatisticQuery();
+        var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
 
     [HttpGet("item-revenue")]
     public async Task<ActionResult<ApiResponse<object>>> GetItemStatisticByRevenue(

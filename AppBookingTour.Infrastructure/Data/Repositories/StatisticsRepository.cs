@@ -2,6 +2,7 @@
 using AppBookingTour.Application.Features.Statistics.ItemRevenueDetail;
 using AppBookingTour.Application.Features.Statistics.ItemStatisticByBookingCount;
 using AppBookingTour.Application.Features.Statistics.ItemStatisticByRevenue;
+using AppBookingTour.Application.Features.Statistics.OverviewStatistic;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Enums;
 using AppBookingTour.Infrastructure.Database;
@@ -503,6 +504,173 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 .QueryAsync<ItemBookingCountDetailDTO>(sql, parameters);
 
             return results;
+        }
+
+        public async Task<OverviewStatisticDTO> GetOverviewStatisticsAsync(
+             DateTime currentPeriodStart,
+             DateTime currentPeriodEnd,
+             DateTime previousPeriodStart,
+             DateTime previousPeriodEnd,
+             DateTime yearStart,
+             CancellationToken cancellationToken = default)
+        {
+            var sql = @"
+                WITH YearlyReportData AS (
+                    SELECT
+                        MONTH(BookingDate) AS ReportMonth,
+                        YEAR(BookingDate) AS ReportYear,
+                        BookingType,
+                        ISNULL(SUM(CASE WHEN Status IN (3, 5) THEN FinalAmount ELSE 0 END), 0) AS TotalRevenue,
+                        COUNT(CASE WHEN Status IN (3, 5) THEN 1 ELSE NULL END) AS CompletedBookings
+                    FROM 
+                        Bookings
+                    WHERE
+                        BookingDate BETWEEN @YearStart AND @CurrentPeriodEnd
+                        AND Status IN (3, 5) 
+                    GROUP BY
+                        YEAR(BookingDate), MONTH(BookingDate), BookingType
+                )
+                SELECT * FROM YearlyReportData;
+
+                WITH CurrentMonthData AS (
+                    SELECT
+                        BookingType,
+                        ISNULL(SUM(CASE WHEN Status IN (3, 5) THEN FinalAmount ELSE 0 END), 0) AS TotalRevenue,
+                        COUNT(Id) AS TotalBookings, 
+                        COUNT(CASE WHEN Status IN (3, 5) THEN 1 ELSE NULL END) AS TotalCompletedBookings,
+                        COUNT(CASE WHEN Status IN (4, 6) THEN 1 ELSE NULL END) AS TotalCanceledBookings
+                    FROM 
+                        Bookings
+                    WHERE
+                        BookingDate BETWEEN @CurrentPeriodStart AND @CurrentPeriodEnd
+                        AND Status IN (3, 5, 4, 6) 
+                    GROUP BY
+                        BookingType
+                )
+                SELECT * FROM CurrentMonthData;
+
+                WITH PreviousMonthData AS (
+                    SELECT
+                        ISNULL(SUM(FinalAmount), 0) AS TotalRevenue
+                    FROM 
+                        Bookings
+                    WHERE
+                        BookingDate BETWEEN @PreviousPeriodStart AND @PreviousPeriodEnd
+                        AND Status IN (3, 5) 
+                )
+                SELECT TotalRevenue AS PreviousMonthRevenue FROM PreviousMonthData;
+            ";
+
+            var parameters = new
+            {
+                CurrentPeriodStart = currentPeriodStart,
+                CurrentPeriodEnd = currentPeriodEnd,
+                PreviousPeriodStart = previousPeriodStart,
+                PreviousPeriodEnd = previousPeriodEnd,
+                YearStart = yearStart
+            };
+
+            var connection = _context.Database.GetDbConnection();
+
+            using (var grid = await connection.QueryMultipleAsync(sql, parameters))
+            {
+                var yearlyData = (await grid.ReadAsync<YearlyAggregateDto>()).ToList();
+                var currentMonthData = (await grid.ReadAsync<CurrentMonthAggregateDto>()).ToList();
+                var previousMonthRevenue = await grid.ReadSingleAsync<decimal>();
+
+                var overviewDto = new OverviewStatisticDTO
+                {
+                    Month = currentPeriodEnd.Month,
+                    Year = currentPeriodEnd.Year,
+                    PreviousMonthRevenue = previousMonthRevenue,
+                    TotalRevenue = currentMonthData.Sum(x => x.TotalRevenue),
+                    TotalBookings = currentMonthData.Sum(x => x.TotalBookings),
+                    CompletedBookings = currentMonthData.Sum(x => x.TotalCompletedBookings),
+                    CanceledBookings = currentMonthData.Sum(x => x.TotalCanceledBookings),
+                    SummaryByType = new SummaryByTypeDTO
+                    {
+                        Tour = MapToTypeStatistic(currentMonthData, BookingType.Tour),
+                        Accommodation = MapToTypeStatistic(currentMonthData, BookingType.Accommodation),
+                        Combo = MapToTypeStatistic(currentMonthData, BookingType.Combo)
+                    },
+                    MonthlyReport = MapToMonthlyReport(yearlyData, currentPeriodEnd.Year)
+                };
+
+                if (overviewDto.PreviousMonthRevenue > 0)
+                {
+                    overviewDto.GrowthRate = Math.Round(
+                        (((double)overviewDto.TotalRevenue - (double)overviewDto.PreviousMonthRevenue) / (double)overviewDto.PreviousMonthRevenue) * 100,
+                        2
+                    );
+                }
+                else if (overviewDto.TotalRevenue > 0)
+                {
+                    overviewDto.GrowthRate = 100.0;
+                }
+                else
+                {
+                    overviewDto.GrowthRate = 0;
+                }
+
+                return overviewDto;
+            }
+        }
+
+        private TypeStatisticDTO MapToTypeStatistic(List<CurrentMonthAggregateDto> data, BookingType type)
+        {
+            var item = data.FirstOrDefault(x => x.BookingType == type);
+            if (item == null)
+                return new TypeStatisticDTO { TotalCompletedBooings = 0, TotalCanceledBookings = 0, TotalRevenue = 0 };
+
+            return new TypeStatisticDTO
+            {
+                TotalCompletedBooings = item.TotalCompletedBookings,
+                TotalCanceledBookings = item.TotalCanceledBookings,
+                TotalRevenue = item.TotalRevenue
+            };
+        }
+
+        private List<MonthlyReportDTO> MapToMonthlyReport(List<YearlyAggregateDto> data, int year)
+        {
+            var report = new List<MonthlyReportDTO>();
+            for (int m = 1; m <= 12; m++)
+            {
+                var monthData = data.Where(x => x.ReportMonth == m).ToList();
+                var tourData = monthData.FirstOrDefault(x => x.BookingType == BookingType.Tour);
+                var accomData = monthData.FirstOrDefault(x => x.BookingType == BookingType.Accommodation);
+                var comboData = monthData.FirstOrDefault(x => x.BookingType == BookingType.Combo);
+
+                report.Add(new MonthlyReportDTO
+                {
+                    Month = m,
+                    Year = year,
+                    TourRevenue = tourData?.TotalRevenue ?? 0,
+                    TourCompletedBookings = tourData?.CompletedBookings ?? 0,
+                    AccommodationRevenue = accomData?.TotalRevenue ?? 0,
+                    AccommodationCompletedBookings = accomData?.CompletedBookings ?? 0,
+                    ComboRevenue = comboData?.TotalRevenue ?? 0,
+                    ComboCompletedBookings = (decimal)(comboData?.CompletedBookings ?? 0)
+                });
+            }
+            return report;
+        }
+
+        private class YearlyAggregateDto
+        {
+            public int ReportMonth { get; set; }
+            public int ReportYear { get; set; }
+            public BookingType BookingType { get; set; }
+            public decimal TotalRevenue { get; set; }
+            public int CompletedBookings { get; set; }
+        }
+
+        private class CurrentMonthAggregateDto
+        {
+            public BookingType BookingType { get; set; }
+            public decimal TotalRevenue { get; set; }
+            public int TotalBookings { get; set; }
+            public int TotalCompletedBookings { get; set; }
+            public int TotalCanceledBookings { get; set; }
         }
 
         /// <summary>
