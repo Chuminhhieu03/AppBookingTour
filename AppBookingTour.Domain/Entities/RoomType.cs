@@ -34,7 +34,7 @@ public class RoomType : BaseEntity
     public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties
-    public virtual ICollection<RoomInventory> RoomInventories { get; set; } = [];
+    public virtual ICollection<RoomInventory> ListRoomInventory { get; set; } = [];
 
     #endregion
 }

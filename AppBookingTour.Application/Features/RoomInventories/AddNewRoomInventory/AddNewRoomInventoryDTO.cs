@@ -7,9 +7,8 @@ namespace AppBookingTour.Application.Features.RoomInventories.AddNewRoomInventor
     {
         public int RoomTypeId { get; set; }
         public DateTime Date { get; set; }
-        public int Quantity { get; set; }
-        public decimal? Price { get; set; }
-        public bool IsActive { get; set; } = true;
+        public decimal? BasePriceAdult { get; set; }
+        public decimal? BasePriceChildren { get; set; }
     }
     public class AddNewRoomInventoryResponse : BaseResponse
     {

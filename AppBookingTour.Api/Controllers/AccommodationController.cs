@@ -2,6 +2,7 @@
 using AppBookingTour.Application.Features.Accommodations.GetAccommodationById;
 using AppBookingTour.Application.Features.Accommodations.SearchAccommodation;
 using AppBookingTour.Application.Features.Accommodations.UpdateAccommodation;
+using AppBookingTour.Application.Features.Accommodations.DeleteAccommodation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,11 +43,19 @@ namespace AppBookingTour.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> SetupDisplay(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             var query = new GetAccommodationByIdQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteAccommodation(int id)
+		{
+			var command = new DeleteAccommodationCommand(id);
+			var result = await _mediator.Send(command);
+			return Ok(result);
+		}
     }
 }
