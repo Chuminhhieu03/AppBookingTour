@@ -13,10 +13,11 @@ namespace AppBookingTour.Application.Features.TourDepartures.Mapping
             CreateMap<TourDepartureRequestDTO, TourDeparture>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<TourDeparture, TourDepartureDTO>();
+            CreateMap<TourDeparture, TourDepartureDTO>()
+                .ForMember(dest => dest.GuideName,
+                    opt => opt.MapFrom(src => src.Guide != null ? src.Guide.FullName : null));
 
-            CreateMap<TourDeparture, ListTourDepartureItem>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            CreateMap<TourDeparture, ListTourDepartureItem>();
         }
     }
 }
