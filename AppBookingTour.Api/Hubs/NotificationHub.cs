@@ -1,38 +1,49 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppBookingTour.Api.Hubs
 {
-    // Hub class kế thừa từ Hub
+    [Authorize]
     public class NotificationHub : Hub
     {
-        // Ghi log khi có client kết nối
         public override async Task OnConnectedAsync()
         {
-            // (Tùy chọn) Bạn có thể lấy user ID từ context nếu user đã đăng nhập
-            // var userId = Context.UserIdentifier; 
+            //// Lấy ID của user từ JWT token
+            //var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Gửi thông báo chào mừng chỉ đến client vừa kết nối
-            await Clients.Caller.SendAsync("ReceiveWelcomeMessage", "Chào mừng bạn đã kết nối tới hệ thống thông báo!");
+            //if (!string.IsNullOrEmpty(userId))
+            //{
+            //    // Group theo Role - Dùng tên Role (string)
+            //    if (Context.User!.IsInRole("Admin"))
+            //    {
+            //        await Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
+            //    }
+            //    if (Context.User.IsInRole("Staff"))
+            //    {
+            //        await Groups.AddToGroupAsync(Context.ConnectionId, "Staff");
+            //    }
+            //    if (Context.User.IsInRole("Customer")) 
+            //    {
+            //        await Groups.AddToGroupAsync(Context.ConnectionId, "Customer");
+            //        // Group cá nhân
+            //        await Groups.AddToGroupAsync(Context.ConnectionId, $"User_{userId}");
+            //    }
+            //    if (Context.User.IsInRole("Guide"))
+            //    {
+            //        await Groups.AddToGroupAsync(Context.ConnectionId, "Guide");
+            //    }
+            //}
 
-            // Ghi log ra console (hoặc logger của bạn)
-            Console.WriteLine($"Client connected: {Context.ConnectionId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, "Group");
+
             await base.OnConnectedAsync();
         }
 
-        // Ghi log khi client ngắt kết nối
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            Console.WriteLine($"Client disconnected: {Context.ConnectionId}");
             await base.OnDisconnectedAsync(exception);
-        }
-
-        // (Demo) Một phương thức mà client có thể gọi lên server
-        // Ví dụ: client gửi 1 tin nhắn, server broadcast cho tất cả
-        public async Task SendMessageToAll(string user, string message)
-        {
-            // "ReceiveMessage" là tên sự kiện mà các client sẽ lắng nghe
-            await Clients.All.SendAsync("ReceiveMessage", user, message);
         }
     }
 }
