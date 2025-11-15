@@ -14,6 +14,8 @@ public class ComboProfile : Profile
             .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
         CreateMap<Combo, ComboDTO>()
+            .ForMember(dest => dest.FromCityId, opt => opt.MapFrom(src => src.FromCity.Id))
+            .ForMember(dest => dest.ToCityId, opt => opt.MapFrom(src => src.ToCity.Id))
             .ForMember(dest => dest.FromCityName, opt => opt.MapFrom(src => src.FromCity.Name))
             .ForMember(dest => dest.ToCityName, opt => opt.MapFrom(src => src.ToCity.Name))
             .ForMember(dest => dest.Vehicle, opt => opt.MapFrom(src => src.Vehicle.ToString()))

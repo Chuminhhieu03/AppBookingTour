@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace AppBookingTour.Domain.Entities;
 
 public class RoomInventory : BaseEntity
@@ -9,5 +11,6 @@ public class RoomInventory : BaseEntity
     public decimal BasePriceChildren { get; set; }
 
     // Navigation properties
+    [JsonIgnore]
     public virtual RoomType RoomType { get; set; } = null!;
 }

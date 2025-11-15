@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
-
 using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Application.Features.Combos.GetComboById;
 
@@ -28,10 +27,8 @@ public sealed class GetComboByIdQueryHandler : IRequestHandler<GetComboByIdQuery
         _logger.LogInformation("Getting combo details for ID: {ComboId}", request.ComboId);
         try
         {
-            var combo = await _unitOfWork.Repository<Combo>().GetByIdAsync(request.ComboId,
-                c => c.FromCity,
-                c => c.ToCity,
-                c => c.Schedules);
+            // Sử dụng ComboRepository để load combo với details
+            var combo = await _unitOfWork.Combos.GetComboWithDetailsAsync(request.ComboId, cancellationToken);
 
             if (combo == null)
             {
@@ -39,7 +36,11 @@ public sealed class GetComboByIdQueryHandler : IRequestHandler<GetComboByIdQuery
                 return GetComboByIdResponse.Failed($"Combo with ID {request.ComboId} not found");
             }
 
+            // Get List Image by ComboID sử dụng ImageRepository
+            var lstImage = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(combo.Id, EntityType.Combo);
+
             var comboDto = _mapper.Map<ComboDTO>(combo);
+            comboDto.ComboImages = [.. lstImage.Select(x => x.Url)];
 
             return GetComboByIdResponse.Success(comboDto);
         }

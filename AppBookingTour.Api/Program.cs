@@ -57,6 +57,8 @@ builder.Services.AddHealthChecks();
 // Output cache for controller attributes
 builder.Services.AddOutputCache();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddLogging();
 
 // Configuration binding

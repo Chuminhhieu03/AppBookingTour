@@ -16,5 +16,12 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
             query = query.OrderBy(x => x.Id).Skip(pageIndex * pageSize).Take(pageSize);
             return await query.ToListAsync();
         }
+
+        public async Task<RoomType?> GetById(int id)
+        {
+            IQueryable<RoomType> query = _dbSet
+                .Include(x => x.ListRoomInventory);
+            return await query.FirstOrDefaultAsync(e => e.Id == id);
+        }
     }
 }

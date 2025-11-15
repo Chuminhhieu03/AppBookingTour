@@ -19,8 +19,10 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
             var filter = request.SearchAccommodationFilter ?? new SearchAccommodationFilter();
             int pageIndex = request.pageIndex ?? Constants.Pagination.PageIndex;
             int pageSize = request.pageSize ?? Constants.Pagination.PageSize;
-            var listAccomodation = await _unitOfWork.Accommodations.SearchAccommodation(filter, pageIndex, pageSize);
-            listAccomodation?.ForEach(item =>
+            var result = await _unitOfWork.Accommodations.SearchAccommodation(filter, pageIndex, pageSize);
+            var listAccommodation = result.ListAccommodation;
+            var totalCount = result.TotalCount;
+            listAccommodation?.ForEach(item =>
             {
                 item.StatusName = Constants.ActiveStatus.dctName[Convert.ToInt32(item.IsActive)];
                 if (item.Type.HasValue && Constants.AccommodationType.dctName.ContainsKey(item.Type.Value))
@@ -29,7 +31,8 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
             return new SearchAccommodationResponse
             {
                 Success = true,
-                ListAccommodation = listAccomodation
+                ListAccommodation = listAccommodation,
+                TotalCount = totalCount
             };
         }
     }

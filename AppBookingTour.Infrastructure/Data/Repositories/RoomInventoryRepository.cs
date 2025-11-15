@@ -2,12 +2,14 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AppBookingTour.Infrastructure.Data.Repositories
 {
     public class RoomInventoryRepository : Repository<RoomInventory>, IRoomInventoryRepository
     {
         public RoomInventoryRepository(ApplicationDbContext context) : base(context) { }
+
         public async Task<List<RoomInventory>> SearchRoomInventory(int? roomTypeId, DateTime? date, int? minQuantity, int pageIndex, int pageSize)
         {
             IQueryable<RoomInventory> query = _dbSet;
