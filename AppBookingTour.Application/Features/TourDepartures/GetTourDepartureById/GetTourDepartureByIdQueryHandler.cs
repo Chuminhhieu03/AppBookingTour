@@ -25,7 +25,11 @@ public sealed class GetTourDepartureByIdQueryHandler : IRequestHandler<GetTourDe
     public async Task<TourDepartureDTO> Handle(GetTourDepartureByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting tour departure details for ID: {TourDepartureId}", request.TourDepartureId);
-        var departure = await _unitOfWork.Repository<TourDeparture>().GetByIdAsync(request.TourDepartureId, cancellationToken);
+        var departure = await _unitOfWork.Repository<TourDeparture>()
+        .GetByIdAsync(
+            request.TourDepartureId,
+            x => x.Guide
+        );
         if (departure == null)
         {
             _logger.LogWarning("Tour departure not found with ID: {TourDepartureId}", request.TourDepartureId);

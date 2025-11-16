@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.SystemParameters.CreateSystemParameter;
 using AppBookingTour.Application.Features.SystemParameters.DeleteSystemParameter;
+using AppBookingTour.Application.Features.SystemParameters.GetSystemParameterByFeatureCode;
 using AppBookingTour.Application.Features.SystemParameters.GetSystemParameterById;
 using AppBookingTour.Application.Features.SystemParameters.UpdateSystemParameter;
 using FluentValidation;
@@ -10,8 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace AppBookingTour.Api.Controllers
 {
     [ApiController]
-    [Route("api/system-parameters")]
-    public sealed class SystemParametersController : ControllerBase
+    [Route("api/[controller]")]
+    public class SystemParametersController : ControllerBase
     {
         private readonly IMediator _mediator;
         private readonly ILogger<SystemParametersController> _logger;
@@ -133,7 +134,7 @@ namespace AppBookingTour.Api.Controllers
                 return Ok(new ApiResponse<object>
                 {
                     Success = true,
-                    Message ="Delete system parameter successfully"
+                    Message = "Delete system parameter successfully"
                 });
             }
             catch (Exception ex)
@@ -141,6 +142,13 @@ namespace AppBookingTour.Api.Controllers
                 _logger.LogError(ex, "Error deleting system parameter with ID: {Id}", id);
                 return BadRequest(ApiResponse<object>.Fail("An error occurred while deleting the system parameter."));
             }
+        }
+
+        [HttpPost("get-by-feature-code")]
+        public async Task<ActionResult<ApiResponse<object>>> GetByFeatureCode([FromBody] GetSystemParameterByFeatureCodeQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return ApiResponse<object>.Ok(result);
         }
     }
 }

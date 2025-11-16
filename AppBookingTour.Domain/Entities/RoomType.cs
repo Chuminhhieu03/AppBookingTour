@@ -12,7 +12,7 @@ public class RoomType : BaseEntity
     public string Name { get; set; }
     public int? MaxAdult { get; set; }
     public int? MaxChildren { get; set; }
-    public int? Status { get; set; }
+    public bool? Status { get; set; }
     public decimal? Price { get; set; }
     public int? Quantity { get; set; }
     public string? Amenities { get; set; } // List id: 1, 2, 3, ..
@@ -34,7 +34,7 @@ public class RoomType : BaseEntity
     public List<Image>? ListInfoImage { get; set; }
 
     // Navigation properties
-    public virtual ICollection<RoomInventory> RoomInventories { get; set; } = [];
+    public virtual ICollection<RoomInventory> ListRoomInventory { get; set; } = [];
 
     #endregion
 }

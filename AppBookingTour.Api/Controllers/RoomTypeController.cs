@@ -1,6 +1,6 @@
 using AppBookingTour.Application.Features.RoomTypes.AddNewRoomType;
-using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeAddnew;
-using AppBookingTour.Application.Features.RoomTypes.SetupRoomTypeDisplay;
+using AppBookingTour.Application.Features.RoomTypes.DeleteRoomType;
+using AppBookingTour.Application.Features.RoomTypes.GetRoomTypeById;
 using AppBookingTour.Application.Features.RoomTypes.UpdateRoomType;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +25,14 @@ namespace AppBookingTour.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var query = new GetRoomTypeByIdQuery(id);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRoomType(int id, [FromForm] UpdateRoomTypeDTO dto)
         {
@@ -33,18 +41,11 @@ namespace AppBookingTour.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost("setup-addnew")]
-        public async Task<IActionResult> SetupAddnew([FromBody] SetupRoomTypeAddnewQuery query)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRoomType(int id)
         {
-            var result = await _mediator.Send(query);
-            return Ok(result);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> SetupDisplay(int id)
-        {
-            var query = new SetupRoomTypeDisplayQuery(id);
-            var result = await _mediator.Send(query);
+            var command = new DeleteRoomTypeCommand(id);
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

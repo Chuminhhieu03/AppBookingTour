@@ -17,7 +17,6 @@ namespace AppBookingTour.Application.Features.RoomInventories.AddNewRoomInventor
         {
             RuleFor(x => x.RoomTypeId).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Loại phòng"));
             RuleFor(x => x.Date).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Ngày tồn kho"));
-            RuleFor(x => x.Quantity).GreaterThanOrEqualTo(0).WithMessage("Số lượng phải >= 0");
         }
     }
 }

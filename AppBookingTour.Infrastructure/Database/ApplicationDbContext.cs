@@ -30,6 +30,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<City> Cities { get; set; }
     public DbSet<Accommodation> Accommodations { get; set; }
     public DbSet<RoomType> RoomTypes { get; set; }
+    public DbSet<RoomInventory> RoomInventories { get; set; }
     #endregion
 
     #region Booking

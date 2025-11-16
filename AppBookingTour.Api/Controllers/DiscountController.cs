@@ -1,5 +1,6 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
+using AppBookingTour.Application.Features.Discounts.DeleteDiscount;
 using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountAddnew;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountDefault;
@@ -72,6 +73,14 @@ namespace AppBookingTour.Api.Controllers
         {
             var query = new SetupDiscountEditQuery(id);
             var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDiscount(int id)
+        {
+            var command = new DeleteDiscountCommand(id);
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

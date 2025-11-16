@@ -32,6 +32,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<DiscountUsage> DiscountUsages { get; }
     IRepository<BookingParticipant> BookingParticipants { get; }
     IRepository<TourDeparture> TourDepartures { get; }
+    IStatisticsRepository Statistics { get; }
 
     #endregion
 

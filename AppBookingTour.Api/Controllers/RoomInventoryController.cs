@@ -1,4 +1,5 @@
 using AppBookingTour.Application.Features.RoomInventories.AddNewRoomInventory;
+using AppBookingTour.Application.Features.RoomInventories.DeleteRoomInventory;
 using AppBookingTour.Application.Features.RoomInventories.SearchRoomInventories;
 using AppBookingTour.Application.Features.RoomInventories.UpdateRoomInventory;
 using MediatR;
@@ -36,6 +37,14 @@ namespace AppBookingTour.Api.Controllers
             var command = new UpdateRoomInventoryCommand(id, dto);
             var response = await _mediator.Send(command);
             return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRoomInventory(int id)
+        {
+            var command = new DeleteRoomInventoryCommand(id);
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
     }
 }

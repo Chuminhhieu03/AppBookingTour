@@ -15,8 +15,7 @@ public class UpdateTourDepartureCommandValidator : AbstractValidator<UpdateTourD
 
         RuleFor(x => x.TourDepartureRequest.DepartureDate)
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Ngày khởi hành"))
-            .Must(BeAValidDate).WithMessage("DepartureDate must be a valid date")
-            .Must(BeFutureDate).WithMessage("DepartureDate must be in the future"); ;
+            .Must(BeAValidDate).WithMessage("DepartureDate must be a valid date");
 
         RuleFor(x => x.TourDepartureRequest.ReturnDate)
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Ngày trở về"))
@@ -48,10 +47,5 @@ public class UpdateTourDepartureCommandValidator : AbstractValidator<UpdateTourD
     private bool BeAValidDate(DateTime? date)
     {
         return date.HasValue && date.Value != default;
-    }
-
-    private bool BeFutureDate(DateTime? date)
-    {
-        return date.HasValue && date.Value.Date > DateTime.UtcNow.Date;
     }
 }
