@@ -23,5 +23,6 @@ public class ComboScheduleDTO
     public int BookedSlots { get; set; }
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChildren { get; set; }
+    public decimal SingleRoomSupplement { get; set; }
     public string Status { get; set; } = null!;
 }

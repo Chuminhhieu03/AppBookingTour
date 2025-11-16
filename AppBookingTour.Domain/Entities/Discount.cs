@@ -16,6 +16,8 @@ namespace AppBookingTour.Domain.Entities
         public int? ServiceType { get; set; }
         public int? Status { get; set; }
         public string? Description { get; set; }
+        public decimal? MaximumDiscount { get; set; }
+        public decimal? MinimumOrderAmount { get; set; }
 
         #endregion
 
@@ -27,5 +29,8 @@ namespace AppBookingTour.Domain.Entities
         public string? ServiceTypeName { get; set; }
 
         #endregion
+
+        // Navigation properties
+        public virtual ICollection<DiscountUsage> DiscountUsages { get; set; } = [];
     }
 }

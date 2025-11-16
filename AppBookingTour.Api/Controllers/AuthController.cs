@@ -58,6 +58,9 @@ public class AuthController : ControllerBase
         return Ok(ApiResponse<object>.Ok(new
         {
             result.Token,
+            result.UserId,
+            result.FullName,
+            result.Role,
             result.Expiration,
             result.Message,
             result.Success

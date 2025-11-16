@@ -34,6 +34,10 @@ public class UpdateComboScheduleCommandValidator : AbstractValidator<UpdateCombo
             .NotNull().WithMessage("BasePriceChildren is required")
             .GreaterThanOrEqualTo(0).WithMessage("BasePriceChildren must be greater than or equal to 0");
 
+        RuleFor(x => x.ComboScheduleRequest.SingleRoomSupplement)
+            .NotNull().WithMessage("SingleRoomSupplement is required")
+            .GreaterThanOrEqualTo(0).WithMessage("SingleRoomSupplement must be greater than or equal to 0");
+
         RuleFor(x => x.ComboScheduleRequest.Status)
             .NotNull().WithMessage("Status is required")
             .InclusiveBetween(1, 3).WithMessage("Status must be a valid enum value (1 = Available, 2 = Full, 3 = Cancelled)");
