@@ -25,5 +25,23 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 .Take(pageSize);
             return await query.ToListAsync();
         }
+
+        public async Task<List<Discount>> GetDiscountsByEntityType(int entityType, string? code, string? name, int pageIndex, int pageSize)
+        {
+            IQueryable<Discount> query = _dbSet
+                .Where(x => x.ServiceType == entityType && x.Status == 1);
+            
+            if (!string.IsNullOrEmpty(code))
+                query = query.Where(x => x.Code != null && x.Code.Contains(code));
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(x => x.Name != null && x.Name.Contains(name));
+            
+            query = query
+                .OrderBy(x => -x.Id)
+                .Skip(pageIndex * pageSize)
+                .Take(pageSize);
+            
+            return await query.ToListAsync();
+        }
     }
 }

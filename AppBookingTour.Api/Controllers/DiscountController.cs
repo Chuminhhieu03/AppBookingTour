@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
 using AppBookingTour.Application.Features.Discounts.DeleteDiscount;
+using AppBookingTour.Application.Features.Discounts.GetDiscountsByEntityType;
 using AppBookingTour.Application.Features.Discounts.SearchDiscounts;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountAddnew;
 using AppBookingTour.Application.Features.Discounts.SetupDiscountDefault;
@@ -26,6 +27,13 @@ namespace AppBookingTour.Api.Controllers
 
         [HttpPost("search")]
         public async Task<IActionResult> SearchDiscount([FromBody] SearchDiscountQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpPost("get-by-entity-type")]
+        public async Task<IActionResult> GetDiscountsByEntityType([FromBody] GetDiscountsByEntityTypeQuery query)
         {
             var result = await _mediator.Send(query);
             return Ok(result);

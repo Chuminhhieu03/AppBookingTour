@@ -139,7 +139,7 @@ using (var scope = app.Services.CreateScope())
 #endregion
 
 // Add Custom Middlewares
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+//app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 # region Middleware Pipeline Configuration
 app.UseSwagger();
