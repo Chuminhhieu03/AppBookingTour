@@ -59,7 +59,7 @@ public class GlobalExceptionHandlingMiddleware
             ),
             _ => (
                 (int)HttpStatusCode.InternalServerError,
-                ApiResponse<object>.Fail("Có l?i x?y ra trong h? th?ng. Vui lòng th? l?i sau.")
+                ApiResponse<object>.Fail("An error occurred in the system. Please try again later.")
             )
         };
 

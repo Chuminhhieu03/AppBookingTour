@@ -38,3 +38,10 @@ public class ComboRequestDTO
     public bool? IsActive { get; set; }
     public List<ComboScheduleRequestDTO>? Schedules { get; set; }
 }
+
+public class UploadComboImagesForm
+{
+    public int Id { get; set; }
+    public IFormFile? CoverImage { get; set; }
+    public IFormFile[]? Images { get; set; }
+}

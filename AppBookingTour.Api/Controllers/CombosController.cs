@@ -121,11 +121,9 @@ public sealed class CombosController : ControllerBase
     //[Authorize(Roles = "Admin,Staff")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<ApiResponse<UploadComboImagesResponse>>> UploadComboImages(
-        int id,
-        [FromForm] IFormFile? coverImage,
-        [FromForm] IFormFile[]? images)
+        UploadComboImagesForm input)
     {
-        var command = new UploadComboImagesCommand(id, coverImage, images);
+        var command = new UploadComboImagesCommand(input.Id, input.CoverImage, input.Images);
         var result = await _mediator.Send(command);
 
         if (!result.IsSuccess)
@@ -138,7 +136,7 @@ public sealed class CombosController : ControllerBase
         }
 
         _logger.LogInformation("Uploaded images for combo {ComboId}: Cover={HasCover}, Count={ImageCount}", 
-            id, result.CoverImageUrl != null, result.ImageUrls.Count);
+            input.Id, result.CoverImageUrl != null, result.ImageUrls.Count);
         
         return Ok(ApiResponse<UploadComboImagesResponse>.Ok(result));
     }

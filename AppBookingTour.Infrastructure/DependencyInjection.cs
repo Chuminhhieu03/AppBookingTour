@@ -1,3 +1,4 @@
+using AppBookingTour.Application.Common.Settings;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
@@ -43,30 +44,33 @@ public static class DependencyInjection
 
         // External services
         AddExternalServices(services, configuration);
+        
+        // Payment services
+        AddPaymentServices(services, configuration);
 
         return services;
     }
 
-        private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
+    private static void AddDatabase(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
+    
+        services.AddDbContext<ApplicationDbContext>(options =>
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        
-            services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(connectionString, builder =>
             {
-                options.UseSqlServer(connectionString, builder =>
-                {
-                    builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
-                    //builder.EnableRetryOnFailure(
-                    //    maxRetryCount: 3,
-                    //    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    //    errorNumbersToAdd: null);
-                });
-            
-                // Enable in development for detailed logs
-                options.EnableSensitiveDataLogging(false);
-                options.EnableDetailedErrors(false);
+                builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                //builder.EnableRetryOnFailure(
+                //    maxRetryCount: 3,
+                //    maxRetryDelay: TimeSpan.FromSeconds(30),
+                //    errorNumbersToAdd: null);
             });
-        }
+        
+            // Enable in development for detailed logs
+            options.EnableSensitiveDataLogging(false);
+            options.EnableDetailedErrors(false);
+        });
+    }
 
     private static void AddIdentity(IServiceCollection services)
     {
@@ -193,6 +197,17 @@ public static class DependencyInjection
         // services.AddScoped<IFileStorageService, AzureBlobStorageService>();
         // services.AddScoped<IPaymentGatewayService, VNPayService>();
     }
+    
+    private static void AddPaymentServices(IServiceCollection services, IConfiguration configuration)
+    {
+        // Configure VNPay settings
+        services.Configure<VNPaySettings>(configuration.GetSection("VNPay"));
+        
+        // Register payment services
+        services.AddScoped<IVNPayService, VNPayService>();
+        services.AddScoped<IQRCodeService, QRCodeService>();
+    }
+    
     /// <summary>
     /// Extension methods for service configuration validation
     /// </summary>

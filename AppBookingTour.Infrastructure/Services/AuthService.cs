@@ -152,6 +152,9 @@ namespace AppBookingTour.Infrastructure.Services
             {
                 Success = true,
                 Token = accessToken,
+                UserId = user.Id,
+                FullName = user.FullName,
+                Role = roles.FirstOrDefault() ?? "Customer",
                 Expiration = accessTokenExpiry,
                 Message = "Đăng nhập thành công, bạn sẽ được chuyển hướng sang trang chính",
                 RefreshToken = refreshToken,

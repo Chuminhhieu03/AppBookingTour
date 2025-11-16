@@ -205,6 +205,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             e.ToTable("TourDepartures");
             e.Property(x => x.PriceAdult).HasPrecision(12, 2);
             e.Property(x => x.PriceChildren).HasPrecision(12, 2);
+            e.Property(x => x.SingleRoomSurcharge).HasPrecision(12, 2);
             e.Property(x => x.Status).HasConversion<int>();
             e.HasIndex(x => new { x.TourId, x.DepartureDate, x.Status });
         });
@@ -350,11 +351,6 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
                 .WithMany(u => u.PromotionUsages)
                 .HasForeignKey(entity => entity.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(entity => entity.Booking)
-                .WithMany(b => b.PromotionUsages)
-                .HasForeignKey(entity => entity.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
@@ -404,6 +400,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
         {
             entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
             entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
+            entity.Property(e => e.SingleRoomSupplement).HasPrecision(12, 2);
         });
 
         modelBuilder.Entity<PromotionUsage>(entity =>

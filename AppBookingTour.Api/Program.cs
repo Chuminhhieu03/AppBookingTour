@@ -1,11 +1,8 @@
 ﻿using AppBookingTour.Api.DataSeeder;
 using AppBookingTour.Api.Middlewares;
 using AppBookingTour.Application;
-using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
-using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -137,7 +134,7 @@ using (var scope = app.Services.CreateScope())
 #endregion
 
 // Add Custom Middlewares
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
+//app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 # region Middleware Pipeline Configuration
 app.UseSwagger();
