@@ -1,11 +1,8 @@
 ﻿using AppBookingTour.Api.DataSeeder;
 using AppBookingTour.Api.Middlewares;
 using AppBookingTour.Application;
-using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure;
-using AppBookingTour.Infrastructure.Database;
 using AppBookingTour.Share.Configurations;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using Serilog;
 

@@ -13,6 +13,11 @@ public class Booking : BaseEntity
     public int NumAdults { get; set; }
     public int NumChildren { get; set; }
     public int NumInfants { get; set; }
+    public int NumSingleRooms { get; set; }
+    public decimal AdultPrice { get; set; }
+    public decimal ChildPrice { get; set; }
+    public decimal InfantPrice { get; set; }
+    public decimal SingleRoomPrice { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal FinalAmount { get; set; }
@@ -28,5 +33,5 @@ public class Booking : BaseEntity
     public virtual ICollection<BookingParticipant> Participants { get; set; } = [];
     public virtual ICollection<Payment> Payments { get; set; } = [];
     public virtual ICollection<Review> Reviews { get; set; } = [];
-    public virtual ICollection<PromotionUsage> PromotionUsages { get; set; } = [];
+    public virtual ICollection<DiscountUsage> DiscountUsages { get; set; } = [];
 }

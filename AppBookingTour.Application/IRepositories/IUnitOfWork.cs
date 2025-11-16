@@ -25,6 +25,13 @@ public interface IUnitOfWork : IDisposable
     ISystemParameterRepository SystemParameters { get; }
     IBookingRepository Bookings { get; }
     IComboRepository Combos { get; }
+    IRepository<Payment> Payments { get; }
+    IRepository<PaymentMethod> PaymentMethods { get; }
+    IRepository<Promotion> Promotions { get; }
+    IRepository<PromotionUsage> PromotionUsages { get; }
+    IRepository<DiscountUsage> DiscountUsages { get; }
+    IRepository<BookingParticipant> BookingParticipants { get; }
+    IRepository<TourDeparture> TourDepartures { get; }
     IStatisticsRepository Statistics { get; }
 
     #endregion
