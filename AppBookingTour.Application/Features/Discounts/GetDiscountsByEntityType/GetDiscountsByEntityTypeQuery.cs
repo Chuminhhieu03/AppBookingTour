@@ -2,12 +2,6 @@ using MediatR;
 
 namespace AppBookingTour.Application.Features.Discounts.GetDiscountsByEntityType
 {
-    public record class GetDiscountsByEntityTypeQuery(
-        int EntityType,
-        int? pageIndex,
-        int? pageSize,
-        string? Code,
-        string? Name
-    ) : IRequest<GetDiscountsByEntityTypeResponse>;
+    public record class GetDiscountsByEntityTypeQuery(int? pageIndex, int? pageSize, GetDiscountsByEntityTypeFilter? filter) : IRequest<GetDiscountsByEntityTypeResponse>;
 }
 

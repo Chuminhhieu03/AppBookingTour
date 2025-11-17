@@ -15,16 +15,11 @@ namespace AppBookingTour.Application.Features.Discounts.GetDiscountsByEntityType
 
         public async Task<GetDiscountsByEntityTypeResponse> Handle(GetDiscountsByEntityTypeQuery request, CancellationToken cancellationToken)
         {
+            var filter = request.filter ?? new GetDiscountsByEntityTypeFilter();
             int pageIndex = request.pageIndex ?? Constants.Pagination.PageIndex;
             int pageSize = request.pageSize ?? Constants.Pagination.PageSize;
             
-            var listDiscount = await _unitOfWork.Discounts.GetDiscountsByEntityType(
-                request.EntityType,
-                request.Code,
-                request.Name,
-                pageIndex,
-                pageSize
-            );
+            var (listDiscount, totalCount) = await _unitOfWork.Discounts.GetDiscountsByEntityType(filter, pageIndex, pageSize);
             
             listDiscount?.ForEach(item =>
             {
@@ -34,10 +29,19 @@ namespace AppBookingTour.Application.Features.Discounts.GetDiscountsByEntityType
                     item.ServiceTypeName = Constants.ServiceType.dctName[item.ServiceType.Value];
             });
             
+            var totalPages = (pageSize == 0) ? 0 : (int)Math.Ceiling((double)totalCount / pageSize);
+            
             return new GetDiscountsByEntityTypeResponse
             {
                 Success = true,
-                ListDiscount = listDiscount
+                ListDiscount = listDiscount,
+                Meta = new PaginationMeta
+                {
+                    TotalCount = totalCount,
+                    Page = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = totalPages
+                }
             };
         }
     }

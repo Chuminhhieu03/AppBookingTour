@@ -265,8 +265,8 @@ public enum PriceLevel
 
 public enum EntityType
 {
-    Accommodation = 1,
-    Tour = 2,
+    Tour = 1,
+    Accommodation = 2,
     Combo = 3,
     User = 4,
     Review = 5,
