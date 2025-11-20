@@ -82,6 +82,7 @@ public class GetListBlogPostsQueryHandler : IRequestHandler<GetListBlogPostsQuer
             StatusName = b.Status.ToString(),
             PublishedDate = b.PublishedDate,
             Tags = b.Tags,
+            CoverImage = b.CoverImage,
             CreatedAt = b.CreatedAt
         }).ToList();
 

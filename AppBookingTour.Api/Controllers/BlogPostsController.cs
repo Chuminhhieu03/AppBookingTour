@@ -32,7 +32,8 @@ public class BlogPostsController : ControllerBase
     /// </summary>
     [HttpPost]
     //[Authorize(Roles = "Admin,Staff")]
-    public async Task<ActionResult<ApiResponse<CreateBlogPostResponse>>> CreateBlogPost([FromBody] CreateBlogPostRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<CreateBlogPostResponse>>> CreateBlogPost([FromForm] CreateBlogPostRequest request)
     {
         var result = await _mediator.Send(new CreateBlogPostCommand(request));
 
@@ -49,7 +50,8 @@ public class BlogPostsController : ControllerBase
     /// </summary>
     [HttpPut("{id}")]
     //[Authorize(Roles = "Admin,Staff")]
-    public async Task<ActionResult<ApiResponse<UpdateBlogPostResponse>>> UpdateBlogPost(int id, [FromBody] UpdateBlogPostRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<UpdateBlogPostResponse>>> UpdateBlogPost(int id, [FromForm] UpdateBlogPostRequest request)
     {
         if (id != request.Id)
         {

@@ -16,4 +16,5 @@ public interface IBlogPostRepository : IRepository<BlogPost>
         int? authorId,
         string? searchTerm,
         CancellationToken cancellationToken = default);
+    Task UpdateCoverImageAsync(int blogPostId, string? coverImageUrl, CancellationToken cancellationToken = default);
 }

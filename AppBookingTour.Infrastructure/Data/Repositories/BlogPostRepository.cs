@@ -86,4 +86,15 @@ public class BlogPostRepository : Repository<BlogPost>, IBlogPostRepository
 
         return (items, totalCount);
     }
+
+    public async Task UpdateCoverImageAsync(int blogPostId, string? coverImageUrl, CancellationToken cancellationToken = default)
+    {
+        var blogPost = await _context.BlogPosts.FindAsync(new object[] { blogPostId }, cancellationToken);
+        if (blogPost != null)
+        {
+            blogPost.CoverImage = coverImageUrl;
+            blogPost.UpdatedAt = DateTime.UtcNow;
+            _context.BlogPosts.Update(blogPost);
+        }
+    }
 }
