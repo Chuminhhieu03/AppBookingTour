@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Combos.CreateCombo;
 using AppBookingTour.Application.Features.Combos.GetComboById;
+using AppBookingTour.Application.Features.Combos.GetFeaturedCombos;
 using AppBookingTour.Application.Features.Combos.UpdateCombo;
 using AppBookingTour.Application.Features.Combos.DeleteCombo;
 using AppBookingTour.Application.Features.Combos.GetListCombos;
@@ -194,5 +195,24 @@ public sealed class CombosController : ControllerBase
             Success = true, 
             Message = $"Đã xóa {result.DeletedCount} ảnh thành công" 
         });
+    }
+
+    /// <summary>
+    /// Get featured combos (random selection)
+    /// </summary>
+    /// <param name="count">Number of combos to retrieve (default: 6, max: 50)</param>
+    [HttpGet("featured")]
+    public async Task<ActionResult<ApiResponse<List<FeaturedComboDTO>>>> GetFeaturedCombos([FromQuery] int count = 6)
+    {
+        if (count <= 0 || count > 50)
+        {
+            return BadRequest(ApiResponse<List<FeaturedComboDTO>>.Fail("Số lượng phải từ 1 đến 50"));
+        }
+
+        var query = new GetFeaturedCombosQuery(count);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} featured combos", result.Count);
+        return Ok(ApiResponse<List<FeaturedComboDTO>>.Ok(result));
     }
 }

@@ -5,6 +5,7 @@ using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Application.Features.Tours.SearchTours;
 using AppBookingTour.Application.Features.Tours.GetTourById;
+using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
 using AppBookingTour.Application.Features.Tours.DeleteTour;
 
@@ -73,5 +74,20 @@ public sealed class ToursController : ControllerBase
             Success = true,
             Message = "Delete tour successfully"
         });
+    }
+
+    [HttpGet("featured")]
+    public async Task<ActionResult<ApiResponse<List<FeaturedTourDTO>>>> GetFeaturedTours([FromQuery] int count = 6)
+    {
+        if (count <= 0 || count > 50)
+        {
+            return BadRequest(ApiResponse<List<FeaturedTourDTO>>.Fail("Số lượng phải từ 1 đến 50"));
+        }
+
+        var query = new GetFeaturedToursQuery(count);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} featured tours", result.Count);
+        return Ok(ApiResponse<List<FeaturedTourDTO>>.Ok(result));
     }
 }
