@@ -33,12 +33,13 @@ public class GetRandomBlogTitlesQueryHandler : IRequestHandler<GetRandomBlogTitl
 
         // Get random n blog posts
         var randomBlogPosts = blogPosts
-            .OrderBy(x => Guid.NewGuid())
+            .OrderBy(x => -x.Id)
             .Take(request.Count)
             .Select(b => new BlogTitleDto
             {
                 Id = b.Id,
-                Title = b.Title
+                Title = b.Title,
+                CoverImage = b.CoverImage ?? ""
             })
             .ToList();
 
