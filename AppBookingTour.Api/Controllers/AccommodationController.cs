@@ -1,8 +1,10 @@
-﻿using AppBookingTour.Application.Features.Accommodations.AddNewAccommodation;
+﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Accommodations.AddNewAccommodation;
+using AppBookingTour.Application.Features.Accommodations.DeleteAccommodation;
 using AppBookingTour.Application.Features.Accommodations.GetAccommodationById;
 using AppBookingTour.Application.Features.Accommodations.SearchAccommodation;
+using AppBookingTour.Application.Features.Accommodations.SearchAccommodationsForCustomer;
 using AppBookingTour.Application.Features.Accommodations.UpdateAccommodation;
-using AppBookingTour.Application.Features.Accommodations.DeleteAccommodation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +26,13 @@ namespace AppBookingTour.Api.Controllers
         {
             var result = await _mediator.Send(query);
             return Ok(result);
+        }
+
+        [HttpPost("search-for-customer")]
+        public async Task<IActionResult> SearchAccommodationForCustomer([FromBody] SearchAccommodationsForCustomerQuery query)
+        {
+            var result = await _mediator.Send(query);
+            return Ok(ApiResponse<object>.Ok(result));
         }
 
         [HttpPost]

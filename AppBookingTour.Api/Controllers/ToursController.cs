@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Application.Features.Tours.SearchTours;
+using AppBookingTour.Application.Features.Tours.SearchToursForCustomer;
 using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
@@ -38,7 +39,13 @@ public sealed class ToursController : ControllerBase
     public async Task<ActionResult<ApiResponse<object>>> SearchTours([FromBody] SearchToursQuery query)
     {
         var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
 
+    [HttpPost("search-for-customer")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchToursForCustomer([FromBody] SearchToursForCustomerQuery query)
+    {
+        var result = await _mediator.Send(query);
         return Ok(ApiResponse<object>.Ok(result));
     }
 

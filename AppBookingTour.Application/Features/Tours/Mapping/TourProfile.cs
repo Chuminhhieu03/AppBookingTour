@@ -1,7 +1,9 @@
 ﻿using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.Features.Tours.SearchTours;
+using AppBookingTour.Application.Features.Tours.SearchToursForCustomer;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.Enums;
 using AutoMapper;
 
 namespace AppBookingTour.Application.Features.Tours.Mapping
@@ -33,6 +35,12 @@ namespace AppBookingTour.Application.Features.Tours.Mapping
                     : src.Excludes.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()));
 
             CreateMap<Tour, TourListItem>()
+                .ForMember(dest => dest.DepartureCityName, opt => opt.MapFrom(src => src.DepartureCity != null ? src.DepartureCity.Name : "N/A"))
+                .ForMember(dest => dest.DestinationCityName, opt => opt.MapFrom(src => src.DestinationCity != null ? src.DestinationCity.Name : "N/A"))
+                .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type != null ? src.Type.Name : "N/A"))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : "N/A"));
+
+            CreateMap<Tour, CustomerTourListItem>()
                 .ForMember(dest => dest.DepartureCityName, opt => opt.MapFrom(src => src.DepartureCity != null ? src.DepartureCity.Name : "N/A"))
                 .ForMember(dest => dest.DestinationCityName, opt => opt.MapFrom(src => src.DestinationCity != null ? src.DestinationCity.Name : "N/A"))
                 .ForMember(dest => dest.TypeName, opt => opt.MapFrom(src => src.Type != null ? src.Type.Name : "N/A"))

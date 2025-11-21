@@ -7,6 +7,7 @@ using AppBookingTour.Application.Features.Combos.GetFeaturedCombos;
 using AppBookingTour.Application.Features.Combos.UpdateCombo;
 using AppBookingTour.Application.Features.Combos.DeleteCombo;
 using AppBookingTour.Application.Features.Combos.GetListCombos;
+using AppBookingTour.Application.Features.Combos.SearchCombosForCustomer;
 using AppBookingTour.Application.Features.Combos.UploadComboImages;
 using AppBookingTour.Application.Features.Combos.DeleteComboCoverImage;
 using AppBookingTour.Application.Features.Combos.DeleteComboGalleryImages;
@@ -51,6 +52,13 @@ public sealed class CombosController : ControllerBase
 
         _logger.LogInformation("Retrieved {Count} combos", result.Items.Count);
         return Ok(ApiResponse<PagedResult<ComboListDTO>>.Ok(result));
+    }
+
+    [HttpPost("search-for-customer")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchComboForCustomer([FromBody] SearchCombosForCustomerQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
     }
 
     [HttpGet("{id:int}")]

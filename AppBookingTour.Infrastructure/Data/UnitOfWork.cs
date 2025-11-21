@@ -42,6 +42,7 @@ public class UnitOfWork : IUnitOfWork
     private IRepository<BookingParticipant>? _bookingParticipantRepository;
     private IRepository<TourDeparture>? _tourDepartureRepository;
     private IStatisticsRepository _statisticsRepository;
+    private IProfileRepository _profileRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -86,6 +87,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<TourDeparture> TourDepartures => _tourDepartureRepository ??= new Repository<TourDeparture>(_context);
 
     public IStatisticsRepository Statistics => _statisticsRepository ?? new StatisticsRepository(_context);
+    public IProfileRepository Profiles => _profileRepository ?? new ProfileRepository(_context);
 
     #endregion
 
