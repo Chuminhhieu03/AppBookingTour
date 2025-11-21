@@ -50,6 +50,7 @@ public class GetBlogPostBySlugQueryHandler : IRequestHandler<GetBlogPostBySlugQu
             StatusName = blogPost.Status.ToString(),
             PublishedDate = blogPost.PublishedDate,
             Tags = blogPost.Tags,
+            CoverImage = blogPost.CoverImage,
             CreatedAt = blogPost.CreatedAt,
             UpdatedAt = blogPost.UpdatedAt
         };

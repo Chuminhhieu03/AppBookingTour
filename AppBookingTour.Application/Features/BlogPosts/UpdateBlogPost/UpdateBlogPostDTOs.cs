@@ -1,4 +1,5 @@
 using AppBookingTour.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace AppBookingTour.Application.Features.BlogPosts.UpdateBlogPost;
 
@@ -11,10 +12,12 @@ public class UpdateBlogPostRequest
     public string Slug { get; set; } = null!;
     public BlogStatus Status { get; set; }
     public string? Tags { get; set; }
+    public IFormFile? CoverImageFile { get; set; }
 }
 
 public class UpdateBlogPostResponse
 {
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
+    public string? CoverImageUrl { get; set; }
 }
