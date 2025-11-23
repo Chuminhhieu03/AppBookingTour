@@ -9,4 +9,6 @@ public interface IProfileRepository
 
     void UpdateUser(User user);
 
+    Task<List<User>> GetGuidesAsync(CancellationToken cancellationToken = default);
+
 }

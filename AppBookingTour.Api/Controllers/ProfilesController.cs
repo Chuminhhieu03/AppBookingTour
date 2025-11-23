@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Profiles.GetListGuide;
 using AppBookingTour.Application.Features.Profiles.GetProfileById;
 using AppBookingTour.Application.Features.Profiles.UpdateProfile;
 using MediatR;
@@ -21,6 +22,14 @@ public class ProfilesController : ControllerBase
     public async Task<ActionResult<ApiResponse<object>>> GetProfile(int id)
     {
         var query = new GetProfileByIdQuery(id);
+        var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("get-list-guide")]
+    public async Task<ActionResult<ApiResponse<object>>> GetListGuide()
+    {
+        var query = new GetListGuideQuery();
         var result = await _mediator.Send(query);
         return Ok(ApiResponse<object>.Ok(result));
     }
