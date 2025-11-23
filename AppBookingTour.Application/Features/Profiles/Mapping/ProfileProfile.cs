@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application.Features.Profiles.GetProfileById;
+﻿using AppBookingTour.Application.Features.Profiles.GetListGuide;
+using AppBookingTour.Application.Features.Profiles.GetProfileById;
 using AppBookingTour.Application.Features.Profiles.UpdateProfile;
 using AppBookingTour.Domain.Entities;
 using AutoMapper;
@@ -17,5 +18,7 @@ public class ProfileProfile : Profile
 
         CreateMap<UpdateProfileDTO, User>()
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        CreateMap<User, GuideItemDTO>();
     }
 }

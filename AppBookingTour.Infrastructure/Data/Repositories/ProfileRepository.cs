@@ -1,5 +1,7 @@
 ﻿using AppBookingTour.Application.IRepositories;
+using Microsoft.EntityFrameworkCore;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.Enums;
 using AppBookingTour.Infrastructure.Database;
 
 namespace AppBookingTour.Infrastructure.Data.Repositories;
@@ -23,5 +25,13 @@ public class ProfileRepository : IProfileRepository
     public void UpdateUser(User user)
     {
         _context.Users.Update(user);
+    }
+
+    public async Task<List<User>> GetGuidesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Where(u => u.UserType == UserType.Guide)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 }

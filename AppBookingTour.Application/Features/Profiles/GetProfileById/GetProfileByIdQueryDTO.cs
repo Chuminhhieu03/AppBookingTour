@@ -4,6 +4,7 @@ namespace AppBookingTour.Application.Features.Profiles.GetProfileById;
 
 public class GetProfileByIdDTO
 {
+    public int Id { get; set; }
     public string FullName { get; set; } = "";
     public Gender Gender { get; set; }
     public DateOnly? DateOfBirth { get; set; }
