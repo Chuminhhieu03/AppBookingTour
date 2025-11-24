@@ -35,4 +35,9 @@ public interface IComboRepository : IRepository<Combo>
     Task UpdateCoverImageAsync(int comboId, string? imageUrl, CancellationToken cancellationToken = default);
 
     Task<(List<Combo> Combos, int TotalCount)> SearchCombosForCustomerAsync(SearchCombosForCustomerFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get featured combos (random selection with available schedules)
+    /// </summary>
+    Task<List<Combo>> GetFeaturedCombosAsync(int count, CancellationToken cancellationToken = default);
 }

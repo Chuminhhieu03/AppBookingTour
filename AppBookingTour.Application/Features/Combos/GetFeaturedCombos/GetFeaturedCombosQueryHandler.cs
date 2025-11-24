@@ -1,5 +1,4 @@
 using AppBookingTour.Application.IRepositories;
-using AppBookingTour.Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -20,38 +19,45 @@ public class GetFeaturedCombosQueryHandler : IRequestHandler<GetFeaturedCombosQu
     {
         _logger.LogInformation("Getting {Count} featured combos", request.Count);
 
-        // Get all active combos with related data
-        var combos = await _unitOfWork.Repository<Combo>()
-            .GetAllAsync(cancellationToken: cancellationToken);
+        // Get featured combos using repository method
+        var combos = await _unitOfWork.Combos.GetFeaturedCombosAsync(request.Count, cancellationToken);
 
         if (combos == null || !combos.Any())
         {
-            _logger.LogWarning("No active combos found");
+            _logger.LogWarning("No featured combos found");
             return new List<FeaturedComboDTO>();
         }
 
-        // Get random n combos
-        var randomCombos = combos
-            .OrderBy(x => Guid.NewGuid())
-            .Take(request.Count)
+        // Map to DTO
+        var featuredCombos = combos
             .Select(c => new FeaturedComboDTO
             {
                 Id = c.Id,
                 Code = c.Code,
                 Name = c.Name,
-                FromCityName = c.FromCity?.Name ?? "Unknown",
-                ToCityName = c.ToCity?.Name ?? "Unknown",
-                ShortDescription = c.ShortDescription,
-                Vehicle = "",
-                ComboImageCoverUrl = c.ComboImageCoverUrl,
                 DurationDays = c.DurationDays,
                 BasePriceAdult = c.BasePriceAdult,
-                Rating = c.Rating
+                BasePriceChildren = c.BasePriceChildren,
+                FromCityName = c.FromCity?.Name ?? "",
+                ToCityName = c.ToCity?.Name ?? "",
+                Vehicle = c.Vehicle,
+                ComboImageCoverUrl = c.ComboImageCoverUrl,
+                Rating = c.Rating,
+                Schedules = c.Schedules
+                    .OrderBy(s => s.DepartureDate)
+                    .Select(s => new FeaturedComboScheduleItem
+                    {
+                        Id = s.Id,
+                        DepartureDate = s.DepartureDate,
+                        ReturnDate = s.ReturnDate,
+                        AvailableSlots = s.AvailableSlots
+                    })
+                    .ToList()
             })
             .ToList();
 
-        _logger.LogInformation("Retrieved {Count} featured combos", randomCombos.Count);
+        _logger.LogInformation("Retrieved {Count} featured combos", featuredCombos.Count);
 
-        return randomCombos;
+        return featuredCombos;
     }
 }

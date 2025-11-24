@@ -20,39 +20,48 @@ public class GetFeaturedToursQueryHandler : IRequestHandler<GetFeaturedToursQuer
     {
         _logger.LogInformation("Getting {Count} featured tours", request.Count);
 
-        // Get all active tours with related data
-        var tours = await _unitOfWork.Repository<Tour>()
-            .GetAllAsync(cancellationToken: cancellationToken);
+        // Get featured tours using repository method
+        var tours = await _unitOfWork.Tours.GetFeaturedToursAsync(request.Count, cancellationToken);
 
         if (tours == null || !tours.Any())
         {
-            _logger.LogWarning("No active tours found");
+            _logger.LogWarning("No featured tours found");
             return new List<FeaturedTourDTO>();
         }
 
-        // Get random n tours
-        var randomTours = tours
-            .OrderBy(x => Guid.NewGuid())
-            .Take(request.Count)
+        // Map to DTO
+        var featuredTours = tours
             .Select(t => new FeaturedTourDTO
             {
                 Id = t.Id,
                 Code = t.Code,
                 Name = t.Name,
-                Description = t.Description,
                 DurationDays = t.DurationDays,
                 DurationNights = t.DurationNights,
                 BasePriceAdult = t.BasePriceAdult,
-                Rating = t.Rating,
+                BasePriceChild = t.BasePriceChild,
+                DepartureCityName = t.DepartureCity?.Name ?? "",
+                DestinationCityName = t.DestinationCity?.Name ?? "",
+                TypeId = t.TypeId,
+                TypeName = t.Type?.Name ?? "",
+                CategoryId = t.CategoryId,
+                CategoryName = t.Category?.Name ?? "",
                 ImageMainUrl = t.ImageMainUrl,
-                DepartureCityName = t.DepartureCity?.Name ?? "Unknown",
-                DestinationCityName = t.DestinationCity?.Name ?? "Unknown",
-                TypeName = t.Type?.Name ?? "Unknown"
+                Departures = t.Departures
+                    .OrderBy(d => d.DepartureDate)
+                    .Select(d => new FeaturedTourDepartureItem
+                    {
+                        Id = d.Id,
+                        DepartureDate = d.DepartureDate,
+                        ReturnDate = d.ReturnDate,
+                        AvailableSlots = d.AvailableSlots
+                    })
+                    .ToList()
             })
             .ToList();
 
-        _logger.LogInformation("Retrieved {Count} featured tours", randomTours.Count);
+        _logger.LogInformation("Retrieved {Count} featured tours", featuredTours.Count);
 
-        return randomTours;
+        return featuredTours;
     }
 }

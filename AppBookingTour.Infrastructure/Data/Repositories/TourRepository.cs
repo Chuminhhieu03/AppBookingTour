@@ -148,4 +148,36 @@ public class TourRepository : Repository<Tour>, ITourRepository
 
         return (items, totalCount);
     }
+
+    public async Task<List<Tour>> GetFeaturedToursAsync(int count, CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet.AsQueryable();
+
+        // Only get active tours
+        query = query.Where(t => t.IsActive == true);
+
+        // Only get tours with available departures
+        query = query.Where(t => t.Departures.Any(d => 
+            d.Status == DepartureStatus.Available && 
+            d.DepartureDate >= DateTime.UtcNow && 
+            d.AvailableSlots > 0
+        ));
+
+        var items = await query
+            .Include(t => t.DepartureCity)
+            .Include(t => t.DestinationCity)
+            .Include(t => t.Category)
+            .Include(t => t.Type)
+            .Include(t => t.Departures.Where(d => 
+                d.Status == DepartureStatus.Available && 
+                d.DepartureDate >= DateTime.UtcNow && 
+                d.AvailableSlots > 0
+            ))
+            .OrderBy(t => Guid.NewGuid())
+            .Take(count)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return items;
+    }
 }

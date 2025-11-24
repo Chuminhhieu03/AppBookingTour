@@ -139,4 +139,34 @@ public class ComboRepository : Repository<Combo>, IComboRepository
 
         return (items, totalCount);
     }
+
+    public async Task<List<Combo>> GetFeaturedCombosAsync(int count, CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet.AsQueryable();
+
+        // Only get active combos
+        query = query.Where(c => c.IsActive == true);
+
+        // Only get combos with available schedules
+        query = query.Where(c => c.Schedules.Any(s => 
+            s.Status == ComboStatus.Available && 
+            s.DepartureDate >= DateTime.UtcNow && 
+            s.AvailableSlots > 0
+        ));
+
+        var items = await query
+            .Include(c => c.FromCity)
+            .Include(c => c.ToCity)
+            .Include(c => c.Schedules.Where(s => 
+                s.Status == ComboStatus.Available && 
+                s.DepartureDate >= DateTime.UtcNow && 
+                s.AvailableSlots > 0
+            ))
+            .OrderBy(c => Guid.NewGuid())
+            .Take(count)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return items;
+    }
 }
