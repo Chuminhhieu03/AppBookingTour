@@ -30,6 +30,8 @@ public class ComboProfile : Profile
             .ForMember(dest => dest.Excludes, opt => opt.MapFrom(src =>
                 string.IsNullOrEmpty(src.Excludes)
                 ? new List<string>()
-                : src.Excludes.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()));
+                : src.Excludes.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
+            .ForMember(dest => dest.AdditionalInfo, opt => opt.MapFrom(src => src.AdditionalInfo))
+            .ForMember(dest => dest.ImportantInfo, opt => opt.MapFrom(src => src.ImportantInfo));
     }
 }

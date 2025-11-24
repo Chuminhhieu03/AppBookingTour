@@ -71,6 +71,14 @@ public class CreateComboCommandValidator : AbstractValidator<CreateComboCommand>
             .MaximumLength(10000).WithMessage("Mô tả chi tiết không được vượt quá 10,000 ký tự")
             .When(x => !string.IsNullOrEmpty(x.ComboRequest.Description));
 
+        RuleFor(x => x.ComboRequest.AdditionalInfo)
+            .MaximumLength(4000).WithMessage("Thông tin thêm không được vượt quá 4000 ký tự")
+            .When(x => !string.IsNullOrEmpty(x.ComboRequest.AdditionalInfo));
+
+        RuleFor(x => x.ComboRequest.ImportantInfo)
+            .MaximumLength(10000).WithMessage("Thông tin quan trọng không được vượt quá 10000 ký tự")
+            .When(x => !string.IsNullOrEmpty(x.ComboRequest.ImportantInfo));
+
         RuleFor(x => x.ComboRequest.Schedules)
             .NotEmpty().WithMessage("Combo phải có ít nhất một lịch khởi hành")
             .Must(s => s != null && s.Count > 0).WithMessage("Combo phải có ít nhất một lịch khởi hành");

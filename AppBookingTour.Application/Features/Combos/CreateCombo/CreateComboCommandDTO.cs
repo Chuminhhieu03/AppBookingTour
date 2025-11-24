@@ -35,6 +35,9 @@ public class ComboRequestDTO
     public string? Includes { get; set; }
     public string? Excludes { get; set; }
     public string? TermsConditions { get; set; }
+    public string? AdditionalInfo { get; set; }
+    public string? ImportantInfo { get; set; }
+    
     public bool? IsActive { get; set; }
     public List<ComboScheduleRequestDTO>? Schedules { get; set; }
 }
