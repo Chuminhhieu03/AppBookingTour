@@ -1,3 +1,4 @@
+﻿using AppBookingTour.Application.Features.Combos.SearchCombosForCustomer;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Domain.Enums;
@@ -79,5 +80,93 @@ public class ComboRepository : Repository<Combo>, IComboRepository
             combo.ComboImageCoverUrl = imageUrl;
             combo.UpdatedAt = DateTime.UtcNow;
         }
+    }
+
+    public async Task<(List<Combo> Combos, int TotalCount)> SearchCombosForCustomerAsync(SearchCombosForCustomerFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default)
+    {
+        IQueryable<Combo> query = _dbSet.AsQueryable();
+
+        query = query.Where(c => c.IsActive == true);
+
+        if (filter.PriceFrom.HasValue)
+        {
+            query = query.Where(c => c.BasePriceAdult >= filter.PriceFrom.Value);
+        }
+
+        if (filter.PriceTo.HasValue)
+        {
+            query = query.Where(c => c.BasePriceAdult <= filter.PriceTo.Value);
+        }
+
+        if (filter.DepartureCityId.HasValue)
+        {
+            query = query.Where(c => c.FromCityId == filter.DepartureCityId.Value);
+        }
+
+        if (filter.DestinationCityId.HasValue)
+        {
+            query = query.Where(c => c.ToCityId == filter.DestinationCityId.Value);
+        }
+
+        if (filter.Vehicle.HasValue)
+        {
+            query = query.Where(c => c.Vehicle == filter.Vehicle.Value);
+        }
+
+        if (filter.DepartureDate.HasValue)
+        {
+            var filterDate = filter.DepartureDate.Value;
+            query = query.Where(c => c.Schedules.Any(s =>
+                s.Status == ComboStatus.Available && 
+                DateOnly.FromDateTime(s.DepartureDate) >= filterDate
+            ));
+        }
+        else
+        {
+            query = query.Where(c => c.Schedules.Any(s => s.Status == ComboStatus.Available));
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Include(c => c.FromCity)
+            .Include(c => c.ToCity)
+            .Include(c => c.Schedules)
+            .OrderByDescending(c => c.Id)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<List<Combo>> GetFeaturedCombosAsync(int count, CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet.AsQueryable();
+
+        // Only get active combos
+        query = query.Where(c => c.IsActive == true);
+
+        // Only get combos with available schedules
+        query = query.Where(c => c.Schedules.Any(s => 
+            s.Status == ComboStatus.Available && 
+            s.DepartureDate >= DateTime.UtcNow && 
+            s.AvailableSlots > 0
+        ));
+
+        var items = await query
+            .Include(c => c.FromCity)
+            .Include(c => c.ToCity)
+            .Include(c => c.Schedules.Where(s => 
+                s.Status == ComboStatus.Available && 
+                s.DepartureDate >= DateTime.UtcNow && 
+                s.AvailableSlots > 0
+            ))
+            .OrderBy(c => Guid.NewGuid())
+            .Take(count)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return items;
     }
 }

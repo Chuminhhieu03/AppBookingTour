@@ -1,3 +1,4 @@
+using AppBookingTour.Application.Features.Combos.SearchCombosForCustomer;
 using AppBookingTour.Domain.Entities;
 
 namespace AppBookingTour.Application.IRepositories;
@@ -32,4 +33,11 @@ public interface IComboRepository : IRepository<Combo>
     /// Update combo cover image URL
     /// </summary>
     Task UpdateCoverImageAsync(int comboId, string? imageUrl, CancellationToken cancellationToken = default);
+
+    Task<(List<Combo> Combos, int TotalCount)> SearchCombosForCustomerAsync(SearchCombosForCustomerFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get featured combos (random selection with available schedules)
+    /// </summary>
+    Task<List<Combo>> GetFeaturedCombosAsync(int count, CancellationToken cancellationToken = default);
 }
