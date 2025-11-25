@@ -12,6 +12,7 @@ public class UpdateBlogPostRequest
     public string Slug { get; set; } = null!;
     public BlogStatus Status { get; set; }
     public string? Tags { get; set; }
+    public string? Description { get; set; }
     public IFormFile? CoverImageFile { get; set; }
 }
 

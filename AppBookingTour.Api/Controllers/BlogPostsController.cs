@@ -2,6 +2,7 @@
 using AppBookingTour.Application.Features.BlogPosts.CreateBlogPost;
 using AppBookingTour.Application.Features.BlogPosts.DeleteBlogPost;
 using AppBookingTour.Application.Features.BlogPosts.GetBlogPostById;
+using AppBookingTour.Application.Features.BlogPosts.GetBlogPostBySlug;
 using AppBookingTour.Application.Features.BlogPosts.GetListBlogPosts;
 using AppBookingTour.Application.Features.BlogPosts.GetRandomBlogTitles;
 using AppBookingTour.Application.Features.BlogPosts.UpdateBlogPost;

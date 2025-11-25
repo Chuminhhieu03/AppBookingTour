@@ -127,6 +127,7 @@ public class CreateBlogPostCommandHandler : IRequestHandler<CreateBlogPostComman
             Slug = request.Slug,
             Status = request.Status,
             Tags = request.Tags,
+            Description = request.Description,
             CoverImage = coverImageUrl,
             PublishedDate = request.Status == BlogStatus.Published ? DateTime.UtcNow : null,
             CreatedAt = DateTime.UtcNow
