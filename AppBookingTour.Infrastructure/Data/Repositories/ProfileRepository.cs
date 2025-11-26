@@ -34,4 +34,12 @@ public class ProfileRepository : IProfileRepository
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<Dictionary<int, string>> GetGuideNamesMapAsync(IEnumerable<int> guideIds, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .Where(u => guideIds.Contains(u.Id) && u.UserType == UserType.Guide)
+            .ToDictionaryAsync(u => u.Id, u => u.FullName, cancellationToken);
+    }
 }

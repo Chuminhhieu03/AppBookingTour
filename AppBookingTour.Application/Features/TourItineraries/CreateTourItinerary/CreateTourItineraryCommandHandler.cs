@@ -26,10 +26,18 @@ public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTo
     {
         _logger.LogInformation("Create tour itinerary from dto request");
 
+        var tourId = request.TourId;
+
+        var tour = await _unitOfWork.Tours.GetByIdAsync(tourId);
+        if (tour == null)
+        {
+            throw new KeyNotFoundException($"Tour with ID {tourId} not found.");
+        }
+
         var existingTourItineraryByName = await _unitOfWork.Repository<TourItinerary>()
             .FirstOrDefaultAsync(x =>
                 x.DayNumber == request.TourItineraryRequest.DayNumber
-                && x.TourId == request.TourItineraryRequest.TourId);
+                && x.TourId == tourId);
         if (existingTourItineraryByName != null)
         {
             throw new ArgumentException(string.Format(Message.AlreadyExists, "Ngày lịch trình"));

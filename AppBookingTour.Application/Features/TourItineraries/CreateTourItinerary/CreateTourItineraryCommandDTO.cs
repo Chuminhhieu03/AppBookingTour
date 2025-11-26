@@ -3,7 +3,6 @@ namespace AppBookingTour.Application.Features.TourItineraries.CreateTourItinerar
 
 public class TourItineraryRequestDTO
 {
-    public int? TourId { get; set; }
     public int? DayNumber { get; set; }
     public string? Title { get; set; }
     public string? Description { get; set; }

@@ -11,4 +11,5 @@ public interface IProfileRepository
 
     Task<List<User>> GetGuidesAsync(CancellationToken cancellationToken = default);
 
+    Task<Dictionary<int, string>> GetGuideNamesMapAsync(IEnumerable<int> guideIds, CancellationToken cancellationToken = default);
 }
