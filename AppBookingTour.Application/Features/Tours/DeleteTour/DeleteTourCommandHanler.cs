@@ -2,7 +2,6 @@
 using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AppBookingTour.Application.Features.Tours.DeleteTour;

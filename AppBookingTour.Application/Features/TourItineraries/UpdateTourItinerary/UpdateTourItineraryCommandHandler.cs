@@ -35,7 +35,7 @@ public sealed class UpdateTourItineraryCommandHandler : IRequestHandler<UpdateTo
         var existingTourItineraryByName = await _unitOfWork.Repository<TourItinerary>()
             .FirstOrDefaultAsync(x =>
                 x.DayNumber == request.TourItineraryRequest.DayNumber
-                && x.TourId == request.TourItineraryRequest.TourId);
+                && x.TourId == existingItinerary.TourId);
         if (existingTourItineraryByName != null && existingTourItineraryByName.Id != existingItinerary.Id)
         {
             throw new ArgumentException(string.Format(Message.AlreadyExists, "Ngày lịch trình"));

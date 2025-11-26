@@ -23,10 +23,10 @@ public sealed class TourDeparturesController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTourDeparture([FromBody] TourDepartureRequestDTO requestBody)
+    [HttpPost("{tourId:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> CreateTourDeparture(int tourId, [FromBody] TourDepartureRequestDTO requestBody)
     {
-        var command = new CreateTourDepartureCommand(requestBody);
+        var command = new CreateTourDepartureCommand(tourId, requestBody);
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Created new tour departure");

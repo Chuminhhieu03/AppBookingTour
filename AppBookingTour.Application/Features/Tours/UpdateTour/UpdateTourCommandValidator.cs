@@ -1,9 +1,10 @@
-﻿using AppBookingTour.Domain.Constants;
+﻿using AppBookingTour.Application.Features.Tours.UpdateTour;
+using AppBookingTour.Domain.Constants;
 using FluentValidation;
 
 namespace AppBookingTour.Application.Features.Tours.CreateTour
 {
-    public class UpdateTourCommandValidator : AbstractValidator<CreateTourCommand>
+    public class UpdateTourCommandValidator : AbstractValidator<UpdateTourCommand>
     {
         public UpdateTourCommandValidator()
         {
@@ -62,18 +63,6 @@ namespace AppBookingTour.Application.Features.Tours.CreateTour
             RuleFor(x => x.TourRequest.BasePriceChild)
                 .NotNull().WithMessage(string.Format(Message.RequiredField, "Giá vé cơ bản trẻ em"))
                 .GreaterThanOrEqualTo(0).WithMessage("BasePriceChild must be greater than or equal to 0");
-
-            RuleFor(x => x.TourRequest.Description)
-            .MaximumLength(3000).WithMessage("Description must not exceed 3000 characters");
-
-            RuleFor(x => x.TourRequest.Includes)
-            .MaximumLength(1500).WithMessage("Includes must not exceed 1500 characters");
-
-            RuleFor(x => x.TourRequest.Excludes)
-            .MaximumLength(1500).WithMessage("Excludes must not exceed 1500 characters");
-
-            RuleFor(x => x.TourRequest.TermsConditions)
-            .MaximumLength(2000).WithMessage("TermsConditions must not exceed 2000 characters");
 
         }
     }
