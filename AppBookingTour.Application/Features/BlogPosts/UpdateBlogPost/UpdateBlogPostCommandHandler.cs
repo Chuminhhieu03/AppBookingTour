@@ -127,6 +127,7 @@ public class UpdateBlogPostCommandHandler : IRequestHandler<UpdateBlogPostComman
         blogPost.Slug = request.Slug;
         blogPost.Status = request.Status;
         blogPost.Tags = request.Tags;
+        blogPost.Description = request.Description;
         
         // Update cover image only if new file was uploaded
         if (newCoverImageUrl != null)

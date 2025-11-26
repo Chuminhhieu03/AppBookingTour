@@ -30,6 +30,10 @@ public class UpdateBlogPostCommandValidator : AbstractValidator<UpdateBlogPostCo
         RuleFor(x => x.Request.Tags)
             .MaximumLength(500).WithMessage("Tags không ???c v??t quá 500 ký t?")
             .When(x => !string.IsNullOrEmpty(x.Request.Tags));
+
+        RuleFor(x => x.Request.Description)
+            .MaximumLength(500).WithMessage("Mô t? không ???c v??t quá 500 ký t?")
+            .When(x => !string.IsNullOrEmpty(x.Request.Description));
     }
 
     private bool NotContainHtmlTags(string? title)
