@@ -33,10 +33,10 @@ public sealed class TourItinerariesController : ControllerBase
         return Ok(ApiResponse<object>.Ok(result));
     }
 
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTourItinerary([FromBody] TourItineraryRequestDTO requestBody)
+    [HttpPost("{tourId:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> CreateTourItinerary(int tourId, [FromBody] TourItineraryRequestDTO requestBody)
     {
-        var command = new CreateTourItineraryCommand(requestBody);
+        var command = new CreateTourItineraryCommand(tourId, requestBody);
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Created new tour itinerary");

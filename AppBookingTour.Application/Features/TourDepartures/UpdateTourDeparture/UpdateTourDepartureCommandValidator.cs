@@ -9,10 +9,6 @@ public class UpdateTourDepartureCommandValidator : AbstractValidator<UpdateTourD
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.TourDepartureRequest.TourId)
-           .NotNull().WithMessage(string.Format(Message.RequiredField, "Tour Id"))
-           .GreaterThan(0).WithMessage("TourId must be greater than 0");
-
         RuleFor(x => x.TourDepartureRequest.DepartureDate)
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Ngày khởi hành"))
             .Must(BeAValidDate).WithMessage("DepartureDate must be a valid date");

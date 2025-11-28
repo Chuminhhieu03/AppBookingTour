@@ -16,6 +16,7 @@ public class BlogPostDetailDto
     public string StatusName { get; set; } = null!;
     public DateTime? PublishedDate { get; set; }
     public string? Tags { get; set; }
+    public string? Description { get; set; }
     public string? CoverImage { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

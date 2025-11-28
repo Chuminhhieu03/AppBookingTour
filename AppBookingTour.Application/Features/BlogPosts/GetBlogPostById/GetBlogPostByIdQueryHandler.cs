@@ -43,6 +43,7 @@ public class GetBlogPostByIdQueryHandler : IRequestHandler<GetBlogPostByIdQuery,
             StatusName = blogPost.Status.ToString(),
             PublishedDate = blogPost.PublishedDate,
             Tags = blogPost.Tags,
+            Description = blogPost.Description,
             CoverImage = blogPost.CoverImage,
             CreatedAt = blogPost.CreatedAt,
             UpdatedAt = blogPost.UpdatedAt

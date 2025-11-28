@@ -1,14 +1,16 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-
-using AppBookingTour.Api.Contracts.Responses;
+﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
+using AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 using AppBookingTour.Application.Features.Tours.CreateTour;
+using AppBookingTour.Application.Features.Tours.DeleteTour;
+using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
+using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.Features.Tours.SearchTours;
 using AppBookingTour.Application.Features.Tours.SearchToursForCustomer;
-using AppBookingTour.Application.Features.Tours.GetTourById;
-using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
-using AppBookingTour.Application.Features.Tours.DeleteTour;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AppBookingTour.Api.Controllers;
 
@@ -26,9 +28,15 @@ public sealed class ToursController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromForm] TourCreateRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromForm] TourCreateRequestDTO request)
     {
-        var command = new CreateTourCommand(requestBody);
+        if (!string.IsNullOrEmpty(request.ItinerariesJson))
+            request.Itineraries = JsonConvert.DeserializeObject<List<TourItineraryRequestDTO>>(request.ItinerariesJson);
+
+        if (!string.IsNullOrEmpty(request.DeparturesJson))
+            request.Departures = JsonConvert.DeserializeObject<List<TourDepartureRequestDTO>>(request.DeparturesJson);
+
+        var command = new CreateTourCommand(request);
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Created new tour with ID: {TourId}", result.Id);
@@ -60,7 +68,7 @@ public sealed class ToursController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromForm] TourCreateRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromForm] TourUpdateRequestDTO requestBody)
     {
         var command = new UpdateTourCommand(id, requestBody);
         var result = await _mediator.Send(command);
