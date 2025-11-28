@@ -8,15 +8,28 @@ namespace AppBookingTour.Application.Features.RoomInventories.AddNewRoomInventor
         public AddNewRoomInventoryValidator()
         {
             RuleFor(x => x.RoomInventory)
-                .SetValidator(new RoomInventoryDtoValidator());
-        }
-    }
-    public class RoomInventoryDtoValidator : AbstractValidator<AddNewRoomInventoryDTO>
-    {
-        public RoomInventoryDtoValidator()
-        {
-            RuleFor(x => x.RoomTypeId).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Loại phòng"));
-            RuleFor(x => x.Date).NotEmpty().WithMessage(string.Format(Message.RequiredField, "Ngày tồn kho"));
+                .NotNull()
+                .WithMessage("Dữ liệu yêu cầu không hợp lệ.")
+                .DependentRules(() =>
+                {
+                    RuleFor(x => x.RoomInventory!.RoomTypeId)
+                        .GreaterThan(0)
+                        .WithMessage(string.Format(Message.RequiredField, "Loại phòng"));
+
+                    RuleFor(x => x.RoomInventory!.Date)
+                        .NotEmpty()
+                        .WithMessage(string.Format(Message.RequiredField, "Ngày tồn kho"));
+
+                    RuleFor(x => x.RoomInventory!.BasePrice)
+                        .GreaterThanOrEqualTo(0)
+                        .WithMessage("Giá phải lớn hơn hoặc bằng 0.");
+
+                    RuleFor(x => x.RoomInventory!.BookedRooms)
+                        .GreaterThanOrEqualTo(0)
+                        .WithMessage("Số slot phải lớn hơn hoặc bằng 0.");
+                });
         }
     }
 }
+
+

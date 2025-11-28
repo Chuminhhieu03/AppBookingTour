@@ -16,6 +16,7 @@ namespace AppBookingTour.Application.Features.Accommodations.AddNewAccommodation
         public string? Regulation { get; set; }
         public string? Amenities { get; set; }
         public bool IsActive { get; set; } = true;
+        public string? Coordinates { get; set; } // Format: "lat, lon"
         public IFormFile? CoverImgFile { get; set; }
         public List<IFormFile>? InfoImgFile { get; set; }
     }

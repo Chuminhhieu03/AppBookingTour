@@ -17,6 +17,7 @@ namespace AppBookingTour.Application.Features.Accommodations.UpdateAccommodation
         public string? Regulation { get; set; }
         public string? Amenities { get; set; }
         public bool IsActive { get; set; } = true;
+        public string? Coordinates { get; set; } // Format: "lat, lon"
         public string? CoverImgUrl { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<int>? ListInfoImageId { get; set; } // Nhận qua Form

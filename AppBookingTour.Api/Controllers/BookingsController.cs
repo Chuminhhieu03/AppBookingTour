@@ -3,6 +3,7 @@ using AppBookingTour.Application.Features.Bookings.ApplyDiscount;
 using AppBookingTour.Application.Features.Bookings.CreateBooking;
 using AppBookingTour.Application.Features.Bookings.GetBookingById;
 using AppBookingTour.Application.Features.Bookings.GetPaymentStatus;
+using AppBookingTour.Application.Features.Bookings.GetUserBookings;
 using AppBookingTour.Application.Features.Bookings.InitiatePayment;
 using AppBookingTour.Application.Features.Bookings.PaymentCallback;
 using MediatR;
@@ -37,12 +38,12 @@ public class BookingsController : ControllerBase
         _logger.LogInformation("Booking created successfully: {BookingCode}", result.BookingCode);
         return Created(
             $"/api/bookings/{result.Id}",
-            ApiResponse<object>.Ok(result, "T?o booking thành công")
+            ApiResponse<object>.Ok(result, "T?o booking thï¿½nh cï¿½ng")
         );
     }
 
     /// <summary>
-    /// Áp d?ng mã gi?m giá
+    /// ï¿½p d?ng mï¿½ gi?m giï¿½
     /// </summary>
     [HttpPost("apply-discount")]
     public async Task<ActionResult<ApiResponse<object>>> ApplyDiscount(
@@ -56,7 +57,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y thông tin chi ti?t booking
+    /// L?y thï¿½ng tin chi ti?t booking
     /// </summary>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetBookingById(int id)
@@ -68,7 +69,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Kh?i t?o thanh toán
+    /// Kh?i t?o thanh toï¿½n
     /// </summary>
     [HttpPost("payment")]
     public async Task<ActionResult<ApiResponse<object>>> InitiatePayment(
@@ -102,7 +103,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Callback t? VNPay sau khi thanh toán
+    /// Callback t? VNPay sau khi thanh toï¿½n
     /// </summary>
     [HttpGet("payment-callback")]
     public async Task<IActionResult> PaymentCallback()
@@ -122,7 +123,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Ki?m tra tr?ng thái thanh toán
+    /// Ki?m tra tr?ng thï¿½i thanh toï¿½n
     /// </summary>
     [HttpGet("payment-status/{bookingId:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetPaymentStatus(int bookingId)
@@ -144,5 +145,37 @@ public class BookingsController : ControllerBase
             _logger.LogError(ex, "Error getting payment status for booking {BookingId}", bookingId);
             return BadRequest(ApiResponse<object>.Fail(ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Get bookings for a specific user with filtering and pagination
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="pageIndex">Page index (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10, max: 50)</param>
+    /// <param name="status">Filter by booking status (optional)</param>
+    [HttpGet("user/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetUserBookingsResponse>>> GetUserBookings(
+        int userId,
+        [FromQuery] int? pageIndex,
+        [FromQuery] int? pageSize,
+        [FromQuery] Domain.Enums.BookingStatus? status)
+    {
+        var effectivePageSize = pageSize ?? 10;
+        if (effectivePageSize <= 0 || effectivePageSize > 50)
+        {
+            return BadRequest(ApiResponse<GetUserBookingsResponse>.Fail("Page size pháº£i tá»« 1 Ä‘áº¿n 50"));
+        }
+
+        var filter = new GetUserBookingsFilter
+        {
+            Status = status
+        };
+
+        var query = new GetUserBookingsQuery(userId, pageIndex, effectivePageSize, filter);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} bookings for user {UserId}", result.Bookings.Count, userId);
+        return Ok(ApiResponse<GetUserBookingsResponse>.Ok(result));
     }
 }

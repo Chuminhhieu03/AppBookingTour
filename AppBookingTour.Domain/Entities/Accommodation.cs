@@ -18,6 +18,7 @@ public class Accommodation : BaseEntity
     public string? Amenities { get; set; } // JSON
     public bool IsActive { get; set; } = true;
     public string? CoverImgUrl { get; set; }
+    public string? Coordinates { get; set; } // Format: "lat, lon"
 
     #endregion
 

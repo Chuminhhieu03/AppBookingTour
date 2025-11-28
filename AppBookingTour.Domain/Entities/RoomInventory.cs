@@ -9,6 +9,7 @@ public class RoomInventory : BaseEntity
     public int BookedRooms { get; set; }
     public decimal BasePriceAdult { get; set; }
     public decimal BasePriceChildren { get; set; }
+    public decimal BasePrice { get; set; }
 
     // Navigation properties
     [JsonIgnore]

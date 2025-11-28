@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Domain.Entities;
+﻿using AppBookingTour.Application.Features.Bookings.GetUserBookings;
+using AppBookingTour.Domain.Entities;
 using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Application.IRepositories;
@@ -10,4 +11,5 @@ public interface IBookingRepository : IRepository<Booking>
     Task<bool> IsBookingCodeExistsAsync(string bookingCode, CancellationToken cancellationToken = default);
     Task<List<Booking>> GetBookingsByUserIdAsync(int userId, CancellationToken cancellationToken = default);
     Task<List<Booking>> GetExpiredPendingBookingsAsync(CancellationToken cancellationToken = default);
+    Task<(List<Booking> Bookings, int TotalCount)> GetUserBookingsWithFilterAsync(int userId, GetUserBookingsFilter filter, int pageIndex, int pageSize, CancellationToken cancellationToken = default);
 }
