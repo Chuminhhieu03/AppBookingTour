@@ -76,6 +76,7 @@ public sealed class CreateTourDepartureCommandHandler : IRequestHandler<CreateTo
 
         // 4. Tạo mới khởi hành
         var tourDeparture = _mapper.Map<TourDeparture>(request.TourDepartureRequest);
+        tourDeparture.TourId = tourId;
         tourDeparture.CreatedAt = DateTime.UtcNow;
 
         await _unitOfWork.Repository<TourDeparture>().AddAsync(tourDeparture, cancellationToken);

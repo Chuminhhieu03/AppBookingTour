@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
+using AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 using AppBookingTour.Application.Features.Tours.GetTourById;
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Application.IServices;
@@ -45,6 +46,11 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
         if (request.TourRequest.Departures != null && request.TourRequest.Departures.Any())
         {
             await ValidateTourDeparturesAsync(request.TourRequest.Departures, cancellationToken);
+        }
+
+        if(request.TourRequest.Itineraries != null && request.TourRequest.Itineraries.Any())
+        {
+            ValidateTourItineraries(request.TourRequest.Itineraries);
         }
 
         // 2. Upload hình ảnh
@@ -172,6 +178,24 @@ public sealed class CreateTourCommandHandler : IRequestHandler<CreateTourCommand
             if (guideSpecificSchedules.Any(x => x.DepartureDate < dep.ReturnDate && x.ReturnDate > dep.DepartureDate))
             {
                 throw new ArgumentException($"Hướng dẫn viên '{validGuidesMap[dep.GuideId!.Value]}' đã bị trùng lịch với Tour khác vào ngày {dep.DepartureDate:dd/MM/yyyy}.");
+            }
+        }
+    }
+
+    private void ValidateTourItineraries(List<TourItineraryRequestDTO> itineraries)
+    {
+        var set = new HashSet<int>();
+
+        foreach (var item in itineraries)
+        {
+            if (item.DayNumber == null)
+            {
+                continue;
+            }
+                 
+            if (!set.Add(item.DayNumber.Value))
+            {
+                throw new ArgumentException($"Ngày {item.DayNumber} trong lịch trình bị trùng. Vui lòng kiểm tra lại.");
             }
         }
     }
