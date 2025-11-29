@@ -44,6 +44,7 @@ public sealed class CreateTourItineraryCommandHandler : IRequestHandler<CreateTo
         }
 
         var tourItinerary = _mapper.Map<TourItinerary>(request.TourItineraryRequest);
+        tourItinerary.TourId = tourId;
         tourItinerary.CreatedAt = DateTime.UtcNow;
 
         await _unitOfWork.Repository<TourItinerary>().AddAsync(tourItinerary, cancellationToken);

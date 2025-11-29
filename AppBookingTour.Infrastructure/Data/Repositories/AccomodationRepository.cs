@@ -174,7 +174,10 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                             rt.MaxAdult,
                             rt.MaxChildren,
                             rt.Price,
-                            (ISNULL(rt.Quantity, 0) - COALESCE(ri.BookedRooms, 0)) AS DailyAvailableStock
+                            CASE 
+                                WHEN ri.RoomTypeId IS NULL THEN 0 
+                                ELSE (ISNULL(rt.Quantity, 0) - ISNULL(ri.BookedRooms, 0)) 
+                            END AS DailyAvailableStock
                         FROM
                             [dbo].[RoomTypes] rt
                         CROSS JOIN 
