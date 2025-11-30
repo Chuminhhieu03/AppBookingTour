@@ -2,6 +2,7 @@
 using AppBookingTour.Application.Features.Accommodations.AddNewAccommodation;
 using AppBookingTour.Application.Features.Accommodations.DeleteAccommodation;
 using AppBookingTour.Application.Features.Accommodations.GetAccommodationById;
+using AppBookingTour.Application.Features.Accommodations.GetAccommodationForCustomerById;
 using AppBookingTour.Application.Features.Accommodations.SearchAccommodation;
 using AppBookingTour.Application.Features.Accommodations.SearchAccommodationsForCustomer;
 using AppBookingTour.Application.Features.Accommodations.UpdateAccommodation;
@@ -55,6 +56,14 @@ namespace AppBookingTour.Api.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var query = new GetAccommodationByIdQuery(id);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("customer/{id}")]
+        public async Task<IActionResult> GetAccommodationForCustomerById(int id)
+        {
+            var query = new GetAccommodationForCustomerByIdQuery(id);
             var result = await _mediator.Send(query);
             return Ok(result);
         }

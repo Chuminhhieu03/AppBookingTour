@@ -20,6 +20,11 @@ public class RoomType : BaseEntity
     public string? CoverImageUrl { get; set; }
     public decimal ExtraAdultPrice { get; set; }
     public decimal ExtraChildrenPrice { get; set; }
+    public TimeOnly CheckinHour { get; set; }
+    public TimeOnly CheckoutHour { get; set; }
+    public decimal Area { get; set; }
+    public string? View { get; set; } // View biển, view đường phố ... List Id
+    public string? CancelPolicy { get; set; }
 
     #endregion
 

@@ -15,8 +15,8 @@ namespace AppBookingTour.Application.Features.RoomInventories.BulkAddRoomInvento
         }
 
         public async Task<BulkAddRoomInventoryResponse> Handle(
-            BulkAddRoomInventoryCommand request,
-            CancellationToken cancellationToken)
+    BulkAddRoomInventoryCommand request,
+    CancellationToken cancellationToken)
         {
             if (request.Request is null)
             {
@@ -40,31 +40,63 @@ namespace AppBookingTour.Application.Features.RoomInventories.BulkAddRoomInvento
                 };
             }
 
-            var inventories = new List<RoomInventory>();
+            var roomTypeId = payload.RoomTypeId;
+
+            // 🔥 Lấy tất cả inventory trong range để tránh query từng ngày
+            var existingInventories = await _unitOfWork.RoomInventories
+                .GetByRoomTypeAndDateRange(roomTypeId, fromDate, toDate.AddDays(1));
+
+            var inventoriesToAdd = new List<RoomInventory>();
+            var inventoriesToUpdate = new List<RoomInventory>();
 
             for (var current = fromDate; current <= toDate; current = current.AddDays(1))
             {
-                inventories.Add(new RoomInventory
+                var existing = existingInventories
+                    .FirstOrDefault(x => x.Date.Date == current.Date);
+
+                if (existing != null)
                 {
-                    RoomTypeId = payload.RoomTypeId,
-                    Date = current,
-                    BasePrice = payload.BasePrice,
-                    BasePriceAdult = payload.BasePriceAdult ?? payload.BasePrice,
-                    BasePriceChildren = payload.BasePriceChildren ?? payload.BasePrice,
-                    BookedRooms = payload.BookedRooms
-                });
+                    // 🔄 Update
+                    existing.BasePrice = payload.BasePrice;
+                    existing.BasePriceAdult = payload.BasePriceAdult ?? payload.BasePrice;
+                    existing.BasePriceChildren = payload.BasePriceChildren ?? payload.BasePrice;
+                    existing.BookedRooms = payload.BookedRooms;
+
+                    inventoriesToUpdate.Add(existing);
+                }
+                else
+                {
+                    // ➕ Add new
+                    inventoriesToAdd.Add(new RoomInventory
+                    {
+                        RoomTypeId = payload.RoomTypeId,
+                        Date = current,
+                        BasePrice = payload.BasePrice,
+                        BasePriceAdult = payload.BasePriceAdult ?? payload.BasePrice,
+                        BasePriceChildren = payload.BasePriceChildren ?? payload.BasePrice,
+                        BookedRooms = payload.BookedRooms
+                    });
+                }
             }
 
-            await _unitOfWork.RoomInventories.AddRangeAsync(inventories, cancellationToken);
+            // ➕ Thêm mới
+            if (inventoriesToAdd.Any())
+                await _unitOfWork.RoomInventories.AddRangeAsync(inventoriesToAdd, cancellationToken);
+
+            // 🔄 EF tracking nên không cần gọi update explicit, nhưng nếu bạn có repository riêng thì gọi:
+            if (inventoriesToUpdate.Any())
+                _unitOfWork.RoomInventories.UpdateRange(inventoriesToUpdate);
+
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new BulkAddRoomInventoryResponse
             {
                 Success = true,
-                Message = $"Đã tạo {inventories.Count} bản ghi tồn kho phòng.",
-                RoomInventories = inventories
+                Message = $"Đã cập nhật {inventoriesToUpdate.Count} bản ghi, tạo mới {inventoriesToAdd.Count} bản ghi.",
+                RoomInventories = inventoriesToAdd.Concat(inventoriesToUpdate).ToList()
             };
         }
+
     }
 }
 

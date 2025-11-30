@@ -18,6 +18,11 @@ namespace AppBookingTour.Application.Features.RoomTypes.UpdateRoomType
         public decimal? ExtraChildrenPrice { get; set; }
         public string? CoverImageUrl { get; set; }
         public string? Amenities { get; set; }
+        public string? CheckinHour { get; set; } // Format: "HH:mm" or "HH:mm:ss"
+        public string? CheckoutHour { get; set; } // Format: "HH:mm" or "HH:mm:ss"
+        public decimal? Area { get; set; }
+        public string? View { get; set; } // View biển, view đường phố ... List Id
+        public string? CancelPolicy { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<int>? ListInfoImageId { get; set; } // Nhận qua Form
         public List<IFormFile>? ListNewInfoImage { get; set; }

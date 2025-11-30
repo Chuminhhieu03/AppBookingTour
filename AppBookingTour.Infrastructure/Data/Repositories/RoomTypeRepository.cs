@@ -23,5 +23,12 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                 .Include(x => x.ListRoomInventory);
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
+
+        public async Task<List<RoomType>> GetByAccommodationId(int accommodationId)
+        {
+            IQueryable<RoomType> query = _dbSet
+                .Include(x => x.ListRoomInventory);
+            return await query.Where(e => e.AccommodationId == accommodationId).ToListAsync();
+        }
     }
 }

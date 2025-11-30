@@ -9,8 +9,13 @@ namespace AppBookingTour.Application.Features.RoomTypes.Mapping
     {
         public RoomTypeProfile()
         {
-            CreateMap<AddNewRoomTypeDTO, RoomType>();
-            CreateMap<UpdateRoomTypeDTO, RoomType>();
+            CreateMap<AddNewRoomTypeDTO, RoomType>()
+                .ForMember(dest => dest.CheckinHour, opt => opt.Ignore())
+                .ForMember(dest => dest.CheckoutHour, opt => opt.Ignore());
+            
+            CreateMap<UpdateRoomTypeDTO, RoomType>()
+                .ForMember(dest => dest.CheckinHour, opt => opt.Ignore())
+                .ForMember(dest => dest.CheckoutHour, opt => opt.Ignore());
         }
     }
 }

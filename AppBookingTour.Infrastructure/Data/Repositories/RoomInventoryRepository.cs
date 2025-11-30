@@ -10,6 +10,21 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
     {
         public RoomInventoryRepository(ApplicationDbContext context) : base(context) { }
 
+        public async Task<List<RoomInventory>> GetByRoomTypeAndDateRange(int roomTypeId, DateTime fromDate, DateTime toDateExclusive)
+        {
+            return await _dbSet
+                .Where(ri => ri.RoomTypeId == roomTypeId&& ri.Date >= fromDate && ri.Date < toDateExclusive)
+                .OrderBy(ri => ri.Date)
+                .ToListAsync();
+        }
+
+        public async Task<List<RoomInventory>> GetByRoomTypeId(int roomTypeId)
+        {
+            IQueryable<RoomInventory> query = _dbSet;
+            query = query.Where(x  => x.RoomTypeId == roomTypeId && x.BookedRooms > 0);
+            return await query.ToListAsync();
+        }
+
         public async Task<List<RoomInventory>> SearchRoomInventory(int? roomTypeId, DateTime? date, int? minQuantity, int pageIndex, int pageSize)
         {
             IQueryable<RoomInventory> query = _dbSet;
