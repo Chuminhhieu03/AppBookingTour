@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Combos.CreateCombo;
 using AppBookingTour.Application.Features.Combos.GetComboById;
+using AppBookingTour.Application.Features.Combos.GetComboForBooking;
+using AppBookingTour.Application.Features.Combos.GetFeaturedCombos;
 using AppBookingTour.Application.Features.Combos.UpdateCombo;
 using AppBookingTour.Application.Features.Combos.DeleteCombo;
 using AppBookingTour.Application.Features.Combos.GetListCombos;
+using AppBookingTour.Application.Features.Combos.SearchCombosForCustomer;
 using AppBookingTour.Application.Features.Combos.UploadComboImages;
 using AppBookingTour.Application.Features.Combos.DeleteComboCoverImage;
 using AppBookingTour.Application.Features.Combos.DeleteComboGalleryImages;
@@ -52,6 +55,13 @@ public sealed class CombosController : ControllerBase
         return Ok(ApiResponse<PagedResult<ComboListDTO>>.Ok(result));
     }
 
+    [HttpPost("search-for-customer")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchComboForCustomer([FromBody] SearchCombosForCustomerQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetComboById(int id)
     {
@@ -69,6 +79,25 @@ public sealed class CombosController : ControllerBase
 
         _logger.LogInformation("Retrieved combo details for ID: {ComboId}", id);
         return Ok(ApiResponse<object>.Ok(result.Combo!));
+    }
+
+    /// <summary>
+    /// Get combo for booking - User has already selected a specific schedule
+    /// </summary>
+    /// <param name="scheduleId">The combo schedule ID that user selected</param>
+    [HttpGet("for-booking/{scheduleId:int}")]
+    public async Task<ActionResult<ApiResponse<ComboForBookingDTO>>> GetComboForBooking(int scheduleId)
+    {
+        var query = new GetComboForBookingQuery(scheduleId);
+        var result = await _mediator.Send(query);
+
+        if (result == null)
+        {
+            return NotFound(ApiResponse<ComboForBookingDTO>.Fail("Combo hoặc lịch khởi hành không tồn tại hoặc không khả dụng"));
+        }
+
+        _logger.LogInformation("Retrieved combo for booking with schedule ID: {ScheduleId}", scheduleId);
+        return Ok(ApiResponse<ComboForBookingDTO>.Ok(result));
     }
 
     [HttpPut("{id:int}")]
@@ -194,5 +223,24 @@ public sealed class CombosController : ControllerBase
             Success = true, 
             Message = $"Đã xóa {result.DeletedCount} ảnh thành công" 
         });
+    }
+
+    /// <summary>
+    /// Get featured combos (random selection)
+    /// </summary>
+    /// <param name="count">Number of combos to retrieve (default: 6, max: 50)</param>
+    [HttpGet("featured")]
+    public async Task<ActionResult<ApiResponse<List<FeaturedComboDTO>>>> GetFeaturedCombos([FromQuery] int count = 6)
+    {
+        if (count <= 0 || count > 50)
+        {
+            return BadRequest(ApiResponse<List<FeaturedComboDTO>>.Fail("Số lượng phải từ 1 đến 50"));
+        }
+
+        var query = new GetFeaturedCombosQuery(count);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} featured combos", result.Count);
+        return Ok(ApiResponse<List<FeaturedComboDTO>>.Ok(result));
     }
 }

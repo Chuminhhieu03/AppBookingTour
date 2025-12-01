@@ -36,6 +36,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     #region Booking
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<BookingParticipant> BookingParticipants { get; set; }
+    public DbSet<BookingRoomDetail> BookingRoomDetails { get; set; }
     #endregion
 
     #region Payments
@@ -270,6 +271,23 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.FullName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Gender).HasConversion<int>();
             entity.Property(e => e.ParticipantType).HasConversion<int>().IsRequired();
+        });
+
+        // BookingRoomDetail configuration
+        modelBuilder.Entity<BookingRoomDetail>(entity =>
+        {
+            entity.ToTable("BookingRoomDetails");
+            entity.Property(e => e.BasePriceAdult).HasPrecision(12, 2);
+            entity.Property(e => e.BasePriceChildren).HasPrecision(12, 2);
+            entity.Property(e => e.BasePrice).HasPrecision(12, 2);
+            
+            entity.HasIndex(e => e.BookingId);
+            entity.HasIndex(e => new { e.BookingId, e.Date });
+
+            entity.HasOne(e => e.Booking)
+                  .WithMany(b => b.RoomDetails)
+                  .HasForeignKey(e => e.BookingId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

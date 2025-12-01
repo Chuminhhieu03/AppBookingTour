@@ -11,6 +11,7 @@
   <ItemGroup>
     <!-- ASP.NET Core & Authentication -->
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.22" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />

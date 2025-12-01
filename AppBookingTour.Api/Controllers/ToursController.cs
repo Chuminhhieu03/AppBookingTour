@@ -1,12 +1,17 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-
-using AppBookingTour.Api.Contracts.Responses;
+﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
+using AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
 using AppBookingTour.Application.Features.Tours.CreateTour;
-using AppBookingTour.Application.Features.Tours.SearchTours;
-using AppBookingTour.Application.Features.Tours.GetTourById;
-using AppBookingTour.Application.Features.Tours.UpdateTour;
 using AppBookingTour.Application.Features.Tours.DeleteTour;
+using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
+using AppBookingTour.Application.Features.Tours.GetTourById;
+using AppBookingTour.Application.Features.Tours.GetTourForBooking;
+using AppBookingTour.Application.Features.Tours.SearchTours;
+using AppBookingTour.Application.Features.Tours.SearchToursForCustomer;
+using AppBookingTour.Application.Features.Tours.UpdateTour;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace AppBookingTour.Api.Controllers;
 
@@ -24,9 +29,15 @@ public sealed class ToursController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromForm] TourCreateRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> CreateTour([FromForm] TourCreateRequestDTO request)
     {
-        var command = new CreateTourCommand(requestBody);
+        if (!string.IsNullOrEmpty(request.ItinerariesJson))
+            request.Itineraries = JsonConvert.DeserializeObject<List<TourItineraryRequestDTO>>(request.ItinerariesJson);
+
+        if (!string.IsNullOrEmpty(request.DeparturesJson))
+            request.Departures = JsonConvert.DeserializeObject<List<TourDepartureRequestDTO>>(request.DeparturesJson);
+
+        var command = new CreateTourCommand(request);
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Created new tour with ID: {TourId}", result.Id);
@@ -37,7 +48,13 @@ public sealed class ToursController : ControllerBase
     public async Task<ActionResult<ApiResponse<object>>> SearchTours([FromBody] SearchToursQuery query)
     {
         var result = await _mediator.Send(query);
+        return Ok(ApiResponse<object>.Ok(result));
+    }
 
+    [HttpPost("search-for-customer")]
+    public async Task<ActionResult<ApiResponse<object>>> SearchToursForCustomer([FromBody] SearchToursForCustomerQuery query)
+    {
+        var result = await _mediator.Send(query);
         return Ok(ApiResponse<object>.Ok(result));
     }
 
@@ -51,8 +68,27 @@ public sealed class ToursController : ControllerBase
         return Ok(ApiResponse<object>.Ok(result));
     }
 
+    /// <summary>
+    /// Get tour for booking - User has already selected a specific departure
+    /// </summary>
+    /// <param name="departureId">The tour departure ID that user selected</param>
+    [HttpGet("for-booking/{departureId:int}")]
+    public async Task<ActionResult<ApiResponse<TourForBookingDTO>>> GetTourForBooking(int departureId)
+    {
+        var query = new GetTourForBookingQuery(departureId);
+        var result = await _mediator.Send(query);
+
+        if (result == null)
+        {
+            return NotFound(ApiResponse<TourForBookingDTO>.Fail("Tour hoặc lịch khởi hành không tồn tại hoặc không khả dụng"));
+        }
+
+        _logger.LogInformation("Retrieved tour for booking with departure ID: {DepartureId}", departureId);
+        return Ok(ApiResponse<TourForBookingDTO>.Ok(result));
+    }
+
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromForm] TourCreateRequestDTO requestBody)
+    public async Task<ActionResult<ApiResponse<object>>> UpdateTour(int id, [FromForm] TourUpdateRequestDTO requestBody)
     {
         var command = new UpdateTourCommand(id, requestBody);
         var result = await _mediator.Send(command);
@@ -73,5 +109,20 @@ public sealed class ToursController : ControllerBase
             Success = true,
             Message = "Delete tour successfully"
         });
+    }
+
+    [HttpGet("featured")]
+    public async Task<ActionResult<ApiResponse<List<FeaturedTourDTO>>>> GetFeaturedTours([FromQuery] int count = 6)
+    {
+        if (count <= 0 || count > 50)
+        {
+            return BadRequest(ApiResponse<List<FeaturedTourDTO>>.Fail("Số lượng phải từ 1 đến 50"));
+        }
+
+        var query = new GetFeaturedToursQuery(count);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} featured tours", result.Count);
+        return Ok(ApiResponse<List<FeaturedTourDTO>>.Ok(result));
     }
 }

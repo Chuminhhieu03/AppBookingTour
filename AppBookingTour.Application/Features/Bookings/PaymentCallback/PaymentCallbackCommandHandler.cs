@@ -145,8 +145,8 @@ public class PaymentCallbackCommandHandler : IRequestHandler<PaymentCallbackComm
             await _unitOfWork.CommitTransactionAsync(cancellationToken);
 
             var redirectFrontendUrl = success
-                ? $"{GetFrontendUrl()}/booking-success?bookingCode={booking.BookingCode}&transactionId={transactionId}"
-                : $"{GetFrontendUrl()}/booking-failed?message={Uri.EscapeDataString(message)}"; 
+                ? $"{GetFrontendUrl()}/booking/booking-success?bookingCode={booking.BookingCode}&transactionId={transactionId}"
+                : $"{GetFrontendUrl()}/booking/booking-failed?message={Uri.EscapeDataString(message)}"; 
 
             return new PaymentCallbackResponseDTO
             {

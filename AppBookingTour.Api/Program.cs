@@ -2,7 +2,9 @@
 using AppBookingTour.Api.Middlewares;
 using AppBookingTour.Application;
 using AppBookingTour.Infrastructure;
+using AppBookingTour.Infrastructure.Jobs;
 using AppBookingTour.Share.Configurations;
+using Hangfire;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -135,6 +137,30 @@ using (var scope = app.Services.CreateScope())
 
 #endregion
 
+#region Hangfire Configuration
+
+// Configure Hangfire Dashboard
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() },
+    DashboardTitle = "AppBookingTour - Background Jobs",
+    StatsPollingInterval = 2000 // Update stats every 2 seconds
+});
+
+// Configure Recurring Jobs
+RecurringJob.AddOrUpdate<RefundExpiredBookingsJob>(
+    "refund-expired-bookings",
+    job => job.ExecuteAsync(),
+    "*/5 * * * *", // Cron: Mỗi 5 phút
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.Local
+    });
+
+Log.Information("Hangfire recurring jobs configured successfully");
+
+#endregion
+
 // Add Custom Middlewares
 //app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
@@ -183,6 +209,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
 {
     foreach (var address in app.Urls)
         Console.WriteLine($"The application is running at: {address}");
+    Console.WriteLine($"Hangfire Dashboard: http://localhost:5000/hangfire");
 });
 
 Log.Information("Running web host in {Environment}", app.Environment.EnvironmentName);

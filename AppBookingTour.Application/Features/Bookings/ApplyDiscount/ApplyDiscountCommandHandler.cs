@@ -1,4 +1,5 @@
 using AppBookingTour.Application.IRepositories;
+using AppBookingTour.Application.IServices;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -7,13 +8,16 @@ namespace AppBookingTour.Application.Features.Bookings.ApplyDiscount;
 public class ApplyDiscountCommandHandler : IRequestHandler<ApplyDiscountCommand, ApplyDiscountResponseDTO>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<ApplyDiscountCommandHandler> _logger;
 
     public ApplyDiscountCommandHandler(
         IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
         ILogger<ApplyDiscountCommandHandler> logger)
     {
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -21,7 +25,8 @@ public class ApplyDiscountCommandHandler : IRequestHandler<ApplyDiscountCommand,
     {
         var req = request.Request;
         
-        _logger.LogInformation("Applying discount code: {Code} for amount: {Amount}", req.DiscountCode, req.TotalAmount);
+        _logger.LogInformation("Applying discount code: {Code} for bookingType: {BookingType}, amount: {Amount}", 
+            req.DiscountCode, req.BookingType, req.TotalAmount);
 
         var discount = await _unitOfWork.Discounts
             .FirstOrDefaultAsync(
@@ -86,25 +91,8 @@ public class ApplyDiscountCommandHandler : IRequestHandler<ApplyDiscountCommand,
             };
         }
 
-        // Check if user has already used this discount
-        if (req.UserId.HasValue)
-        {
-            var hasUsed = await _unitOfWork.DiscountUsages
-                .ExistsAsync(
-                    du => du.DiscountId == discount.Id && du.UserId == req.UserId.Value,
-                    cancellationToken);
-
-            if (hasUsed)
-            {
-                return new ApplyDiscountResponseDTO
-                {
-                    IsValid = false,
-                    Message = "B?n ?ã s? d?ng mã gi?m giá này r?i",
-                    DiscountAmount = 0,
-                    FinalAmount = req.TotalAmount
-                };
-            }
-        }
+        // Note: We don't check if user has already used this discount here
+        // This check will be done when creating the actual booking
 
         // Calculate discount
         var discountAmount = CalculateDiscount(discount, req.TotalAmount);
@@ -119,8 +107,12 @@ public class ApplyDiscountCommandHandler : IRequestHandler<ApplyDiscountCommand,
             Message = "Áp d?ng mã gi?m giá thành công",
             DiscountCode = discount.Code,
             DiscountName = discount.Name,
+            DiscountType = "Percentage",
+            DiscountPercent = discount.DiscountPercent,
             DiscountAmount = discountAmount,
-            FinalAmount = finalAmount
+            FinalAmount = finalAmount,
+            ValidUntil = discount.EndEffectedDtg,
+            ApplicableFor = req.BookingType
         };
     }
 

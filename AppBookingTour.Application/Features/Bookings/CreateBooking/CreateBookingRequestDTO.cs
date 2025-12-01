@@ -11,9 +11,10 @@ public class CreateBookingRequestDTO
     public string? SpecialRequests { get; set; }
     
     // Booking Information
-    public int ItemId { get; set; } // Tour/Combo ID
+    public int ItemId { get; set; } // Tour/Combo/Accommodation ID
     public BookingType BookingType { get; set; } = BookingType.Tour;
     public int? TourDepartureId { get; set; } // For Tour: TourDepartureId, For Combo: ComboScheduleId
+    public List<int>? RoomInventoryIds { get; set; } // For Accommodation: List of RoomInventoryId
     public DateTime TravelDate { get; set; }
     public PaymentType PaymentType { get; set; } = PaymentType.FullPayment;
     

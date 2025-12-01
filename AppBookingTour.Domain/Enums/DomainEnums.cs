@@ -66,8 +66,7 @@ public enum BookingStatus
 public enum PaymentType
 {
     FullPayment = 1,
-    Deposit = 2,
-    Installment = 3
+    Deposit = 2
 }
 
 public enum ParticipantType
