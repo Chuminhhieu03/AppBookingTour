@@ -33,6 +33,10 @@ public class TourDepartureRequestValidator : AbstractValidator<TourDepartureRequ
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Giá vé trẻ em"))
             .GreaterThanOrEqualTo(0).WithMessage("Giá vé trẻ em phải lớn hơn hoặc bằng 0");
 
+        RuleFor(x => x.SingleRoomSurcharge)
+            .NotNull().WithMessage(string.Format(Message.RequiredField, "Phụ thu phòng đơn"))
+            .GreaterThanOrEqualTo(0).WithMessage("Phụ thu phòng đơn phải lớn hơn hoặc bằng 0");
+
         RuleFor(x => x.Status)
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Trạng thái"))
             .InclusiveBetween(1, 3).WithMessage("Trạng thái không hợp lệ (1 = Sẵn sàng, 2 = Đầy, 3 = Hủy)");

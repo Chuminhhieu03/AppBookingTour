@@ -21,6 +21,7 @@ namespace AppBookingTour.Application.Features.Tours.SearchTours
         public int PageSize { get; set; }
         public int TotalPages { get; set; }
     }
+
     public class TourListItem
     {
         public int Id { get; set; }

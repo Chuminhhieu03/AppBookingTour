@@ -48,6 +48,9 @@ public static class DependencyInjection
         // Payment services
         AddPaymentServices(services, configuration);
 
+        // Excel export service
+        services.AddScoped<IExcelExportService, ExcelExportService>();
+
         return services;
     }
 

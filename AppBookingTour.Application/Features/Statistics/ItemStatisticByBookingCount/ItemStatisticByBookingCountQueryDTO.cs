@@ -1,4 +1,5 @@
-﻿
+﻿using AppBookingTour.Application.Features.Tours.SearchTours;
+
 namespace AppBookingTour.Application.Features.Statistics.ItemStatisticByBookingCount;
 
 public class ItemStatisticByBookingCountResponse
@@ -8,6 +9,7 @@ public class ItemStatisticByBookingCountResponse
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public List<ItemStatisticByBookingCountDTO> Items { get; set; } = new();
+    public PaginationMeta Meta { get; set; } = null!;
 }
 
 public class ItemStatisticByBookingCountDTO
