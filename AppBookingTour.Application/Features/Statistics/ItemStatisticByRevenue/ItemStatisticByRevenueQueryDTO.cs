@@ -1,6 +1,6 @@
-﻿
-namespace AppBookingTour.Application.Features.Statistics.ItemStatisticByRevenue;
+﻿using AppBookingTour.Application.Features.Tours.SearchTours;
 
+namespace AppBookingTour.Application.Features.Statistics.ItemStatisticByRevenue;
 
 public class ItemStatisticByRevenueResponse
 {
@@ -9,6 +9,7 @@ public class ItemStatisticByRevenueResponse
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public List<ItemStatisticDTO> Items { get; set; } = new();
+    public PaginationMeta Meta { get; set; } = null!;
 }
 
 public class ItemStatisticDTO
