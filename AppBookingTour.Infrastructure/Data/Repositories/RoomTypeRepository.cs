@@ -19,7 +19,7 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
 
         public async Task<RoomType?> GetById(int id)
         {
-            IQueryable<RoomType> query = _dbSet;
+            IQueryable<RoomType> query = _dbSet.Include(x => x.ListRoomInventory);
             return await query.FirstOrDefaultAsync(e => e.Id == id);
         }
 
