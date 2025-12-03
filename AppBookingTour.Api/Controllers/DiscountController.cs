@@ -1,4 +1,5 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Bookings.ApplyDiscount;
 using AppBookingTour.Application.Features.Discounts.AddNewDiscount;
 using AppBookingTour.Application.Features.Discounts.DeleteDiscount;
 using AppBookingTour.Application.Features.Discounts.GetDiscountsByEntityType;
@@ -19,10 +20,30 @@ namespace AppBookingTour.Api.Controllers
     public class DiscountController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<DiscountController> _logger;
 
-        public DiscountController(IMediator mediator, ILogger<AuthController> logger)
+        public DiscountController(IMediator mediator, ILogger<DiscountController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Apply discount code (New endpoint - recommended)
+        /// </summary>
+        [HttpPost("apply")]
+        public async Task<ActionResult<ApiResponse<ApplyDiscountResponseDTO>>> ApplyDiscount(
+            [FromBody] ApplyDiscountRequestDTO request)
+        {
+            var command = new ApplyDiscountCommand(request);
+            var result = await _mediator.Send(command);
+
+            if (!result.IsValid)
+            {
+                return BadRequest(ApiResponse<ApplyDiscountResponseDTO>.Fail(result.Message));
+            }
+
+            return Ok(ApiResponse<ApplyDiscountResponseDTO>.Ok(result));
         }
 
         [HttpPost("search")]

@@ -42,11 +42,13 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         try
         {
-            // 1. Validate tour/combo and get pricing information
+            // 1. Validate tour/combo/accommodation and get pricing information
             Tour? tour = null;
             TourDeparture? tourDeparture = null;
             Combo? combo = null;
             ComboSchedule? comboSchedule = null;
+            Accommodation? accommodation = null;
+            List<RoomInventory>? roomInventories = null;
             string? itemName = null;
             string? itemImageUrl = null;
             DateTime? departureDate = null;
@@ -56,6 +58,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             decimal priceAdult = 0;
             decimal priceChild = 0;
             decimal singleRoomSurcharge = 0;
+            decimal totalRoomPrice = 0;
 
             if (req.BookingType == BookingType.Tour)
             {
@@ -138,16 +141,82 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                     singleRoomSurcharge = 0;
                 }
             }
+            else if (req.BookingType == BookingType.Accommodation)
+            {
+                // Validate RoomInventoryIds
+                if (req.RoomInventoryIds == null || !req.RoomInventoryIds.Any())
+                    throw new ArgumentException(
+                        "RoomInventoryIds không được để trống cho Accommodation"
+                    );
+
+                // Get all room inventories
+                roomInventories = (
+                    await _unitOfWork
+                        .Repository<RoomInventory>()
+                        .FindAsync(ri => req.RoomInventoryIds.Contains(ri.Id), cancellationToken)
+                ).ToList();
+
+                if (roomInventories.Count != req.RoomInventoryIds.Count)
+                    throw new ArgumentException("Một số RoomInventory không tồn tại");
+
+                // Check all belong to same room type
+                var roomTypeId = roomInventories.First().RoomTypeId;
+                if (roomInventories.Any(ri => ri.RoomTypeId != roomTypeId))
+                    throw new ArgumentException("Tất cả RoomInventory phải cùng một RoomType");
+
+                // Get room type
+                var roomType = await _unitOfWork
+                    .Repository<RoomType>()
+                    .GetByIdAsync(roomTypeId, cancellationToken);
+
+                if (roomType == null)
+                    throw new ArgumentException("RoomType không tồn tại");
+
+                // Get accommodation
+                accommodation = await _unitOfWork.Accommodations.GetById(roomType.AccommodationId);
+
+                if (accommodation == null)
+                    throw new ArgumentException("Accommodation không tồn tại");
+
+                if (!accommodation.IsActive)
+                    throw new ArgumentException("Accommodation không còn hoạt động");
+
+                // Check availability
+                foreach (var inventory in roomInventories)
+                {
+                    var availableRooms = inventory.BookedRooms - 1;
+                    if (availableRooms < 0)
+                        throw new InvalidOperationException(
+                            $"Không còn phòng trống cho ngày {inventory.Date:dd/MM/yyyy}"
+                        );
+                }
+
+                itemName = accommodation.Name;
+                itemImageUrl = accommodation.CoverImgUrl;
+                departureDate = roomInventories.Min(ri => ri.Date);
+                returnDate = roomInventories.Max(ri => ri.Date);
+                totalRoomPrice = roomInventories.Sum(x => x.BasePrice);
+            }
             else
             {
                 throw new ArgumentException($"BookingType {req.BookingType} chưa được hỗ trợ");
             }
 
             // 2. Calculate pricing using values from schedule
-            var totalAmount =
-                (req.NumAdults * priceAdult)
-                + (req.NumChildren * priceChild)
-                + (req.NumSingleRooms * singleRoomSurcharge);
+
+            decimal totalAmount = 0m;
+
+            if (req.BookingType == BookingType.Accommodation)
+            {
+                totalAmount = totalRoomPrice;
+            }
+            else
+            {
+                totalAmount =
+                    (req.NumAdults * priceAdult)
+                    + (req.NumChildren * priceChild)
+                    + (req.NumSingleRooms * singleRoomSurcharge);
+            }
 
             _logger.LogInformation(
                 "Calculated total: {Total} = Adults({NumAdults}x{PriceAdult}) + Children({NumChildren}x{PriceChild}) + SingleRooms({NumSingle}x{SingleSurcharge})",
@@ -195,7 +264,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 TravelDate = req.TravelDate,
                 NumAdults = req.NumAdults,
                 NumChildren = req.NumChildren,
-                NumInfants = req.NumInfants,
                 NumSingleRooms = req.NumSingleRooms,
                 AdultPrice = priceAdult,
                 ChildPrice = priceChild,
@@ -267,7 +335,9 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 if (tourDeparture.AvailableSlots == 0)
                     tourDeparture.Status = DepartureStatus.Full;
                 else if (tourDeparture.AvailableSlots < 0)
-                    throw new InvalidOperationException("Số lượng người tham gia tour đã quá số lượng cho phép, xin bạn vui lòng đổi sang ngày khác");
+                    throw new InvalidOperationException(
+                        "Số lượng người tham gia tour đã quá số lượng cho phép, xin bạn vui lòng đổi sang ngày khác"
+                    );
                 _unitOfWork.TourDepartures.Update(tourDeparture);
             }
             else if (comboSchedule != null)
@@ -278,8 +348,40 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 if (comboSchedule.AvailableSlots == 0)
                     comboSchedule.Status = ComboStatus.Full;
                 else if (comboSchedule.AvailableSlots < 0)
-                    throw new InvalidOperationException("Số lượng người tham gia combo đã quá số lượng cho phép, xin bạn vui lòng đổi sang ngày khác");
+                    throw new InvalidOperationException(
+                        "Số lượng người tham gia combo đã quá số lượng cho phép, xin bạn vui lòng đổi sang ngày khác"
+                    );
                 _unitOfWork.Repository<ComboSchedule>().Update(comboSchedule);
+            }
+            else if (roomInventories != null && roomInventories.Any())
+            {
+                // Update booked rooms for each inventory
+                foreach (var inventory in roomInventories)
+                {
+                    inventory.BookedRooms += 1; // FIX: Phải cộng, không phải trừ
+                    _unitOfWork.Repository<RoomInventory>().Update(inventory);
+                }
+
+                // ⭐ LƯU CHI TIẾT GIÁ TỪNG ĐÊM
+                var roomDetails = roomInventories.Select(ri => new BookingRoomDetail
+                {
+                    BookingId = booking.Id,
+                    RoomInventoryId = ri.Id,
+                    Date = ri.Date,
+                    BasePriceAdult = ri.BasePriceAdult,
+                    BasePriceChildren = ri.BasePriceChildren,
+                    BasePrice = ri.BasePrice,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                }).ToList();
+
+                await _unitOfWork.Repository<BookingRoomDetail>()
+                    .AddRangeAsync(roomDetails, cancellationToken);
+
+                _logger.LogInformation(
+                    "Updated {Count} room inventories and saved room details for accommodation booking",
+                    roomInventories.Count
+                );
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -299,7 +401,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 TravelDate = booking.TravelDate,
                 NumAdults = booking.NumAdults,
                 NumChildren = booking.NumChildren,
-                NumInfants = booking.NumInfants,
                 NumSingleRooms = booking.NumSingleRooms,
                 TotalAmount = booking.TotalAmount,
                 AdultPrice = booking.AdultPrice,

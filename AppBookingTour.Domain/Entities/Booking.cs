@@ -1,4 +1,4 @@
-using AppBookingTour.Domain.Enums;
+﻿using AppBookingTour.Domain.Enums;
 
 namespace AppBookingTour.Domain.Entities;
 
@@ -7,7 +7,7 @@ public class Booking : BaseEntity
     public string BookingCode { get; set; } = null!;
     public int UserId { get; set; }
     public BookingType BookingType { get; set; }
-    public int ItemId { get; set; } // FK to Tour, Hotel, or Combo
+    public int ItemId { get; set; }
     public DateTime BookingDate { get; set; }
     public DateTime TravelDate { get; set; }
     public int NumAdults { get; set; }
@@ -16,7 +16,6 @@ public class Booking : BaseEntity
     public int NumSingleRooms { get; set; }
     public decimal AdultPrice { get; set; }
     public decimal ChildPrice { get; set; }
-    public decimal InfantPrice { get; set; }
     public decimal SingleRoomPrice { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
@@ -27,6 +26,7 @@ public class Booking : BaseEntity
     public string ContactName { get; set; } = null!;
     public string ContactPhone { get; set; } = null!;
     public string ContactEmail { get; set; } = null!;
+    public string? RoomInventoryIds { get; set; }
 
     // Navigation properties
     public virtual User User { get; set; } = null!;
@@ -34,4 +34,5 @@ public class Booking : BaseEntity
     public virtual ICollection<Payment> Payments { get; set; } = [];
     public virtual ICollection<Review> Reviews { get; set; } = [];
     public virtual ICollection<DiscountUsage> DiscountUsages { get; set; } = [];
+    public virtual ICollection<BookingRoomDetail> RoomDetails { get; set; } = [];
 }

@@ -16,9 +16,6 @@ public class Combo : BaseEntity
     public decimal BasePriceChildren { get; set; }
     public string? Amenities { get; set; } // JSON
     public string? Description { get; set; } // TEXT
-    public string? Includes { get; set; } // JSON
-    public string? Excludes { get; set; } // JSON
-    public string? TermsConditions { get; set; } // JSON
     [Column(TypeName = "nvarchar(max)")]
     public string? AdditionalInfo { get; set; }
     [Column(TypeName = "nvarchar(max)")]

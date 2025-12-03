@@ -5,7 +5,10 @@ using AppBookingTour.Domain.Entities;
 using AppBookingTour.Infrastructure.Data;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
+using AppBookingTour.Infrastructure.Jobs;
 using AppBookingTour.Infrastructure.Services;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +50,9 @@ public static class DependencyInjection
         
         // Payment services
         AddPaymentServices(services, configuration);
+
+        // ? Background Jobs with Hangfire
+        AddHangfire(services, configuration);
 
         // Excel export service
         services.AddScoped<IExcelExportService, ExcelExportService>();
@@ -210,27 +216,34 @@ public static class DependencyInjection
         services.AddScoped<IVNPayService, VNPayService>();
         services.AddScoped<IQRCodeService, QRCodeService>();
     }
-    
-    /// <summary>
-    /// Extension methods for service configuration validation
-    /// </summary>
-    //public static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
-    //{
-    //    services.AddHealthChecks()
-    //        .AddSqlServer(
-    //            configuration.GetConnectionString("DefaultConnection")!,
-    //            name: "Database",
-    //            tags: new[] { "db", "sql", "sqlserver" })
-    //        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
 
-    //    // Add Redis health check if configured
-    //    var redisConfiguration = configuration.GetSection("Redis:Configuration").Value;
-    //    if (!string.IsNullOrEmpty(redisConfiguration))
-    //    {
-    //        services.AddHealthChecks()
-    //            .AddRedis(redisConfiguration, name: "Redis", tags: new[] { "cache", "redis" });
-    //    }
+    private static void AddHangfire(IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
+        
+        // Add Hangfire services
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(connectionString, new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true,
+                SchemaName = "Hangfire"
+            }));
+        
+        // Add the processing server as IHostedService
+        services.AddHangfireServer(options =>
+        {
+            options.WorkerCount = 5; // S? l??ng worker threads
+            options.ServerName = "AppBookingTour-Server";
+        });
 
-    //    return services;
-    //}
+        // Register background jobs
+        services.AddScoped<RefundExpiredBookingsJob>();
+    }
 }

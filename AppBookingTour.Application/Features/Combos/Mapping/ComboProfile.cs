@@ -23,14 +23,6 @@ public class ComboProfile : Profile
                 string.IsNullOrEmpty(src.Amenities)
                 ? new List<string>()
                 : src.Amenities.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
-            .ForMember(dest => dest.Includes, opt => opt.MapFrom(src =>
-                string.IsNullOrEmpty(src.Includes)
-                ? new List<string>()
-                : src.Includes.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
-            .ForMember(dest => dest.Excludes, opt => opt.MapFrom(src =>
-                string.IsNullOrEmpty(src.Excludes)
-                ? new List<string>()
-                : src.Excludes.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()))
             .ForMember(dest => dest.AdditionalInfo, opt => opt.MapFrom(src => src.AdditionalInfo))
             .ForMember(dest => dest.ImportantInfo, opt => opt.MapFrom(src => src.ImportantInfo));
 

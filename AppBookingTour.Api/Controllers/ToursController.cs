@@ -5,6 +5,7 @@ using AppBookingTour.Application.Features.Tours.CreateTour;
 using AppBookingTour.Application.Features.Tours.DeleteTour;
 using AppBookingTour.Application.Features.Tours.GetFeaturedTours;
 using AppBookingTour.Application.Features.Tours.GetTourById;
+using AppBookingTour.Application.Features.Tours.GetTourForBooking;
 using AppBookingTour.Application.Features.Tours.SearchTours;
 using AppBookingTour.Application.Features.Tours.SearchToursForCustomer;
 using AppBookingTour.Application.Features.Tours.UpdateTour;
@@ -65,6 +66,25 @@ public sealed class ToursController : ControllerBase
 
         _logger.LogInformation("Retrieved tour details for ID: {TourId}", id);
         return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    /// <summary>
+    /// Get tour for booking - User has already selected a specific departure
+    /// </summary>
+    /// <param name="departureId">The tour departure ID that user selected</param>
+    [HttpGet("for-booking/{departureId:int}")]
+    public async Task<ActionResult<ApiResponse<TourForBookingDTO>>> GetTourForBooking(int departureId)
+    {
+        var query = new GetTourForBookingQuery(departureId);
+        var result = await _mediator.Send(query);
+
+        if (result == null)
+        {
+            return NotFound(ApiResponse<TourForBookingDTO>.Fail("Tour hoặc lịch khởi hành không tồn tại hoặc không khả dụng"));
+        }
+
+        _logger.LogInformation("Retrieved tour for booking with departure ID: {DepartureId}", departureId);
+        return Ok(ApiResponse<TourForBookingDTO>.Ok(result));
     }
 
     [HttpPut("{id:int}")]

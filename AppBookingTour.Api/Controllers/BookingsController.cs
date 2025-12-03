@@ -1,4 +1,4 @@
-using AppBookingTour.Api.Contracts.Responses;
+﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.Bookings.ApplyDiscount;
 using AppBookingTour.Application.Features.Bookings.CreateBooking;
 using AppBookingTour.Application.Features.Bookings.GetBookingById;
@@ -38,7 +38,7 @@ public class BookingsController : ControllerBase
         _logger.LogInformation("Booking created successfully: {BookingCode}", result.BookingCode);
         return Created(
             $"/api/bookings/{result.Id}",
-            ApiResponse<object>.Ok(result, "T?o booking th�nh c�ng")
+            ApiResponse<object>.Ok(result, "T?o booking thÃ nh cÃ´ng")
         );
     }
 
@@ -46,6 +46,7 @@ public class BookingsController : ControllerBase
     /// �p d?ng m� gi?m gi�
     /// </summary>
     [HttpPost("apply-discount")]
+    [Obsolete("This endpoint is deprecated. Please use POST /api/discounts/apply instead.")]
     public async Task<ActionResult<ApiResponse<object>>> ApplyDiscount(
         [FromBody] ApplyDiscountRequestDTO request
     )
@@ -57,7 +58,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y th�ng tin chi ti?t booking
+    /// L?y thÃ´ng tin chi ti?t booking
     /// </summary>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetBookingById(int id)
@@ -69,7 +70,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Kh?i t?o thanh to�n
+    /// Kh?i t?o thanh toÃ¡n
     /// </summary>
     [HttpPost("payment")]
     public async Task<ActionResult<ApiResponse<object>>> InitiatePayment(
@@ -103,7 +104,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Callback t? VNPay sau khi thanh to�n
+    /// Callback t? VNPay sau khi thanh toÃ¡n
     /// </summary>
     [HttpGet("payment-callback")]
     public async Task<IActionResult> PaymentCallback()
@@ -123,7 +124,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Ki?m tra tr?ng th�i thanh to�n
+    /// Ki?m tra tr?ng thÃ¡i thanh toÃ¡n
     /// </summary>
     [HttpGet("payment-status/{bookingId:int}")]
     public async Task<ActionResult<ApiResponse<object>>> GetPaymentStatus(int bookingId)
