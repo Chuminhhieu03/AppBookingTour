@@ -58,9 +58,8 @@ public enum BookingStatus
     Pending = 1,
     Confirmed = 2,
     Paid = 3,
-    Cancelled = 4,
-    Completed = 5,
-    Refunded = 6
+    UnderPaid = 4,
+    Cancelled = 5,
 }
 
 public enum PaymentType
@@ -264,8 +263,8 @@ public enum PriceLevel
 
 public enum EntityType
 {
-    Accommodation = 1,
-    Tour = 2,
+    Tour = 1,
+    Accommodation = 2,
     Combo = 3,
     User = 4,
     Review = 5,

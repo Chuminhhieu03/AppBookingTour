@@ -26,10 +26,10 @@ public sealed class GetListCityQueryHandler : IRequestHandler<GetListCityQuery, 
 
     public async Task<GetListCityResponse> Handle(GetListCityQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Getting all cities");
+        _logger.LogInformation("Getting list city active!");
         try
         {
-            var cities = await _unitOfWork.Repository<City>().GetAllAsync(cancellationToken);
+            var cities = await _unitOfWork.Repository<City>().FindAsync(x => x.IsActive == true, cancellationToken);
 
             var cityDtos = _mapper.Map<List<CityDTO>>(cities);
 

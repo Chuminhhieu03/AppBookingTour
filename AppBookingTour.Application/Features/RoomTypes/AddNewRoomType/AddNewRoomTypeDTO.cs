@@ -17,8 +17,15 @@ namespace AppBookingTour.Application.Features.RoomTypes.AddNewRoomType
         public decimal? ExtraAdultPrice { get; set; }
         public decimal? ExtraChildrenPrice { get; set; }
         public string? Amenities { get; set; }
+        public string? CheckinHour { get; set; } // Format: "HH:mm" or "HH:mm:ss"
+        public string? CheckoutHour { get; set; } // Format: "HH:mm" or "HH:mm:ss"
+        public decimal? Area { get; set; }
+        public string? View { get; set; } // View biển, view đường phố ... List Id
+        public string? CancelPolicy { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<IFormFile>? InfoImgFile { get; set; }
+        public decimal? VAT { get; set; } // Thuế VAT
+        public decimal? ManagementFee { get; set; } // Phụ thu quản trị
     }
 
     public class AddNewRoomTypeResponse : BaseResponse

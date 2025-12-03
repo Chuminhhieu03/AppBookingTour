@@ -25,8 +25,8 @@ public sealed class GetTourTypesListQueryHandler : IRequestHandler<GetTourTypesL
 
     public async Task<List<TourTypeDTO>> Handle(GetTourTypesListQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Getting all tour types");
-        var tourTypes = await _unitOfWork.TourTypes.GetAllAsync(cancellationToken);
+        _logger.LogInformation("Getting list tour type active!");
+        var tourTypes = await _unitOfWork.TourTypes.FindAsync(x => x.IsActive, cancellationToken);
 
         var tourTypeDtos = _mapper.Map<List<TourTypeDTO>>(tourTypes);
 

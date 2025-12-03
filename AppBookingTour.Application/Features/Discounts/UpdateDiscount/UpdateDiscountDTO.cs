@@ -14,6 +14,8 @@ namespace AppBookingTour.Application.Features.Discounts.UpdateDiscount
         public int? ServiceType { get; set; }
         public int? Status { get; set; }
         public string? Description { get; set; }
+        public decimal? MaximumDiscount { get; set; }
+        public string? COORDINATES { get; set; }
     }
 
     public class UpdateDiscountResponse : BaseResponse

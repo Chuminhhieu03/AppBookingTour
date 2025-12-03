@@ -10,10 +10,13 @@ namespace AppBookingTour.Application.IRepositories
     // Interface này không cần kế thừa IRepository<T> vì nó chuyên dụng
     public interface IStatisticsRepository
     {
-        Task<IEnumerable<ItemStatisticDTO>> GetItemRevenueStatisticsAsync(
+        Task<(IEnumerable<ItemStatisticDTO> Items, int TotalCount, int TotalPages)> GetItemRevenueStatisticsAsync(
             DateOnly startDate,
             DateOnly endDate,
             ItemType itemType,
+            int? pageIndex,
+            int? pageSize,
+            bool isDesc,
             CancellationToken cancellationToken = default);
 
         Task<IEnumerable<ItemRevenueDetailDTO>> GetItemRevenueDetailAsync(
@@ -23,10 +26,13 @@ namespace AppBookingTour.Application.IRepositories
             int itemId,
             CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<ItemStatisticByBookingCountDTO>> GetItemBookingCountStatisticsAsync(
+        Task<(IEnumerable<ItemStatisticByBookingCountDTO> Items, int TotalCount, int TotalPages)> GetItemBookingCountStatisticsAsync(
             DateOnly startDate,
             DateOnly endDate,
             ItemType itemType,
+            int? pageIndex,
+            int? pageSize,
+            bool isDesc,
             CancellationToken cancellationToken = default);
 
         Task<IEnumerable<ItemBookingCountDetailDTO>> GetItemBookingCountDetailAsync(

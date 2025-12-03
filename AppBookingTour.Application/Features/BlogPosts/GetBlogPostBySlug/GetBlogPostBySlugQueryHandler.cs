@@ -3,7 +3,7 @@ using AppBookingTour.Application.Features.BlogPosts.GetBlogPostById;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace AppBookingTour.Application.Features.BlogPosts.GetListBlogPosts;
+namespace AppBookingTour.Application.Features.BlogPosts.GetBlogPostBySlug;
 
 public class GetBlogPostBySlugQueryHandler : IRequestHandler<GetBlogPostBySlugQuery, BlogPostDetailDto?>
 {
@@ -20,7 +20,7 @@ public class GetBlogPostBySlugQueryHandler : IRequestHandler<GetBlogPostBySlugQu
     {
         _logger.LogInformation("Getting blog post with slug: {Slug}", request.Slug);
 
-        var blogPostRepo = _unitOfWork.Repository<Domain.Entities.BlogPost>() as IBlogPostRepository;
+        var blogPostRepo = _unitOfWork.BlogPosts;
         
         if (blogPostRepo == null)
         {
@@ -50,6 +50,8 @@ public class GetBlogPostBySlugQueryHandler : IRequestHandler<GetBlogPostBySlugQu
             StatusName = blogPost.Status.ToString(),
             PublishedDate = blogPost.PublishedDate,
             Tags = blogPost.Tags,
+            Description = blogPost.Description,
+            CoverImage = blogPost.CoverImage,
             CreatedAt = blogPost.CreatedAt,
             UpdatedAt = blogPost.UpdatedAt
         };

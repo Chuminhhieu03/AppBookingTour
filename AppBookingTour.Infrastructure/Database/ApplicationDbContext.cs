@@ -63,6 +63,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
     public DbSet<Image> Images { get; set; }
 
     public DbSet<Discount> Discounts { get; set; }
+    public DbSet<ItemDiscount> ItemDiscounts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -180,7 +181,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.HasOne(t => t.DepartureCity)
                   .WithMany(c => c.DepartureTours)
                   .HasForeignKey(t => t.DepartureCityId)
-                  .OnDelete(DeleteBehavior.Restrict);           
+                  .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(t => t.DestinationCity)
                   .WithMany(c => c.DestinationTours)
@@ -411,6 +412,15 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, i
             entity.Property(e => e.FeatureCode).HasMaxLength(100).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(200);
         });
+    }
+
+    private void ConfigureItemDiscountEntities(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<ItemDiscount>()
+            .HasOne(id => id.Discount)
+            .WithMany(d => d.ItemDiscounts)
+            .HasForeignKey(id => id.DiscountId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private void ConfigureAdditionalDecimalEntities(ModelBuilder modelBuilder)

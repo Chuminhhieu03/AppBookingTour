@@ -25,29 +25,21 @@ public sealed class GetComboByIdQueryHandler : IRequestHandler<GetComboByIdQuery
     public async Task<GetComboByIdResponse> Handle(GetComboByIdQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting combo details for ID: {ComboId}", request.ComboId);
-        try
+        // Sử dụng ComboRepository để load combo với details
+        var combo = await _unitOfWork.Combos.GetComboWithDetailsAsync(request.ComboId, cancellationToken);
+
+        if (combo == null)
         {
-            // Sử dụng ComboRepository để load combo với details
-            var combo = await _unitOfWork.Combos.GetComboWithDetailsAsync(request.ComboId, cancellationToken);
-
-            if (combo == null)
-            {
-                _logger.LogWarning("Combo not found with ID: {ComboId}", request.ComboId);
-                return GetComboByIdResponse.Failed($"Combo with ID {request.ComboId} not found");
-            }
-
-            // Get List Image by ComboID sử dụng ImageRepository
-            var lstImage = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(combo.Id, EntityType.Combo);
-
-            var comboDto = _mapper.Map<ComboDTO>(combo);
-            comboDto.ComboImages = [.. lstImage.Select(x => x.Url)];
-
-            return GetComboByIdResponse.Success(comboDto);
+            _logger.LogWarning("Combo not found with ID: {ComboId}", request.ComboId);
+            return GetComboByIdResponse.Failed($"Combo with ID {request.ComboId} not found");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting combo details for ID: {ComboId}", request.ComboId);
-            return GetComboByIdResponse.Failed("An error occurred while retrieving combo details");
-        }
+
+        // Get List Image by ComboID sử dụng ImageRepository
+        var lstImage = await _unitOfWork.Images.GetListImageByEntityIdAndEntityType(combo.Id, EntityType.Combo);
+
+        var comboDto = _mapper.Map<ComboDTO>(combo);
+        comboDto.ComboImages = [.. lstImage.Select(x => x.Url)];
+
+        return GetComboByIdResponse.Success(comboDto);
     }
 }

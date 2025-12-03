@@ -2,7 +2,9 @@
 using AppBookingTour.Application.Features.BlogPosts.CreateBlogPost;
 using AppBookingTour.Application.Features.BlogPosts.DeleteBlogPost;
 using AppBookingTour.Application.Features.BlogPosts.GetBlogPostById;
+using AppBookingTour.Application.Features.BlogPosts.GetBlogPostBySlug;
 using AppBookingTour.Application.Features.BlogPosts.GetListBlogPosts;
+using AppBookingTour.Application.Features.BlogPosts.GetRandomBlogTitles;
 using AppBookingTour.Application.Features.BlogPosts.UpdateBlogPost;
 using AppBookingTour.Share.DTOS;
 using MediatR;
@@ -32,7 +34,8 @@ public class BlogPostsController : ControllerBase
     /// </summary>
     [HttpPost]
     //[Authorize(Roles = "Admin,Staff")]
-    public async Task<ActionResult<ApiResponse<CreateBlogPostResponse>>> CreateBlogPost([FromBody] CreateBlogPostRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<CreateBlogPostResponse>>> CreateBlogPost([FromForm] CreateBlogPostRequest request)
     {
         var result = await _mediator.Send(new CreateBlogPostCommand(request));
 
@@ -49,7 +52,8 @@ public class BlogPostsController : ControllerBase
     /// </summary>
     [HttpPut("{id}")]
     //[Authorize(Roles = "Admin,Staff")]
-    public async Task<ActionResult<ApiResponse<UpdateBlogPostResponse>>> UpdateBlogPost(int id, [FromBody] UpdateBlogPostRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ApiResponse<UpdateBlogPostResponse>>> UpdateBlogPost(int id, [FromForm] UpdateBlogPostRequest request)
     {
         if (id != request.Id)
         {
@@ -125,5 +129,21 @@ public class BlogPostsController : ControllerBase
         var result = await _mediator.Send(new GetListBlogPostsQuery(request));
 
         return Ok(ApiResponse<Share.DTOS.PagedResult<BlogPostListDto>>.Ok(result));
+    }
+
+    /// <summary>
+    /// Get random blog titles (Public)
+    /// </summary>
+    [HttpGet("random-titles")]
+    public async Task<ActionResult<ApiResponse<List<BlogTitleDto>>>> GetRandomBlogTitles([FromQuery] int count = 5)
+    {
+        if (count <= 0 || count > 100)
+        {
+            return BadRequest(ApiResponse<List<BlogTitleDto>>.Fail("Số lượng phải từ 1 đến 100"));
+        }
+
+        var result = await _mediator.Send(new GetRandomBlogTitlesQuery(count));
+
+        return Ok(ApiResponse<List<BlogTitleDto>>.Ok(result));
     }
 }

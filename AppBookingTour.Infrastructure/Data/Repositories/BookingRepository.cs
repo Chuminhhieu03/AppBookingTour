@@ -1,4 +1,5 @@
-﻿using AppBookingTour.Application.IRepositories;
+﻿using AppBookingTour.Application.Features.Bookings.GetUserBookings;
+using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Domain.Enums;
 using AppBookingTour.Infrastructure.Database;
@@ -52,5 +53,33 @@ public class BookingRepository : Repository<Booking>, IBookingRepository
         return await _context.Bookings
             .Where(b => b.Status == BookingStatus.Pending && b.CreatedAt.AddMinutes(15) < now)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<(List<Booking> Bookings, int TotalCount)> GetUserBookingsWithFilterAsync(
+        int userId, 
+        GetUserBookingsFilter filter, 
+        int pageIndex, 
+        int pageSize, 
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Booking> query = _context.Bookings
+            .Where(b => b.UserId == userId);
+
+        // Apply filters
+        if (filter.Status.HasValue)
+        {
+            query = query.Where(b => b.Status == filter.Status.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var bookings = await query
+            .OrderByDescending(b => b.CreatedAt)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return (bookings, totalCount);
     }
 }

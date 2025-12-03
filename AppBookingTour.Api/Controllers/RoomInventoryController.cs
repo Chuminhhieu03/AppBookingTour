@@ -1,4 +1,7 @@
+using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.RoomInventories.AddNewRoomInventory;
+using AppBookingTour.Application.Features.RoomInventories.BulkAddRoomInventory;
+using AppBookingTour.Application.Features.RoomInventories.BulkDeleteRoomInventory;
 using AppBookingTour.Application.Features.RoomInventories.DeleteRoomInventory;
 using AppBookingTour.Application.Features.RoomInventories.SearchRoomInventories;
 using AppBookingTour.Application.Features.RoomInventories.UpdateRoomInventory;
@@ -24,11 +27,52 @@ namespace AppBookingTour.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Create room inventory for each day in range
+        /// </summary>
+        [HttpPost("bulk")]
+        public async Task<ActionResult<ApiResponse<BulkAddRoomInventoryResponse>>> BulkAddRoomInventory(
+            [FromBody] BulkAddRoomInventoryRequest request)
+        {
+            var result = await _mediator.Send(new BulkAddRoomInventoryCommand(request));
+
+            if (!result.Success)
+            {
+                return BadRequest(ApiResponse<BulkAddRoomInventoryResponse>.Fail(result.Message));
+            }
+
+            return Ok(ApiResponse<BulkAddRoomInventoryResponse>.Ok(result));
+        }
+
+        /// <summary>
+        /// Delete multiple room inventories by ids
+        /// </summary>
+        [HttpPost("bulk-delete")]
+        public async Task<ActionResult<ApiResponse<BulkDeleteRoomInventoryResponse>>> BulkDeleteRoomInventory(
+            [FromBody] BulkDeleteRoomInventoryRequest request)
+        {
+            var result = await _mediator.Send(new BulkDeleteRoomInventoryCommand(request));
+
+            if (!result.Success)
+            {
+                return BadRequest(ApiResponse<BulkDeleteRoomInventoryResponse>.Fail(result.Message));
+            }
+
+            return Ok(ApiResponse<BulkDeleteRoomInventoryResponse>.Ok(result));
+        }
+
         [HttpPost]
-        public async Task<IActionResult> AddNewRoomInventory([FromBody] AddNewRoomInventoryCommand command)
+        public async Task<ActionResult<ApiResponse<AddNewRoomInventoryResponse>>> AddNewRoomInventory(
+            [FromBody] AddNewRoomInventoryCommand command)
         {
             var result = await _mediator.Send(command);
-            return Ok(result);
+
+            if (!result.Success)
+            {
+                return BadRequest(ApiResponse<AddNewRoomInventoryResponse>.Fail(result.Message));
+            }
+
+            return Ok(ApiResponse<AddNewRoomInventoryResponse>.Ok(result));
         }
 
         [HttpPut("{id}")]

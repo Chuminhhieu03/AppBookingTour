@@ -27,10 +27,13 @@ namespace AppBookingTour.Domain.Entities
         public string? StatusName { get; set; }
         [NotMapped]
         public string? ServiceTypeName { get; set; }
+        [NotMapped]
+        public bool? Checked { get; set; }
 
         #endregion
 
         // Navigation properties
         public virtual ICollection<DiscountUsage> DiscountUsages { get; set; } = [];
+        public virtual ICollection<ItemDiscount> ItemDiscounts { get; set; }
     }
 }

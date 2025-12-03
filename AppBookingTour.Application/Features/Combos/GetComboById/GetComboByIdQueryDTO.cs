@@ -36,6 +36,8 @@ public class ComboDTO
     public List<string> Includes { get; set; } = [];
     public List<string> Excludes { get; set; } = [];
     public string? TermsConditions { get; set; }
+    public string? AdditionalInfo { get; set; }
+    public string? ImportantInfo { get; set; }
     public decimal Rating { get; set; }
     public int TotalBookings { get; set; }
     public int ViewCount { get; set; }

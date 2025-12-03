@@ -2,6 +2,7 @@
 using AppBookingTour.Application.IRepositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using AppBookingTour.Application.Features.Tours.SearchTours;
 
 namespace AppBookingTour.Application.Features.Statistics.ItemStatisticByRevenue;
 
@@ -18,15 +19,25 @@ public class ItemStatisticByRevenueQueryHandler : IRequestHandler<ItemStatisticB
     }
     public async Task<ItemStatisticByRevenueResponse> Handle(ItemStatisticByRevenueQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Handling ItemStatisticByRevenueQuery from {StartDate} to {EndDate} for ItemType: {ItemType}",
-            request.StartDate,
-            request.EndDate,
-            request.ItemType.ToString());
+        var startDate = request.StartDate;
+        var endDate = request.EndDate;
+        var itemType = request.ItemType;
+        var pageIndex = request.PageIndex > 0 ? request.PageIndex.Value : 1;
+        var pageSize = request.PageSize > 0 ? request.PageSize.Value : 10;
+        var isDesc = request.IsDesc ?? true;
 
-        var statisticItems = await _unitOfWork.Statistics.GetItemRevenueStatisticsAsync(
-            request.StartDate,
-            request.EndDate,
-            request.ItemType,
+        _logger.LogInformation("Handling ItemStatisticByRevenueQuery from {StartDate} to {EndDate} for ItemType: {ItemType}",
+            startDate,
+            endDate,
+            itemType.ToString());
+
+        var (items, totalCount, totalPages) = await _unitOfWork.Statistics.GetItemRevenueStatisticsAsync(
+            startDate,
+            endDate,
+            itemType,
+            pageIndex,
+            pageSize,
+            isDesc,
             cancellationToken);
 
         return new ItemStatisticByRevenueResponse
@@ -35,7 +46,14 @@ public class ItemStatisticByRevenueQueryHandler : IRequestHandler<ItemStatisticB
             ItemTypeName = request.ItemType.ToString(),
             StartDate = request.StartDate,
             EndDate = request.EndDate,
-            Items = statisticItems.ToList()
+            Items = items.ToList(),
+            Meta = new PaginationMeta
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                Page = pageIndex,
+                PageSize = pageSize
+            }
         };
     }
 }

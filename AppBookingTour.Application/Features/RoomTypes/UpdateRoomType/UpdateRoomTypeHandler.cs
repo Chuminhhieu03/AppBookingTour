@@ -27,6 +27,19 @@ namespace AppBookingTour.Application.Features.RoomTypes.UpdateRoomType
             if (roomType == null)
                 throw new Exception(Message.NotFound);
             _mapper.Map(dto, roomType);
+            
+            // Set the new fields if provided
+            if (!string.IsNullOrEmpty(dto.CheckinHour) && TimeOnly.TryParse(dto.CheckinHour, out var checkinHour))
+                roomType.CheckinHour = checkinHour;
+            if (!string.IsNullOrEmpty(dto.CheckoutHour) && TimeOnly.TryParse(dto.CheckoutHour, out var checkoutHour))
+                roomType.CheckoutHour = checkoutHour;
+            if (dto.Area.HasValue)
+                roomType.Area = dto.Area.Value;
+            if (dto.View != null)
+                roomType.View = dto.View;
+            if (dto.CancelPolicy != null)
+                roomType.CancelPolicy = dto.CancelPolicy;
+            
             var coverImgFile = dto.CoverImgFile;
             var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
             if (string.IsNullOrEmpty(roomType.CoverImageUrl))

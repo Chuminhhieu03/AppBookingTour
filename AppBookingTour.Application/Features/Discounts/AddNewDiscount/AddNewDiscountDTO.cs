@@ -14,6 +14,7 @@ namespace AppBookingTour.Application.Features.Discounts.AddNewDiscount
         public int? ServiceType { get; set; }
         public int? Status { get; set; }
         public string? Description { get; set; }
+        public decimal? MaximumDiscount { get; set; }
     }
 
     public class AddNewDiscountResponse : BaseResponse

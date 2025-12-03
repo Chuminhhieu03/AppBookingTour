@@ -24,9 +24,8 @@ public sealed class GetTourCategoriesListQueryHandler : IRequestHandler<GetTourC
 
     public async Task<List<TourCategoryDTO>> Handle(GetTourCategoriesListQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Getting all tour categories");
-        var tourCategories = await _unitOfWork.TourCategories
-                                       .FindAsync(predicate: c => true, includes: c => c.ParentCategory);
+        _logger.LogInformation("Getting list tour category active");
+        var tourCategories = await _unitOfWork.TourCategories.FindAsync(x => x.IsActive, cancellationToken);
 
         var tourCategoryItems = _mapper.Map<List<TourCategoryDTO>>(tourCategories);
 

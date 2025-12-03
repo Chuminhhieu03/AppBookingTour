@@ -1,7 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using AppBookingTour.Application.Features.TourItineraries.CreateTourItinerary;
+using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
 
 namespace AppBookingTour.Application.Features.Tours.CreateTour;
+
 
 public class TourCreateRequestDTO
 {
@@ -20,9 +22,12 @@ public class TourCreateRequestDTO
     public bool? IsActive { get; set; }
     public IFormFile? ImageMain { get; set; }
     public List<IFormFile>? Images { get; set; }
-    public List<string>? RemoveImageUrls { get; set; }
     public string? Description { get; set; }
-    public string? Includes { get; set; }
-    public string? Excludes { get; set; }
-    public string? TermsConditions { get; set; }
+    public string? AdditionalInfo { get; set; }
+    public string? ImportantInfo { get; set; }
+    public string? ItinerariesJson { get; set; }
+    public string? DeparturesJson { get; set; }
+
+    public List<TourItineraryRequestDTO>? Itineraries { get; set; } = new List<TourItineraryRequestDTO>();
+    public List<TourDepartureRequestDTO>? Departures { get; set; } = new List<TourDepartureRequestDTO>();
 }

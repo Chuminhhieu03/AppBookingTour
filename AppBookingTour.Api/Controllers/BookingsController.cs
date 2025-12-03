@@ -3,6 +3,7 @@ using AppBookingTour.Application.Features.Bookings.ApplyDiscount;
 using AppBookingTour.Application.Features.Bookings.CreateBooking;
 using AppBookingTour.Application.Features.Bookings.GetBookingById;
 using AppBookingTour.Application.Features.Bookings.GetPaymentStatus;
+using AppBookingTour.Application.Features.Bookings.GetUserBookings;
 using AppBookingTour.Application.Features.Bookings.InitiatePayment;
 using AppBookingTour.Application.Features.Bookings.PaymentCallback;
 using MediatR;
@@ -145,5 +146,37 @@ public class BookingsController : ControllerBase
             _logger.LogError(ex, "Error getting payment status for booking {BookingId}", bookingId);
             return BadRequest(ApiResponse<object>.Fail(ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Get bookings for a specific user with filtering and pagination
+    /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <param name="pageIndex">Page index (default: 1)</param>
+    /// <param name="pageSize">Page size (default: 10, max: 50)</param>
+    /// <param name="status">Filter by booking status (optional)</param>
+    [HttpGet("user/{userId}")]
+    public async Task<ActionResult<ApiResponse<GetUserBookingsResponse>>> GetUserBookings(
+        int userId,
+        [FromQuery] int? pageIndex,
+        [FromQuery] int? pageSize,
+        [FromQuery] Domain.Enums.BookingStatus? status)
+    {
+        var effectivePageSize = pageSize ?? 10;
+        if (effectivePageSize <= 0 || effectivePageSize > 50)
+        {
+            return BadRequest(ApiResponse<GetUserBookingsResponse>.Fail("Page size phải từ 1 đến 50"));
+        }
+
+        var filter = new GetUserBookingsFilter
+        {
+            Status = status
+        };
+
+        var query = new GetUserBookingsQuery(userId, pageIndex, effectivePageSize, filter);
+        var result = await _mediator.Send(query);
+
+        _logger.LogInformation("Retrieved {Count} bookings for user {UserId}", result.Bookings.Count, userId);
+        return Ok(ApiResponse<GetUserBookingsResponse>.Ok(result));
     }
 }

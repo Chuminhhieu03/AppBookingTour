@@ -18,7 +18,9 @@ namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
             var filter = request.discountFilter ?? new SearchDiscountFilter();
             int pageIndex = request.pageIndex ?? Constants.Pagination.PageIndex;
             int pageSize = request.pageSize ?? Constants.Pagination.PageSize;
-            var listDiscount = await _unitOfWork.Discounts.SearchDiscount(filter, pageIndex, pageSize);
+            
+            var (listDiscount, totalCount) = await _unitOfWork.Discounts.SearchDiscount(filter, pageIndex, pageSize);
+            
             listDiscount?.ForEach(item =>
             {
                 if (item.Status.HasValue)
@@ -26,10 +28,20 @@ namespace AppBookingTour.Application.Features.Discounts.SearchDiscounts
                 if (item.ServiceType.HasValue && Constants.ServiceType.dctName.ContainsKey(item.ServiceType.Value))
                     item.ServiceTypeName = Constants.ServiceType.dctName[item.ServiceType.Value];
             });
+            
+            var totalPages = (pageSize == 0) ? 0 : (int)Math.Ceiling((double)totalCount / pageSize);
+            
             return new SearchDiscountResponse
             {
                 Success = true,
-                ListDiscount = listDiscount
+                ListDiscount = listDiscount,
+                Meta = new PaginationMeta
+                {
+                    TotalCount = totalCount,
+                    Page = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = totalPages
+                }
             };
         }
     }

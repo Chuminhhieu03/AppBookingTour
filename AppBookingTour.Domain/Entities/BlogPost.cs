@@ -12,6 +12,8 @@ public class  BlogPost : BaseEntity
     public BlogStatus Status { get; set; } = BlogStatus.Draft;
     public DateTime? PublishedDate { get; set; }
     public string? Tags { get; set; } // JSON
+    public string? CoverImage { get; set; }
+    public string? Description { get; set; }
 
     // Navigation properties
     public virtual User Author { get; set; } = null!;

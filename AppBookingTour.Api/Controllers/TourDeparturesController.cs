@@ -1,6 +1,7 @@
 ﻿using AppBookingTour.Api.Contracts.Responses;
 using AppBookingTour.Application.Features.TourDepartures.CreateTourDeparture;
 using AppBookingTour.Application.Features.TourDepartures.DeleteTourDeparture;
+using AppBookingTour.Application.Features.TourDepartures.GetListTourDepartureForGuide;
 using AppBookingTour.Application.Features.TourDepartures.GetListTourDeparture;
 using AppBookingTour.Application.Features.TourDepartures.GetTourDepartureById;
 using AppBookingTour.Application.Features.TourDepartures.UpdateTourDeparture;
@@ -22,14 +23,23 @@ public sealed class TourDeparturesController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<ApiResponse<object>>> CreateTourDeparture([FromBody] TourDepartureRequestDTO requestBody)
+    [HttpPost("{tourId:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> CreateTourDeparture(int tourId, [FromBody] TourDepartureRequestDTO requestBody)
     {
-        var command = new CreateTourDepartureCommand(requestBody);
+        var command = new CreateTourDepartureCommand(tourId, requestBody);
         var result = await _mediator.Send(command);
 
         _logger.LogInformation("Created new tour departure");
         return Created("", ApiResponse<object>.Ok(result));
+    }
+
+    [HttpGet("get-list-for-guide/{guideId:int}")]
+    public async Task<ActionResult<ApiResponse<object>>> GetTourDeparturesForGuide(int guideId)
+    {
+        var query = new GetListTourDepartureForGuideQuery(guideId);
+        var result = await _mediator.Send(query);
+        _logger.LogInformation("Retrieved tour departures for Guide ID {GuideId}", guideId);
+        return Ok(ApiResponse<List<TourDepartureItemForGuide>>.Ok(result));
     }
 
     [HttpGet("get-list/{tourId:int}")]

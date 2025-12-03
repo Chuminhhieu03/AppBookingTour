@@ -54,6 +54,9 @@ public static class DependencyInjection
         // ? Background Jobs with Hangfire
         AddHangfire(services, configuration);
 
+        // Excel export service
+        services.AddScoped<IExcelExportService, ExcelExportService>();
+
         return services;
     }
 
