@@ -31,6 +31,10 @@ public class UpdateTourDepartureCommandValidator : AbstractValidator<UpdateTourD
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Giá vẻ trẻ em"))
             .GreaterThanOrEqualTo(0).WithMessage("PriceChildren must be greater than or equal to 0");
 
+        RuleFor(x => x.TourDepartureRequest.SingleRoomSurcharge)
+            .NotNull().WithMessage(string.Format(Message.RequiredField, "Phụ thu phòng đơn"))
+            .GreaterThanOrEqualTo(0).WithMessage("Phụ thu phòng đơn phải lớn hơn hoặc bằng 0");
+
         RuleFor(x => x.TourDepartureRequest.Status)
             .NotNull().WithMessage(string.Format(Message.RequiredField, "Status"))
             .InclusiveBetween(1, 3).WithMessage("Status must be a valid enum value (1 = Available, 2 = Full, 3 = Cancelled)");
