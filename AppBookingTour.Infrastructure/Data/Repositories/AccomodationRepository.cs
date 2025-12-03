@@ -116,7 +116,8 @@ namespace AppBookingTour.Infrastructure.Data.Repositories
                     Type = a.Type,
                     StarRating = a.StarRating,
                     CoverImgUrl = a.CoverImgUrl,
-                    MinRoomTypePrice = a.ListRoomType.Min(rt => rt.Price) ?? 0
+                    MinRoomTypePrice = a.ListRoomType.Min(rt => rt.Price) ?? 0,
+                    Amenities = a.Amenities,
                 })
                 .ToListAsync(cancellationToken);
 

@@ -25,6 +25,8 @@ public class RoomType : BaseEntity
     public decimal Area { get; set; }
     public string? View { get; set; } // View biển, view đường phố ... List Id
     public string? CancelPolicy { get; set; }
+    public decimal? VAT { get; set; } // Thuế VAT
+    public decimal? ManagementFee { get; set; } // Phụ thu quản trị
 
     #endregion
 

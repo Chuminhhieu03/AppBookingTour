@@ -36,4 +36,5 @@ public class CustomerAccommodationListItem
     public string? Amenities { get; set; }
     public int TotalAvailableRooms { get; set; }
     public decimal MinRoomTypePrice { get; set; }
+    public string AmenitiesName { get; set; }
 }

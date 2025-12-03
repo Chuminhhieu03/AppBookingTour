@@ -58,7 +58,12 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
                             validRoomType.Add(roomType);
                         }
                     }
-                    if (validRoomType.Count() > 0) validListAccommodation.Add(accommodation);
+                    if (validRoomType.Count() > 0)
+                    {
+                        accommodation.TotalAvailableRooms = validRoomType.Count();
+                        accommodation.AmenitiesName = GetListAmenityName(accommodation.Amenities);
+                        validListAccommodation.Add(accommodation);
+                    }
                 }
             }
             totalCount = validListAccommodation.Count();
@@ -67,7 +72,7 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
 
             return new SearchAccommodationsForCustomerResponse
             {
-                Accommodations = accommodations,
+                Accommodations = validListAccommodation,
                 Meta = new PaginationMeta
                 {
                     TotalCount = totalCount,
@@ -76,6 +81,24 @@ namespace AppBookingTour.Application.Features.Accommodations.SearchAccommodation
                     TotalPages = totalPages
                 }
             };
+        }
+
+        private string GetListAmenityName(string amenities)
+        {
+            if (string.IsNullOrEmpty(amenities)) return "";
+            var listAmenityIDStr = amenities?.Split(", ").ToList() ?? new List<string>();
+
+            var listAmenityID = listAmenityIDStr
+                .Select(x => int.Parse(x))
+                .ToList();
+
+            var listAmenity = _unitOfWork.SystemParameters
+                .GetListSystemParameterByListId(listAmenityID)
+                .Result;
+
+            var listAmenityName = string.Join(", ", listAmenity.Select(x => x.Name));
+
+            return listAmenityName;
         }
     }
 }

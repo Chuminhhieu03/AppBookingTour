@@ -24,6 +24,8 @@ namespace AppBookingTour.Application.Features.RoomTypes.AddNewRoomType
         public string? CancelPolicy { get; set; }
         public IFormFile? CoverImgFile { get; set; }
         public List<IFormFile>? InfoImgFile { get; set; }
+        public decimal? VAT { get; set; } // Thuế VAT
+        public decimal? ManagementFee { get; set; } // Phụ thu quản trị
     }
 
     public class AddNewRoomTypeResponse : BaseResponse

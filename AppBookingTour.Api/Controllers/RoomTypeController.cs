@@ -2,6 +2,7 @@ using AppBookingTour.Application.Features.RoomTypes.AddNewRoomType;
 using AppBookingTour.Application.Features.RoomTypes.DeleteRoomType;
 using AppBookingTour.Application.Features.RoomTypes.GetRoomTypeById;
 using AppBookingTour.Application.Features.RoomTypes.UpdateRoomType;
+using AppBookingTour.Application.Features.RoomTypes.GetPreviewRoomTypeById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,14 @@ namespace AppBookingTour.Api.Controllers
         {
             var command = new DeleteRoomTypeCommand(id);
             var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
+        [HttpGet("preview/{id}")]
+        public async Task<IActionResult> GetPreviewById(int id)
+        {
+            var query = new GetPreviewRoomTypeByIdQuery(id);
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
     }
