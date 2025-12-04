@@ -40,7 +40,7 @@ jobs:
 
     - name: 📤 Publish
       run: |
-        dotnet publish AppBookingTour.Api/AppBookingTour.Api.csproj \
+        dotnet publish AppBookingTour.Api/AppBookingTour.API.csproj \
           -c Release \
           -o ${{github.workspace}}/publish \
           --no-restore \
