@@ -4,117 +4,122 @@ on:
   workflow_dispatch:
     inputs:
       migration-action:
-        description: 'Migration action'
+        description: "Migration action"
         required: true
         type: choice
         options:
           - Apply Migrations
           - Generate Script Only
-          - Rollback Last Migration
-        default: 'Apply Migrations'
-      
+        default: "Apply Migrations"
+
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
         type: choice
         options:
           - Production
           - Staging
           - Development
-        default: 'Production'
-      
+        default: "Production"
+
       confirm:
         description: 'Type "MIGRATE" to confirm'
         required: true
         type: string
 
 env:
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: "8.0.x"
 
 jobs:
+
   validate:
     name: Validate Migration Request
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: ✅ Validate confirmation
-      run: |
-        if [ "${{ github.event.inputs.confirm }}" != "MIGRATE" ]; then
-          echo "❌ Migration cancelled. You must type 'MIGRATE' to confirm."
-          exit 1
-        fi
-        echo "✅ Migration confirmed by ${{ github.actor }}"
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "MIGRATE" ]; then
+            echo "❌ Migration cancelled: You must type 'MIGRATE'."
+            exit 1
+          fi
+          echo "✅ Migration confirmed by ${{ github.actor }}"
 
   migrate:
     name: Run Database Migration
     runs-on: ubuntu-latest
     needs: validate
     environment: ${{ github.event.inputs.environment }}
-    
+
     steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      - name: 📥 Checkout source code
+        uses: actions/checkout@v4
 
-    - name: 🔧 Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: 🔧 Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 🔧 Install EF Core Tools
-      run: dotnet tool install --global dotnet-ef --version 8.0.*
+      - name: 🔧 Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.*
 
-    - name: 📦 Restore dependencies
-      run: dotnet restore
+      - name: 📦 Restore packages
+        run: dotnet restore
 
-    - name: 🏗️ Build
-      run: dotnet build --configuration Release --no-restore
+      - name: 🏗️ Build Startup Project (Debug – required for EF)
+        run: >
+          dotnet build AppBookingTour.Api/AppBookingTour.API.csproj
+          --configuration Debug --no-restore
 
-    - name: 📝 Generate Migration Script
-      run: |
-        dotnet ef migrations script \
-          --idempotent \
-          --project AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj \
-          --startup-project AppBookingTour.Api/AppBookingTour.API.csproj \
-          --output ${{github.workspace}}/migration.sql \
-          --verbose
+      - name: 🏗️ Build Infrastructure Project
+        run: >
+          dotnet build AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj
+          --configuration Debug --no-restore
 
-    - name: 📄 Display Migration Script
-      run: |
-        echo "### 📋 Migration SQL Script" >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
-        head -n 50 ${{github.workspace}}/migration.sql >> $GITHUB_STEP_SUMMARY
-        echo "..." >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      - name: 📝 Generate SQL Script
+        run: |
+          dotnet ef migrations script \
+            --idempotent \
+            --no-build \
+            --configuration Debug \
+            --project AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj \
+            --startup-project AppBookingTour.Api/AppBookingTour.API.csproj \
+            --output ${{ github.workspace }}/migration.sql \
+            --verbose
 
-    - name: 💾 Upload SQL Script
-      uses: actions/upload-artifact@v4
-      with:
-        name: migration-script-${{ github.sha }}
-        path: ${{github.workspace}}/migration.sql
-        retention-days: 30
+      - name: 📄 Preview SQL Script
+        run: |
+          echo "### 📋 Migration SQL Script Preview" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
+          head -n 60 ${{ github.workspace }}/migration.sql >> $GITHUB_STEP_SUMMARY
+          echo "..." >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-    - name: 🗄️ Apply Migration to Azure SQL
-      if: github.event.inputs.migration-action == 'Apply Migrations'
-      uses: azure/sql-action@v2
-      with:
-        connection-string: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
-        path: ${{github.workspace}}/migration.sql
+      - name: 💾 Upload Script
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-script-${{ github.sha }}
+          path: ${{ github.workspace }}/migration.sql
+          retention-days: 30
 
-    - name: ✅ Migration Summary
-      if: success()
-      run: |
-        echo "### ✅ Migration Completed Successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **Action**: ${{ github.event.inputs.migration-action }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Executed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "- **SQL Script**: Download artifact for full script" >> $GITHUB_STEP_SUMMARY
+      - name: 🗄️ Apply Migration to Azure SQL
+        if: github.event.inputs.migration-action == 'Apply Migrations'
+        uses: azure/sql-action@v2
+        with:
+          connection-string: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+          path: ${{ github.workspace }}/migration.sql
 
-    - name: ❌ Migration Failed
-      if: failure()
-      run: |
-        echo "### ❌ Migration Failed!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Please check the logs and SQL script artifact." >> $GITHUB_STEP_SUMMARY
-        echo "**DO NOT** manually apply the migration without reviewing the error." >> $GITHUB_STEP_SUMMARY
+      - name: ✅ Migration Summary
+        if: success()
+        run: |
+          echo "### ✅ Migration Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ github.event.inputs.migration-action }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Executed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date)" >> $GITHUB_STEP_SUMMARY
+
+      - name: ❌ Migration Failed
+        if: failure()
+        run: |
+          echo "### ❌ Migration Failed!" >> $GITHUB_STEP_SUMMARY
+          echo "Please review logs and the generated SQL script." >> $GITHUB_STEP_SUMMARY
