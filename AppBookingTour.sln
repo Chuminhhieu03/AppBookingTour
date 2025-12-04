@@ -13,6 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBookingTour.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBookingTour.Domain", "AppBookingTour.Domain\AppBookingTour.Domain.csproj", "{C6A86771-CA07-3773-8CDF-2F9F340D2F46}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{79C4B380-602A-47DF-82D5-085786BF5785}"
+	ProjectSection(SolutionItems) = preProject
+		01-build-test.yml = 01-build-test.yml
+		02-deploy-azure.yml = 02-deploy-azure.yml
+		03-database-migration.yml = 03-database-migration.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +95,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{79C4B380-602A-47DF-82D5-085786BF5785} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5450F255-1973-4D4B-A35D-6B8DCB9B6D69}
