@@ -1,4 +1,4 @@
-﻿name: Deploy to Azure
+﻿name: Deploy to Azure App Service
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
         default: 'Production'
 
 env:
-  AZURE_WEBAPP_NAME: 'your-app-name'
+  AZURE_WEBAPP_NAME: 'HHHTravel'
   DOTNET_VERSION: '8.0.x'
 
 jobs:
