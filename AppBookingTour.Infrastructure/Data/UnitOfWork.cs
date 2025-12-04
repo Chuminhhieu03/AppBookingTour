@@ -1,5 +1,6 @@
 using AppBookingTour.Application.IRepositories;
 using AppBookingTour.Domain.Entities;
+using AppBookingTour.Domain.IRepositories;
 using AppBookingTour.Infrastructure.Data.Repositories;
 using AppBookingTour.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -21,6 +22,27 @@ public class UnitOfWork : IUnitOfWork
     // Repository instances
     //private IUserRepository? _userRepository;
     private ITourRepository? _tourRepository;
+    private ITourCategoryRepository? _tourCategoryRepository;
+    private ITourTypeRepository? _tourTypeRepository;
+    private IDiscountRepository _discountRepository;
+    private IAccommodationRepository _accommodationRepository;
+    private IRoomInventoryRepository _roomInventoryRepository;
+    private IRoomTypeRepository _roomTypeRepository;
+    private ICityRepository _cityRepository;
+    private IBlogPostRepository? _blogPostRepository;
+    private IImageRepository _imageRepository;
+    private ISystemParameterRepository _systemParameterRepository;
+    private IBookingRepository _bookingRepository;
+    private IComboRepository? _comboRepository;
+    private IRepository<Payment>? _paymentRepository;
+    private IRepository<PaymentMethod>? _paymentMethodRepository;
+    private IRepository<Promotion>? _promotionRepository;
+    private IRepository<PromotionUsage>? _promotionUsageRepository;
+    private IRepository<DiscountUsage>? _discountUsageRepository;
+    private IRepository<BookingParticipant>? _bookingParticipantRepository;
+    private IRepository<TourDeparture>? _tourDepartureRepository;
+    private IStatisticsRepository _statisticsRepository;
+    private IProfileRepository _profileRepository;
 
     // Generic repositories cache
     private readonly Dictionary<Type, object> _repositories = new();
@@ -38,6 +60,34 @@ public class UnitOfWork : IUnitOfWork
 
     public ITourRepository Tours =>
         _tourRepository ??= new TourRepository(_context);
+
+    public ITourCategoryRepository TourCategories =>
+        _tourCategoryRepository ??= new TourCategoryRepository(_context);
+
+    public ITourTypeRepository TourTypes =>
+        _tourTypeRepository ??= new TourTypeRepository(_context);
+
+    public IDiscountRepository Discounts => _discountRepository ?? new DiscountRepository(_context);
+    public IAccommodationRepository Accommodations => _accommodationRepository ?? new AccomodationRepository(_context);
+    public IRoomTypeRepository RoomTypes => _roomTypeRepository ?? new RoomTypeRepository(_context);
+    public IRoomInventoryRepository RoomInventories => _roomInventoryRepository ?? new RoomInventoryRepository(_context);
+    public ICityRepository Cities => _cityRepository ?? new CityRepository(_context);
+    public IBlogPostRepository BlogPosts => _blogPostRepository ??= new BlogPostRepository(_context);
+    public IImageRepository Images => _imageRepository ?? new ImageRepository(_context);
+    public ISystemParameterRepository SystemParameters => _systemParameterRepository ?? new SystemParameterRepository(_context);
+    public IBookingRepository Bookings => _bookingRepository ?? new BookingRepository(_context);
+    public IComboRepository Combos => _comboRepository ??= new ComboRepository(_context);
+    
+    public IRepository<Payment> Payments => _paymentRepository ??= new Repository<Payment>(_context);
+    public IRepository<PaymentMethod> PaymentMethods => _paymentMethodRepository ??= new Repository<PaymentMethod>(_context);
+    public IRepository<Promotion> Promotions => _promotionRepository ??= new Repository<Promotion>(_context);
+    public IRepository<PromotionUsage> PromotionUsages => _promotionUsageRepository ??= new Repository<PromotionUsage>(_context);
+    public IRepository<DiscountUsage> DiscountUsages => _discountUsageRepository ??= new Repository<DiscountUsage>(_context);
+    public IRepository<BookingParticipant> BookingParticipants => _bookingParticipantRepository ??= new Repository<BookingParticipant>(_context);
+    public IRepository<TourDeparture> TourDepartures => _tourDepartureRepository ??= new Repository<TourDeparture>(_context);
+
+    public IStatisticsRepository Statistics => _statisticsRepository ?? new StatisticsRepository(_context);
+    public IProfileRepository Profiles => _profileRepository ?? new ProfileRepository(_context);
 
     #endregion
 
@@ -65,10 +115,7 @@ public class UnitOfWork : IUnitOfWork
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         try
-        {
-            // Dispatch domain events before saving
-            await DispatchDomainEventsAsync(cancellationToken);
-            
+        {  
             var result = await _context.SaveChangesAsync(cancellationToken);
             
             _logger.LogInformation("Successfully saved {EntityCount} entities to database", result);
@@ -135,38 +182,6 @@ public class UnitOfWork : IUnitOfWork
             await _transaction.DisposeAsync();
             _transaction = null;
         }
-    }
-
-    #endregion
-
-    #region Domain Events
-
-    public async Task DispatchDomainEventsAsync(CancellationToken cancellationToken = default)
-    {
-        var entities = _context.ChangeTracker
-            .Entries<BaseEntity>()
-            .Where(e => e.Entity.DomainEvents.Any())
-            .Select(e => e.Entity)
-            .ToList();
-
-        var domainEvents = entities
-            .SelectMany(e => e.DomainEvents)
-            .ToList();
-
-        // Clear domain events from entities
-        entities.ForEach(e => e.ClearDomainEvents());
-
-        // Dispatch domain events
-        foreach (var domainEvent in domainEvents)
-        {
-            _logger.LogInformation("Dispatching domain event: {EventType}", domainEvent.GetType().Name);
-            
-            // Here you would typically use a domain event dispatcher/mediator
-            // For now, we'll just log the events
-            // await _mediator.Publish(domainEvent, cancellationToken);
-        }
-
-        _logger.LogInformation("Dispatched {EventCount} domain events", domainEvents.Count);
     }
 
     #endregion

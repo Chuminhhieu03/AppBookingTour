@@ -11,5 +11,5 @@ public class TourCategory : BaseEntity
     // Navigation properties
     public virtual TourCategory? ParentCategory { get; set; }
     public virtual ICollection<TourCategory> ChildCategories { get; set; } = [];
-    public virtual ICollection<TourType> TourTypes { get; set; } = [];
+    public virtual ICollection<Tour> Tours { get; set; } = [];
 }

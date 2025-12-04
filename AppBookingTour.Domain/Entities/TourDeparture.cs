@@ -11,6 +11,7 @@ public class TourDeparture : BaseEntity
     public int BookedSlots { get; set; }
     public decimal PriceAdult { get; set; }
     public decimal PriceChildren { get; set; }
+    public decimal SingleRoomSurcharge { get; set; }
     public DepartureStatus Status { get; set; } = DepartureStatus.Available;
     public int? GuideId { get; set; }
 

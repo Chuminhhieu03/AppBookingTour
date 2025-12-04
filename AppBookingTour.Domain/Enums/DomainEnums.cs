@@ -1,3 +1,6 @@
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
+
 namespace AppBookingTour.Domain.Enums;
 
 /// <summary>
@@ -24,15 +27,6 @@ public enum UserType
 #endregion
 
 #region Tour Enums
-public enum TourStatus
-{
-    Draft = 1,
-    Active = 2,
-    Inactive = 3,
-    Suspended = 4,
-    Deleted = 5
-}
-
 public enum TourPriceLevel
 {
     Budget = 1,
@@ -55,9 +49,8 @@ public enum TourDepartureStatus
 public enum BookingType
 {
     Tour = 1,
-    Hotel = 2,
+    Accommodation = 2,
     Combo = 3,
-    Flight = 4
 }
 
 public enum BookingStatus
@@ -65,16 +58,14 @@ public enum BookingStatus
     Pending = 1,
     Confirmed = 2,
     Paid = 3,
-    Cancelled = 4,
-    Completed = 5,
-    Refunded = 6
+    UnderPaid = 4,
+    Cancelled = 5,
 }
 
 public enum PaymentType
 {
     FullPayment = 1,
-    Deposit = 2,
-    Installment = 3
+    Deposit = 2
 }
 
 public enum ParticipantType
@@ -183,19 +174,23 @@ public enum ReviewType
 #region General Enums
 public enum Region
 {
-    North = 1,   // Mi?n B?c
-    Central = 2, // Mi?n Trung
-    South = 3    // Mi?n Nam
+    [Description("Miền Bắc")]
+    North = 1,
+
+    [Description("Miền Trung")]
+    Central = 2,
+
+    [Description("Nam Trung Bộ")]
+    SouthCentral = 3,
+
+    [Description("Tây Nam Bộ")]
+    SouthWest = 4
 }
 
 public enum Vehicle
 {
-    Bus = 1,
-    Car = 2,
-    Plane = 3,
-    Train = 4,
-    Boat = 5,
-    Motorbike = 6
+    Car = 1,
+    Plane = 2
 }
 
 public enum Currency
@@ -241,7 +236,7 @@ public enum ComboStatus
 public enum ItemType
 {
     Tour = 1,
-    Hotel = 2,
+    Accommodation = 2,
     Combo = 3
 }
 
@@ -250,12 +245,6 @@ public enum ReviewItemType
     Tour = 1,
     Hotel = 2,
     Combo = 3,
-}
-
-public enum RoomStatus
-{
-    Draft = 1,
-    Published = 2
 }
 
 public enum DepartureStatus
@@ -270,4 +259,23 @@ public enum PriceLevel
     Budget = 1,
     Standard = 2,
     Premium = 3
+}
+
+public enum EntityType
+{
+    Tour = 1,
+    Accommodation = 2,
+    Combo = 3,
+    User = 4,
+    Review = 5,
+    RoomType = 6
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum FeatureCode
+{
+    [Description("RoomTypeAmenity")]
+    RoomTypeAmenity,
+    [Description("AccommodationAmenity")]
+    AccommodationAmenity
 }

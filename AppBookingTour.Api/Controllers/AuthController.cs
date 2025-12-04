@@ -1,7 +1,13 @@
-﻿using AppBookingTour.Api.Contracts.Responses;
+﻿    using AppBookingTour.Api.Contracts.Responses;
+using AppBookingTour.Application.Features.Auth.ChangePassword;
+using AppBookingTour.Application.Features.Auth.ConfirmEmail;
+using AppBookingTour.Application.Features.Auth.ForgotPassword;
 using AppBookingTour.Application.Features.Auth.Login;
+using AppBookingTour.Application.Features.Auth.RefreshToken;
 using AppBookingTour.Application.Features.Auth.Register;
+using AppBookingTour.Application.Features.Auth.ResetPassword;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppBookingTour.Api.Controllers;
@@ -11,7 +17,7 @@ namespace AppBookingTour.Api.Controllers;
 /// Uses MediatR for handling authentication use cases
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -27,24 +33,38 @@ public class AuthController : ControllerBase
     /// User login endpoint
     /// </summary>
     [HttpPost("login")]
-    public async Task<ActionResult> Login([FromBody] LoginCommand command)
+    public async Task<ActionResult<ApiResponse<object>>> Login([FromBody] LoginCommand command)
     {
-        try
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
         {
-            var result = await _mediator.Send(command);
-            
-            if (result.Success)
+            return Unauthorized(ApiResponse<object>.Fail(result.Message));
+        }
+
+        if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue)
+        {
+            var cookieOptions = new CookieOptions
             {
-                return Ok(result);
-            }
-            
-            return Unauthorized(result);
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = result.RefreshTokenExpiry.Value
+            };
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
         }
-        catch (Exception ex)
+
+        return Ok(ApiResponse<object>.Ok(new
         {
-            _logger.LogError(ex, "Error during login for email: {Email}", command.Email);
-            return BadRequest(new { Success = false, Message = "An error occurred during login" });
-        }
+            result.Token,
+            result.UserId,
+            result.FullName,
+            result.Role,
+            result.Expiration,
+            result.Message,
+            result.Success
+        }));
     }
 
     /// <summary>
@@ -53,79 +73,134 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<ApiResponse<RegisterCommandResponse>>> Register([FromBody] RegisterCommand command)
     {
-        try
+        var result = await _mediator.Send(command);
+        
+        if (result.Success)
         {
-            var result = await _mediator.Send(command);
-            
-            if (result.Success)
-            {
-                return Ok(ApiResponse<RegisterCommandResponse>.Ok(result));
-            }
-            
-            return BadRequest(ApiResponse<RegisterCommandResponse>.Fail(result.Message));
+            return Ok(ApiResponse<RegisterCommandResponse>.Ok(result));
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during registration for email: {Email}", command.Email);
-            return BadRequest(ApiResponse<RegisterCommandResponse>.Fail("Đang có lỗi xảy ra trong quá trình đăng ký, vui lòng thử lại sau"));
-        }
+        
+        return BadRequest(ApiResponse<RegisterCommandResponse>.Fail(result.Message));
     }
 
     /// <summary>
-    /// Get current user profile
+    /// User refresh token endpoint
     /// </summary>
-    //[HttpGet("profile")]
-    //public async Task<ActionResult> GetProfile()
-    //{
-    //    try
-    //    {
-    //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //        if (string.IsNullOrEmpty(userId))
-    //        {
-    //            return Unauthorized();
-    //        }
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<ApiResponse<object>>> RefreshToken()
+    {
+        var refreshToken = Request.Cookies["refreshToken"];
 
-    //        var query = new GetProfileQuery(userId);
-    //        var result = await _mediator.Send(query);
-            
-    //        if (result == null)
-    //        {
-    //            return NotFound(new { Message = "User profile not found" });
-    //        }
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return Unauthorized(ApiResponse<object>.Fail("Xác thực refresh token thất bại, vui lòng đăng nhập lại"));
+        }
 
-    //        return Ok(result);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error getting user profile");
-    //        return BadRequest(new { Message = "An error occurred while getting profile" });
-    //    }
-    //}
+        var result = await _mediator.Send(new RefreshTokenCommand(refreshToken));
+        
+        if (!result.Success)
+        {
+            return Unauthorized(ApiResponse<object>.Fail(result.Message));
+        }
+
+        if (!string.IsNullOrEmpty(result.RefreshToken) && result.RefreshTokenExpiry.HasValue)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = result.RefreshTokenExpiry.Value
+            };
+
+            Response.Cookies.Append("refreshToken", result.RefreshToken, cookieOptions);
+        }
+
+        return Ok(ApiResponse<object>.Ok(new
+        {
+            result.Token,
+            result.Expiration,
+            result.Message,
+            result.Success
+        }));
+    }
 
     /// <summary>
-    /// User logout endpoint
+    /// User forgot password endpoint
     /// </summary>
-    //[HttpPost("logout")]
-    //public async Task<ActionResult> Logout()
-    //{
-    //    try
-    //    {
-    //        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    //        if (string.IsNullOrEmpty(userId))
-    //        {
-    //            return Unauthorized();
-    //        }
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<ApiResponse<object>>> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        var result = await _mediator.Send(command);
 
-    //        // Get auth service directly from DI (for logout operations)
-    //        var authService = HttpContext.RequestServices.GetRequiredService<IAuthService>();
-    //        await authService.LogoutAsync(userId);
-            
-    //        return Ok(new { Success = true, Message = "Logged out successfully" });
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error during logout");
-    //        return BadRequest(new { Success = false, Message = "An error occurred during logout" });
-    //    }
-    //}
+        if (!result.Success)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.Message));
+        }
+
+        return Ok(ApiResponse<object>.Ok(new { result.Message }));
+    }
+
+    /// <summary>
+    /// User reset password endpoint
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<ActionResult<ApiResponse<object>>> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.Message));
+        }
+
+        return Ok(ApiResponse<object>.Ok(new { result.Message }));
+    }
+
+    /// <summary>
+    /// Change password endpoint (requires authentication)
+    /// </summary>
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<object>>> ChangePassword([FromBody] ChangePasswordCommand command)
+    {
+        var result = await _mediator.Send(command);
+
+        if (!result.Success)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.Message));
+        }
+
+        return Ok(ApiResponse<object>.Ok(new { result.Message }));
+    }
+
+    /// <summary>
+    /// Logout endpoint (clears refresh token cookie)
+    /// </summary>
+    [HttpPost("logout")]
+    [Authorize]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("refreshToken");
+        
+        _logger.LogInformation("User logged out successfully");
+        
+        return Ok(ApiResponse<object>.Ok(new { Message = "Đăng xuất thành công" }));
+    }
+
+    /// <summary>
+    /// Confirm email endpoint
+    /// </summary>
+    [HttpGet("confirm-email")]
+    public async Task<ActionResult<ApiResponse<object>>> ConfirmEmail([FromQuery] string userName, [FromQuery] string token)
+    {
+        var result = await _mediator.Send(new ConfirmEmailCommand(userName, token));
+        
+        if (!result.Success)
+        {
+            return BadRequest(ApiResponse<object>.Fail(result.Message));
+        }
+        
+        return Ok(ApiResponse<object>.Ok(new { result.Message }));
+    }
 }

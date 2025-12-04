@@ -4,8 +4,8 @@ using AppBookingTour.Application.IServices;
 using AppBookingTour.Domain.Entities;
 using AppBookingTour.Share.Configurations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -16,27 +16,27 @@ namespace AppBookingTour.Infrastructure.Services
     public class AuthService(
         UserManager<User> _userManager,
         ILogger<AuthService> _logger,
-        IOptions<JwtSettings> jwtSetting
+        IJwtService _jwtService
         ) : IAuthService
     {
-        private readonly JwtSettings _jwtSettings = jwtSetting.Value;
+        // Method dùng để đăng ký tài khoản 
         public async Task<RegisterCommandResponse> RegisterAsync(RegisterCommand request)
         {
             // Ghi log 
             _logger.LogInformation("Bắt đầu quá trình tạo tài khoản cho email: {Email} và userName: {UserName}", request.Email, request.UserName);
 
             // Kiểm tra email của người dùng đã tồn tại chưa 
-            var exitEmail = _userManager.FindByEmailAsync( request.Email );
+            var exitEmail = await _userManager.FindByEmailAsync(request.Email);
             if (exitEmail != null)
             {
                 return new RegisterCommandResponse(false, "Email này đã tồn tại trong hệ thống, bạn vui lòng đổi sang email khác");
             }
-            var exitUserName = _userManager.FindByNameAsync( request.UserName );
+            var exitUserName = await _userManager.FindByNameAsync(request.UserName);
             if (exitUserName != null)
             {
                 return new RegisterCommandResponse(false, "Tài khoản này đã tồn tài trong hệ thống, bạn vui lòng chọn tài khoản khác");
             }
-            
+
             var newUser = new User
             {
                 UserName = request.UserName,
@@ -57,19 +57,25 @@ namespace AppBookingTour.Infrastructure.Services
                 var errors = string.Join("; ", result.Errors.Select(e => e.Description));
                 return new RegisterCommandResponse(false, errors);
             }
-
-            var resultCreateRole = await _userManager.AddToRoleAsync(newUser, request.UserType.ToString());
-            if (!resultCreateRole.Succeeded)
+            try
             {
-                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-                return new RegisterCommandResponse(false, errors);
+                var resultCreateRole = await _userManager.AddToRoleAsync(newUser, request.UserType.ToString());
+                if (!resultCreateRole.Succeeded)
+                {
+                    var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                    return new RegisterCommandResponse(false, errors);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("CHUI");
             }
 
             _logger.LogInformation("Đã tạo tài khoản thành công cho {Email}", request.Email);
 
             return new RegisterCommandResponse(true, "Tạo tài khoản thành công");
         }
-
+        // Method dùng để tạo token generate Email Confirm
         public async Task<string> GenerateTokenEmailConfirm(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -82,7 +88,7 @@ namespace AppBookingTour.Infrastructure.Services
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             return token;
         }
-
+        // Method dùng để xóa tài khoản 
         public async Task DeleteAsync(string userEmail)
         {
             var user = await _userManager.FindByEmailAsync(userEmail);
@@ -92,6 +98,7 @@ namespace AppBookingTour.Infrastructure.Services
             }
         }
 
+        // Method dùng để đăng nhập tài khoản 
         public async Task<LoginCommandResponse> LoginAsync(LoginCommand request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
@@ -103,6 +110,17 @@ namespace AppBookingTour.Infrastructure.Services
                     Message = "Email đăng nhập không tồn tại trong hệ thống"
                 };
             }
+
+            // Kiểm tra user đã confirm mail chưa 
+            if(!user.EmailConfirmed)
+            {
+                return new LoginCommandResponse
+                {
+                    Success = false,
+                    Message = "Bạn cần xác nhận email trước khi dùng tiếp hệ thống"
+                };
+            };
+
             var checkValidUser = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!checkValidUser)
             {
@@ -113,41 +131,86 @@ namespace AppBookingTour.Infrastructure.Services
                 };
             }
 
+
+
             // Lấy ra roles của user 
             var roles = await _userManager.GetRolesAsync(user);
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.Key);
+            // Tạo access token 
+            var accessToken = _jwtService.GenerateAccessToken(user, roles, out var accessTokenExpiry);
 
-            List<Claim> claims = [
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim(ClaimTypes.Name, user.UserName!),
-                // Đây là thêm role cho claims
-                ..roles.Select(role => new Claim(ClaimTypes.Role, role)),
-            ];
+            // Tạo refresh token
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            var refreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtService.GetRefreshTokenExpiryDays());
 
-            // Tạo "bản thiết kế" cho JWT" để gửi cho client
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-                SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key),
-                SecurityAlgorithms.HmacSha256Signature
-            ),
-                Issuer = _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience
-            };
+            // Cập nhật refresh token cho user
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = refreshTokenExpiry;
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            _logger.LogInformation("Hệ thống xác thực đăng nhập thành công cho {Email}", user.Email);
 
             return new LoginCommandResponse
             {
                 Success = true,
-                Message = "Login successful",
-                Token = tokenHandler.WriteToken(token),
-                Expiration = tokenDescriptor.Expires
+                Token = accessToken,
+                UserId = user.Id,
+                FullName = user.FullName,
+                Role = roles.FirstOrDefault() ?? "Customer",
+                Expiration = accessTokenExpiry,
+                Message = "Đăng nhập thành công, bạn sẽ được chuyển hướng sang trang chính",
+                RefreshToken = refreshToken,
+                RefreshTokenExpiry = refreshTokenExpiry,
             };
         }
+
+
+        public async Task<LoginCommandResponse> RefreshTokenAsync(string refreshToken)
+        {
+            // Tìm kiếm user dựa trên refresh token 
+            var user = await _userManager.Users.FirstOrDefaultAsync(user => user.RefreshToken  == refreshToken);
+            if(user == null)
+            {
+                return new LoginCommandResponse
+                {
+                    Success = false,
+                    Message = "Refresh Token không hợp lệ, vui lòng đăng nhập lại"
+                };
+            }
+
+            // Kiểm tra tiếp thời hạn của refresh token
+            if (user.RefreshTokenExpiryTime.HasValue && user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                return new LoginCommandResponse
+                {
+                    Success = false,
+                    Message = "Refresh Token đã hết hạn, vui lòng đăng nhập lại"
+                };
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            // Tạo access token 
+            var accessToken = _jwtService.GenerateAccessToken(user, roles, out var accessTokenExpiry);
+
+            // Tạo refresh token
+            var newRefreshToken = _jwtService.GenerateRefreshToken();
+            var refreshTokenExpiry = DateTime.UtcNow.AddDays(_jwtService.GetRefreshTokenExpiryDays());
+
+            // Cập nhật refresh token cho user
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = refreshTokenExpiry;
+
+            _logger.LogInformation("Hệ thống đã cấp mã refresh token mới cho {Email}", user.Email);
+
+            return new LoginCommandResponse
+            {
+                Success = true,
+                Token = accessToken,
+                Expiration = accessTokenExpiry,
+                Message = "Refesh token thành công",
+                RefreshToken = refreshToken,
+                RefreshTokenExpiry = refreshTokenExpiry,
+            };
+        }
+
     }
 }
+               
