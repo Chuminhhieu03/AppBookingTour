@@ -1,4 +1,4 @@
-﻿name: Database Migration Workflow
+name: Database Migration Workflow
 
 on:
   workflow_dispatch:
