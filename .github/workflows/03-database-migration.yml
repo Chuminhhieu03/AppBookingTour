@@ -54,39 +54,43 @@ jobs:
     - name: 📥 Checkout source code
       uses: actions/checkout@v4
 
-    - name: 🔧 Setup .NET SDK
+    - name: 🔧 Install .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-    - name: 🔧 Install EF Core Tools
+    - name: 🔧 Install EF Core CLI
       run: dotnet tool install --global dotnet-ef --version 8.0.*
 
-    - name: 📦 Restore Dependencies
+    - name: 📦 Restore packages
       run: dotnet restore
 
-    - name: 🏗️ Build Project
-      run: dotnet build --configuration Release --no-restore
+    - name: 🏗️ Build Startup Project (Debug – required for EF)
+      run: dotnet build AppBookingTour.Api/AppBookingTour.API.csproj --configuration Debug --no-restore
 
-    - name: 📝 Generate SQL Script (No Migration Folder Required)
+    - name: 🏗️ Build Infrastructure Project
+      run: dotnet build AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj --configuration Debug --no-restore
+
+    - name: 📝 Generate SQL Script (NO migration folder needed)
       run: |
         dotnet ef migrations script \
           --idempotent \
           --no-build \
+          --configuration Debug \
           --project AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj \
           --startup-project AppBookingTour.Api/AppBookingTour.API.csproj \
           --output ${{ github.workspace }}/migration.sql \
           --verbose
 
-    - name: 📄 Display first part of SQL script
+    - name: 📄 Preview SQL Script
       run: |
         echo "### 📋 Migration SQL Script Preview" >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
-        head -n 50 ${{ github.workspace }}/migration.sql >> $GITHUB_STEP_SUMMARY
+        head -n 60 ${{ github.workspace }}/migration.sql >> $GITHUB_STEP_SUMMARY
         echo "..." >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-    - name: 💾 Upload Script as Artifact
+    - name: 💾 Upload Script
       uses: actions/upload-artifact@v4
       with:
         name: migration-script-${{ github.sha }}
@@ -107,10 +111,10 @@ jobs:
         echo "- **Action**: ${{ github.event.inputs.migration-action }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Executed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date)" >> $GITHUB_STEP_SUMMARY
 
     - name: ❌ Migration Failed
       if: failure()
       run: |
         echo "### ❌ Migration Failed!" >> $GITHUB_STEP_SUMMARY
-        echo "Check logs and review the SQL script artifact." >> $GITHUB_STEP_SUMMARY
+        echo "Please review logs and the generated SQL script." >> $GITHUB_STEP_SUMMARY
