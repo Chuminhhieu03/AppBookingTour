@@ -1,4 +1,4 @@
-﻿name: Database Migration Workflow
+name: Database Migration Workflow
 
 on:
   workflow_dispatch:
@@ -10,7 +10,6 @@ on:
         options:
           - Apply Migrations
           - Generate Script Only
-          - Rollback Last Migration
         default: 'Apply Migrations'
       
       environment:
@@ -37,10 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: ✅ Validate confirmation
+    - name: Validate confirmation
       run: |
         if [ "${{ github.event.inputs.confirm }}" != "MIGRATE" ]; then
-          echo "❌ Migration cancelled. You must type 'MIGRATE' to confirm."
+          echo "❌ Migration cancelled: You must type 'MIGRATE'."
           exit 1
         fi
         echo "✅ Migration confirmed by ${{ github.actor }}"
@@ -52,10 +51,10 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     
     steps:
-    - name: 📥 Checkout code
+    - name: 📥 Checkout source code
       uses: actions/checkout@v4
 
-    - name: 🔧 Setup .NET
+    - name: 🔧 Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
@@ -63,34 +62,35 @@ jobs:
     - name: 🔧 Install EF Core Tools
       run: dotnet tool install --global dotnet-ef --version 8.0.*
 
-    - name: 📦 Restore dependencies
+    - name: 📦 Restore Dependencies
       run: dotnet restore
 
-    - name: 🏗️ Build
+    - name: 🏗️ Build Project
       run: dotnet build --configuration Release --no-restore
 
-    - name: 📝 Generate Migration Script
+    - name: 📝 Generate SQL Script (No Migration Folder Required)
       run: |
         dotnet ef migrations script \
           --idempotent \
+          --no-build \
           --project AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj \
           --startup-project AppBookingTour.Api/AppBookingTour.API.csproj \
-          --output ${{github.workspace}}/migration.sql \
+          --output ${{ github.workspace }}/migration.sql \
           --verbose
 
-    - name: 📄 Display Migration Script
+    - name: 📄 Display first part of SQL script
       run: |
-        echo "### 📋 Migration SQL Script" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 Migration SQL Script Preview" >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
-        head -n 50 ${{github.workspace}}/migration.sql >> $GITHUB_STEP_SUMMARY
+        head -n 50 ${{ github.workspace }}/migration.sql >> $GITHUB_STEP_SUMMARY
         echo "..." >> $GITHUB_STEP_SUMMARY
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-    - name: 💾 Upload SQL Script
+    - name: 💾 Upload Script as Artifact
       uses: actions/upload-artifact@v4
       with:
         name: migration-script-${{ github.sha }}
-        path: ${{github.workspace}}/migration.sql
+        path: ${{ github.workspace }}/migration.sql
         retention-days: 30
 
     - name: 🗄️ Apply Migration to Azure SQL
@@ -98,23 +98,19 @@ jobs:
       uses: azure/sql-action@v2
       with:
         connection-string: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
-        path: ${{github.workspace}}/migration.sql
+        path: ${{ github.workspace }}/migration.sql
 
     - name: ✅ Migration Summary
       if: success()
       run: |
         echo "### ✅ Migration Completed Successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
         echo "- **Action**: ${{ github.event.inputs.migration-action }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Executed by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "- **SQL Script**: Download artifact for full script" >> $GITHUB_STEP_SUMMARY
 
     - name: ❌ Migration Failed
       if: failure()
       run: |
         echo "### ❌ Migration Failed!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Please check the logs and SQL script artifact." >> $GITHUB_STEP_SUMMARY
-        echo "**DO NOT** manually apply the migration without reviewing the error." >> $GITHUB_STEP_SUMMARY
+        echo "Check logs and review the SQL script artifact." >> $GITHUB_STEP_SUMMARY
