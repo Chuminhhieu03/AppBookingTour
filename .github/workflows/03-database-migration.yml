@@ -74,7 +74,7 @@ jobs:
         dotnet ef migrations script \
           --idempotent \
           --project AppBookingTour.Infrastructure/AppBookingTour.Infrastructure.csproj \
-          --startup-project AppBookingTour.Api/AppBookingTour.Api.csproj \
+          --startup-project AppBookingTour.Api/AppBookingTour.API.csproj \
           --output ${{github.workspace}}/migration.sql \
           --verbose
 
