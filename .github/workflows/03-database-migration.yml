@@ -35,7 +35,6 @@ jobs:
   validate:
     name: Validate Migration Request
     runs-on: ubuntu-latest
-
     steps:
       - name: Validate confirmation
         run: |
@@ -59,6 +58,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # --- [BƯỚC MỚI] TẠO FILE GIẢ ĐỂ TRÁNH LỖI CRASH ---
+      - name: 📄 Create dummy appsettings.json
+        run: |
+          echo '{
+            "Logging": {
+              "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+              }
+            },
+            "AllowedHosts": "*"
+          }' > AppBookingTour.Api/appsettings.json
 
       - name: 🔧 Install EF Core CLI
         run: dotnet tool install --global dotnet-ef --version 8.0.*
